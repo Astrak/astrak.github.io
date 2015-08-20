@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CASTRES</title>
+	<link href='style.css' rel=stylesheet>
+</head>
+<body>
+	<div class=background>
+		<div id=load-container>
+			<div class=illumination></div>
+			<div id=load-contained>
+				<svg width=50 height=50 class=svg>
+					<path d="M 25,2 A 23,23,0,1,1,25,49  A 23,23,0,1,1,25,2" fill=none stroke-linecap=round stroke-width=3 stroke=#244 ></path>
+					<path class=spinner-loading d="M 25,2 A 23,23,0,1,1,25,49  A 23,23,0,1,1,25,2" stroke-linecap=round stroke-width=3></path>
+				</svg>
+			</div>
+			<span class=valign></span>
+		</div>
+		<span class=valign></span>
+	</div>
+	<div class=canvas-container></div>
+	<script src='../libs/three.js'></script>
+	<script src='../libs/tween.js'></script>
+	<script src='../libs/controls/TrackballControls_modified.js'></script>
+	<script>
+	initLoadScreen();
+	function getResources(){
+	    // add minfilter param
+	    return {
+	        textures:[
+	            'hospitaltest141',
+	            'gambetta2test095',
+	            'gambettatest186',
+	            'hugotest177',
+	            'chantier1test018',
+	            'chantiertest043',
+	            'commercestest019',
+	            'nouveauxbat048',
+	            'platane10',
+	            'gridtest033',
+	            'lensflare1_uncache',
+	            'lensflare2',
+	            'lensflare3',
+	            'routestest090',
+	            'trottoirstest042',
+	            'carstest041',
+	            'gardenstest028',
+	            'gambettacitytest281'
+	            ],
+	        geometries:[
+	            'hospital',
+	            'hugo',
+	            'gambettacity',
+	            'gambetta',
+	            'gambetta2',
+	            'chantier',
+	            'chantier1',
+	            'commerces',
+	            'commercesdepth',
+	            'escalier',
+	            'nouveau_sol',
+	            'residences',
+	            'RPA',
+	            'gardens',
+	            'routes',
+	            'trottoirs',
+	            '4x4_shadow',
+	            'citadine_shadow',
+	            'break_shadow',
+	            'berline_shadow',
+	            'kangoo_shadow',
+	            'sportive_shadow',
+	            'camionette_shadow',
+	            'familiale_shadow'
+	            ],
+	        meshes:[//! dont change cars indices
+	            /*CARS*/
+	            {
+	                geometry:16,
+	                map:15,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true}),
+	                name:'4x4',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:17,
+	                map:15,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true}),
+	                name:'citadine',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:18,
+	                map:15,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true}),
+	                name:'break',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:19,
+	                map:15,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true}),
+	                name:'berline',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:20,
+	                map:15,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true}),
+	                name:'kangoo',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:21,
+	                map:15,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true}),
+	                name:'sportive',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:22,
+	                map:15,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true}),
+	                name:'camionette',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:23,
+	                map:15,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true}),
+	                name:'familiale',
+	                steps:[true,true,true]
+	            },//cars
+	            {
+	                geometry:13,
+	                map:16,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'gardens',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:14,
+	                map:13,//minFilter set to Linear in loadTextures
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'routes',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:15,
+	                map:14,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'trottoirs',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:12,
+	                map:7,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'RPA',
+	                steps:[false,false,true]
+	            },
+	            {
+	                geometry:11,
+	                map:7,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'residences',
+	                steps:[false,false,true]
+	            },
+	            {
+	                geometry:10,
+	                map:7,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'nouveau_sol',
+	                steps:[false,false,true]
+	            },
+	            {
+	                geometry:9,
+	                map:7,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'escalier',
+	                steps:[false,false,true]
+	            },
+	            {
+	                geometry:8,
+	                map:undefined,
+	                material:new THREE.MeshLambertMaterial({
+	    				color:0xaaaaff,
+	    				shading:THREE.FlatShading,
+	    				depthTest:false,depthWrite:true,
+	    				transparent:true,
+	    				opacity:.5,
+	    				side:THREE.FrontSide
+	                }),
+	                name:'commercesdepth',
+	                steps:[false,false,true]
+	            },
+	            {
+	                geometry:7,
+	                map:6,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'commerces',
+	                steps:[false,false,true]
+	            },
+	            {
+	                geometry:5,
+	                map:5,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading}),
+	                name:'chantier',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:6,
+	                map:4,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'chantier1',
+	                steps:[false,true,false]
+	            },
+	            {
+	                geometry:0,
+	                map:0,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading,side:THREE.DoubleSide}),
+	                name:'hospital',
+	                infos:{title:"Informations sur le bâtiment principal de l'hôpital",description:"Il a été bâti en 1982"},
+	                steps:[true,false,false]
+	            },
+	            {
+	                geometry:3,
+	                map:2,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'gambetta',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:4,
+	                map:1,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'gambetta2',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:1,
+	                map:3,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'hugo',
+	                steps:[true,true,true]
+	            },
+	            {
+	                geometry:2,
+	                map:17,
+	                material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+	                name:'gambettacity',
+	                steps:[true,true,true]
+	            }
+	            ]
+	    };
+	}
+	function initLoadScreen(){
+	    var resources=getResources();
+	    /*STYLING*/
+	    
+	    //get layout and deduce height&width
+	    var header=document.querySelector('header'),footer=document.querySelector('footer'),aside=document.querySelector('aside');
+	    var headerHeight,footerHeight,asideWidth;
+	    headerHeight=header!=undefined?parseInt(getComputedStyle(header,null).height):0;
+	    footerHeight=footer!=undefined?parseInt(getComputedStyle(footer,null).height):0;
+	    asideWidth=aside!=undefined?parseInt(getComputedStyle(aside,null).width):0;
+	    var height=window.innerHeight-footerHeight-headerHeight;
+	    var width=window.innerWidth-asideWidth;
+	    
+	    //loadscreen positioning
+	    var loadScreen=document.querySelector('.background');
+	    if(loadScreen!=undefined)loadScreen.style.height=height+'px';
+	    
+	    //handle resize
+	    addEventListener('resize',loadScreenResize,false);
+	    
+	    /*LOADING*/
+	    var texturesLength=resources.textures.length,geometriesLength=resources.geometries.length,meshesLength=resources.meshes.length;
+	    var texturesCounter=0,geometriesCounter=0,meshesCounter=0;
+	    
+	    var loader=new THREE.JSONLoader();
+	    var loadContained=document.getElementById('load-contained');
+	    var geometriesInfo=document.createElement('p'),texturesInfo=document.createElement('p'),meshesInfo=document.createElement('p');
+	    geometriesInfo.className=texturesInfo.className=meshesInfo.className='info';
+	    geometriesInfo.innerHTML='<br/>&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;analyse des géometries, 0/'+geometriesLength;
+	    texturesInfo.innerHTML='&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chargement des textures, 0/'+texturesLength;
+	    meshesInfo.innerHTML='&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;création des objets, 0/'+meshesLength;
+	    
+	    //timeout for css animations
+	    setTimeout(function(){
+	        geometriesLength>0?loadGeometries():texturesLength>0?loadTextures():meshesLength>0?createMeshes():setTimeout(function(){endLoadScreen(resources)},500);
+	    },200);
+	    
+	    function loadScreenResize(){
+	        headerHeight=header!=undefined?parseInt(getComputedStyle(header,null).height):0;
+	        footerHeight=footer!=undefined?parseInt(getComputedStyle(footer,null).height):0;
+	        asideWidth=aside!=undefined?parseInt(getComputedStyle(aside,null).width):0;
+	        height=window.innerHeight-footerHeight-headerHeight;
+	        width=window.innerWidth-asideWidth;
+	        if(loadScreen!=undefined)loadScreen.style.height=height+'px';
+	    }
+	    function loadGeometries(){
+	        loadContained.appendChild(geometriesInfo);
+	        setTimeout(function(){
+	            for(var i=0;i<geometriesLength;i++){
+	                (function(i){
+	                    var src='JSON/'+resources.geometries[i]+'.json',name=resources.geometries[i];
+	                    loader.load(src,function(geo){
+	                        geo.name=name;
+	                        resources.geometries[i]=geo;
+	                        onGeometryLoaded();
+	                    });
+	                })(i);//becare to pass i to the IEF to handle asynchronous loading
+	            }
+	        },200);
+	    }
+	    function loadTextures(){
+	        loadContained.appendChild(texturesInfo);
+	        setTimeout(function(){
+	            for(var i=0;i<texturesLength;i++){
+	                (function(){
+	                    var src='img/'+resources.textures[i]+'.png',name=resources.textures[i];
+	                    resources.textures[i]=THREE.ImageUtils.loadTexture(src,undefined,function(){onTextureLoaded()});
+	                    if(i===13||i===14||i===8||i===8)resources.textures[i].minFilter=THREE.LinearFilter;
+	                    resources.textures[i].name=name;
+	                })();
+	            }
+	        },200);
+	    }
+	    function createMeshes(){
+	        loadContained.appendChild(meshesInfo);
+	        setTimeout(function(){
+	            for(var i=0;i<meshesLength;i++){
+	                (function(i){
+	                    var material=resources.meshes[i].material;
+	                    var geometryRef=resources.meshes[i].geometry;
+	                    var mapRef=resources.meshes[i].map;
+	                    var steps=resources.meshes[i].steps!=undefined?resources.meshes[i].steps:undefined;
+	                    var name=resources.meshes[i].name;
+	                    var infos=resources.meshes[i].infos;
+	                    
+	                    var mesh=new THREE.Mesh();
+	                    
+	                    if(material instanceof THREE.MeshFaceMaterial){
+	                        var src='JSON/'+resources.geometries[geometryRef].name+'.json';
+	                        loader.load(src,function(geo,mat){
+	                            var matLength=mat.length;
+	                            for(var j=0;j<matLength;j++){
+	                				var color=mat[j].color;
+	                				mat[j]=new THREE.MeshLambertMaterial({color:color,shading:THREE.FlatShading});
+	                            }
+	                            material.materials=mat;
+	                            mesh.material=material;
+	                        })
+	                    }else {
+	                        mesh.material=material;
+	                        if(mapRef!=undefined)material.map=resources.textures[mapRef];
+	                    }
+	                    mesh.geometry=resources.geometries[geometryRef];
+	                    mesh.name=name;
+	                    if(steps!=undefined)mesh.data={steps:steps,infos:infos};
+	                    resources.meshes[i]=mesh;
+	                    onObjectCreated();
+	                })(i);//for asynchronous loading of meshfacematerials
+	            }
+	        },200);
+	    }
+	    
+	    function onTextureLoaded(){
+	        texturesCounter+=1;
+	        texturesInfo.innerHTML='&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chargement des textures, '+texturesCounter+'/'+texturesLength;
+	        if(texturesCounter==texturesLength){
+	            texturesInfo.innerHTML='&#9745;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chargement des textures, '+texturesCounter+'/'+texturesLength;
+	            createMeshes();
+	        }
+	    }
+	    function onGeometryLoaded(){
+	        geometriesCounter+=1;
+	        geometriesInfo.innerHTML='<br/>&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;analyse des géometries, '+geometriesCounter+'/'+geometriesLength;
+	        if(geometriesCounter==geometriesLength){
+	            geometriesInfo.innerHTML='<br/>&#9745;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;analyse des géometries, '+geometriesCounter+'/'+geometriesLength;
+	            loadTextures();
+	        }
+	    }
+	    function onObjectCreated(){
+	        meshesCounter+=1;
+	        meshesInfo.innerHTML='&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;création des objets, '+meshesCounter+'/'+meshesLength;
+	        if(meshesCounter==meshesLength){
+	            meshesInfo.innerHTML='&#9745;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;création des objets, '+meshesCounter+'/'+meshesLength;
+	            endLoadScreen(resources);
+	        }
+	    }
+	    
+	    function endLoadScreen(data){
+	        window.removeEventListener('resize',loadScreenResize,false);
+	        setTimeout(function(){initScene(data)},500);
+	    }
+	}
+	function initScene(data){
+	    
+	    /*RESTYLE*/
+	    var header=document.querySelector('header'),
+	        footer=document.querySelector('footer'),
+	        aside=document.querySelector('aside'),
+	        canvasContainer=document.querySelector('.canvas-container'),
+	        loadScreen=document.querySelector('.background');
+	    var headerHeight,footerHeight,asideWidth;
+	    var width,height;
+	    updateWH();
+	    document.body.style.overflowY='hidden';
+	    if(loadScreen!=undefined)document.body.removeChild(loadScreen);
+	    if(aside!=undefined){
+	        aside.style.display='block';
+	        aside.style.height=aside.style.maxHeight=height-10+'px';
+	    }
+	    
+	    /*3D STUFF*/
+	    
+	    var meshes=data.meshes;
+	    
+	    var scene, camera, light, ambient, renderer, controls ;
+	    usualStuff();
+	    
+	    var parkedCars=[
+			{car:meshes[0],name:'4x4',proba:7},
+			{car:meshes[1],name:'citadine',proba:20},
+			{car:meshes[2],name:'break',proba:12},
+			{car:meshes[3],name:'berline',proba:20},
+			{car:meshes[4],name:'kangoo',proba:12},
+			{car:meshes[5],name:'sportive',proba:2},
+			{car:meshes[6],name:'camionette',proba:8},
+			{car:meshes[7],name:'familiale',proba:7},
+	        ];
+		var parkedCarsCoordinates=[
+	    	{x:5.43,z:2.11,rot:-34.5},{x:5.89,z:1.44,rot:-34.5},{x:6.96,z:1.37,rot:-34.5},{x:6.65,z:.32,rot:-34.5},{x:7.37,z:.73,rot:-34.5},
+	    	{x:8.14,z:-.34,rot:-34.5},{x:7.36,z:-.72,rot:-34.5},{x:7.79,z:-1.34,rot:-34.5},{x:6.21,z:2.5,rot:-34.5},{x:5.77,z:3.12,rot:-34.5},
+	    	{x:8.84,z:-1.41,rot:-34.5},//gambetta1
+	    	{x:10.25,z:-3.38,rot:-33},{x:10.7,z:-4,rot:-33},{x:11.5,z:-5.3,rot:-35},{x:12,z:-6,rot:-34},{x:12.4,z:-6.6,rot:-32},{x:11.7,z:-7,rot:-32},
+	    	{x:12.1,z:-7.6,rot:-32},{x:13,z:-7.6,rot:-32},{x:13.43,z:-8.3,rot:-32},{x:13.9,z:-9,rot:-32},{x:12.77,z:-8.7,rot:-32},
+	    	{x:13.2,z:-9.3,rot:-29},//gambetta2
+	    	{x:13.73,z:-10.9,rot:-11},{x:14.41,z:-10.75,rot:-11},{x:14.58,z:-11.47,rot:-11},{x:13.9,z:-11.62,rot:-11},{x:14.71,z:-12.21,rot:-11},
+	    	{x:14.18,z:-13.09,rot:-8},{x:14.85,z:-13,rot:-8},{x:14.3,z:-14,rot:-8},{x:15,z:-13.9,rot:-8},{x:15.11,z:-14.66,rot:-11},
+	    	{x:14.41,z:-14.76,rot:-7},{x:14.5,z:-15.5,rot:-5},{x:15.2,z:-15.4,rot:-6.6},{x:15.3,z:-16.15,rot:-9},{x:14.6,z:-16.25,rot:-9},
+	    	{x:15.41,z:-16.88,rot:-9},{x:14.8,z:-17.71,rot:-9},{x:15.7,z:-19,rot:-6},{x:15,z:-19,rot:-6},{x:15.1,z:-19.9,rot:-5.3},
+	    	{x:15.8,z:-19.8,rot:-5.3},{x:15.9,z:-21,rot:-6.5},{x:15.1,z:-20.5,rot:-5.5},{x:15.25,z:-21.5,rot:-5.5},{x:16,z:-21.5,rot:-6.3},
+	    	{x:16.1,z:-22.1,rot:-3},{x:15.4,z:-23.2,rot:-3},//sabatier
+	    	{x:10.7,z:.96,rot:-39.7},{x:11.19,z:.37,rot:-39.7},{x:12,z:1.43,rot:-10.2},{x:11.85,z:2.18,rot:-10.2},{x:11.76,z:2.96,rot:-.15},
+	    	{x:12.87,z:4.17,rot:133},//around theater
+	    	{x:1.04,z:-6.7,rot:63},{x:2.17,z:-6.3,rot:67},{x:3.15,z:-5.9,rot:68},{x:3.87,z:-5.6,rot:68},{x:-5.9,z:-9.5,rot:51},{x:-7,z:-10.3,rot:51},
+	    	{x:-11.1,z:-12.6,rot:46},{x:-12.3,z:-13.5,rot:225},{x:-11.8,z:-13.9,rot:216},{x:-11.4,z:-15.2,rot:74},{x:-11.7,z:-15.7,rot:74},
+	    	{x:-12.1,z:-16.25,rot:74},//l'edit
+	    	{x:6.87,z:-11.96,rot:-95},{x:6.45,z:-11.04,rot:-95},{x:6.48,z:-10.45,rot:-95},{x:7.39,z:-11.36,rot:-25},//gabrielguy
+	    	{x:-2.9,z:13.98,rot:-54},{x:-2.25,z:13.5,rot:-57},{x:-4.1,z:14.77,rot:-55},{x:-5.25,z:15.5,rot:-55},{x:-8.38,z:17.75,rot:-55},
+	    	{x:-9.12,z:18.22,rot:-55},{x:-9.9,z:18.75,rot:-56},{x:-10.6,z:-19,rot:-56},{x:-11.54,z:19.8,rot:-56},{x:-12.2,z:20.2,rot:-56},
+	    	{x:-13.1,z:20.77,rot:-56.5},{x:-13.76,z:21.21,rot:-56.5},{x:-14.75,z:21.82,rot:-59},{x:-15.41,z:22.2,rot:-57},
+	    	{x:-16.6,z:23,rot:-56},{x:-17.25,z:23.5,rot:-56},{x:-17.9,z:23.8,rot:-56},{x:-18.9,z:24.5,rot:-56},//albertIer
+	    	{x:-19,z:7.28,rot:-37},{x:-19.6,z:7.9,rot:-37},{x:-20.06,z:8.5,rot:-41},{x:-20.6,z:9.06,rot:-41},{x:-21.1,z:9.63,rot:-41.5},
+	    	{x:-22.1,z:10.73,rot:-41.5},{x:-23.5,z:12.34,rot:-41.5},{x:-24.4,z:13.41,rot:-37.8},{x:-25,z:14,rot:-41},{x:-26,z:15,rot:-42.5},//north of albert I
+	    	{x:-21.6,z:.2,rot:67},{x:-22.6,z:-.2,rot:67},{x:-23.6,z:-.6,rot:67},{x:-25.8,z:-1.5,rot:67},{x:-27,z:1.9,rot:67}
+	    	//whats next is actually 70% hidden by frascaty trees so its not necessary now
+	    	//{x:-27.7,z:-6.7,rot:-14.5},{x:-27.5,z:-7.6,rot:-12.5},{x:-28.6,z:-7.8,rot:-12.6},{x:-28.4,z:-8.7,rot:-12.6},{x:-27.3,z:-8.4,rot:-12.6},
+	    	//{x:-27,z:-9.4,rot:-12.6},{x:-28.2,z:-9.7,rot:-12.6},{x:-26.9,z:-10.5,rot:-12.6},{x:-27.7,z:-11.9,rot:-12.6},{x:-26.6,z:-11.6,rot:-12.6},
+	    	//{x:-26.4,z:-12.6,rot:-12.6},{x:-27.4,z:-12.9,rot:-12.6},{x:-27.2,z:-13.9,rot:-12.6},{x:-25.8,z:-14.9,rot:-12.6},{x:-26.7,z:-16.3,rot:-12.6}
+		];
+	    addParkedCars();
+	    
+	    var streetCars=[
+			{car:meshes[0],name:'4x4',proba:7},
+			{car:meshes[1],name:'citadine',proba:20},
+			{car:meshes[2],name:'break',proba:12},
+			{car:meshes[3],name:'berline',proba:20},
+			{car:meshes[4],name:'kangoo',proba:12},
+			{car:meshes[5],name:'sportive',proba:2},
+			{car:meshes[6],name:'camionette',proba:8},
+			{car:meshes[7],name:'familiale',proba:7},
+	        ];
+	    var streetCarsData=[
+			{
+				pathDescription:'bvd lices > amiral galibert : arrêt au 1er feu 1',
+				curve:{
+					points:[{x:-24.75,z:-19.8},{x:-17.57,z:-3.31},{x:-16.05,z:.95},{x:-17.72,z:3.79},{x:-22.18,z:9.99},{x:-27.1,z:15.5}],
+					spline:undefined
+				},
+				tweens:[
+					{to:.15,duration:6000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:.22,duration:19000,easing:TWEEN.Easing.Exponential.Out,delay:0,ending:false},
+					{to:.35,duration:8000,easing:TWEEN.Easing.Exponential.In,delay:0,ending:false},
+					{to:1,duration:11000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true}
+				],
+				tweensArray:[],
+				begin:0
+			},
+			{
+				pathDescription:'bvd lices > amiral galibert : arrêt au 1er feu 2',
+				curve:{
+					points:[{x:-24.75,z:-19.8},{x:-17.57,z:-3.31},{x:-16.05,z:.95},{x:-17.72,z:3.79},{x:-22.18,z:9.99},{x:-27.1,z:15.5}],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:2000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.15,duration:6000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:.202,duration:19000,easing:TWEEN.Easing.Exponential.Out,delay:0,ending:false},
+					{to:.332,duration:8000,easing:TWEEN.Easing.Exponential.In,delay:0,ending:false},
+					{to:.9,duration:9000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+				],
+				tweensArray:[],
+				begin:.9
+			},
+			{
+				pathDescription:'bvd lices > foch > pont, voie droite 1',
+				curve:{
+					points:[
+						{x:-24.75,y:0,z:-19.8},{x:-23.03,y:0,z:-15.88},{x:-21.23,y:0,z:-11.75},{x:-19.57,y:0,z:-7.84},{x:-17.58,y:0,z:-3.31},
+						{x:-15.5,y:0,z:1.02},{x:-12.88,y:0,z:3.48},{x:-9.02,y:0,z:6.38},{x:-5.57,y:0,z:8.91},{x:-2.1,y:0,z:11.48},
+						{x:.98,y:0,z:13.76},{x:5,y:0,z:14.16},{x:10.53,y:0,z:14.16},{x:14.29,y:0,z:14.57},{x:16.30,y:0,z:17.37},{x:17.4,y:0,z:21.4},
+						{x:20.17,y:0,z:24.76}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:28000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.4,duration:16000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+				],
+				tweensArray:[],
+				begin:.4
+			},
+			{
+				pathDescription:'bvd lices > foch > pont, voie droite 2',
+				curve:{
+					points:[
+						{x:-24.75,y:0,z:-19.8},{x:-23.03,y:0,z:-15.88},{x:-21.23,y:0,z:-11.75},{x:-19.57,y:0,z:-7.84},{x:-17.58,y:0,z:-3.31},
+						{x:-15.5,y:0,z:1.02},{x:-12.88,y:0,z:3.48},{x:-9.02,y:0,z:6.38},{x:-5.57,y:0,z:8.91},{x:-2.1,y:0,z:11.48},
+						{x:.98,y:0,z:13.76},{x:5,y:0,z:14.16},{x:10.53,y:0,z:14.16},{x:14.29,y:0,z:14.57},{x:16.30,y:0,z:17.37},{x:17.4,y:0,z:21.4},
+						{x:20.17,y:0,z:24.76}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:34000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.2,duration:10000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+				],
+				tweensArray:[],
+				begin:.2
+			},
+			{
+				pathDescription:'bvd lices > foch > pont, voie droite : arrêt au 2nd feu 1',
+				curve:{
+					points:[
+						{x:-24.75,y:0,z:-19.8},{x:-23.03,y:0,z:-15.88},{x:-21.23,y:0,z:-11.75},{x:-19.57,y:0,z:-7.84},{x:-17.58,y:0,z:-3.31},
+						{x:-15.5,y:0,z:1.02},{x:-12.88,y:0,z:3.48},{x:-9.02,y:0,z:6.38},{x:-5.57,y:0,z:8.91},{x:-2.1,y:0,z:11.48},
+						{x:.98,y:0,z:13.76},{x:5,y:0,z:14.16},{x:10.53,y:0,z:14.16},{x:14.29,y:0,z:14.57},{x:16.30,y:0,z:17.37},{x:17.4,y:0,z:21.4},
+						{x:20.17,y:0,z:24.76}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:.45,duration:12000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:.55,duration:18000,easing:TWEEN.Easing.Exponential.Out,delay:0,ending:false},
+					{to:.62,duration:15000,easing:TWEEN.Easing.Exponential.In,delay:6000,ending:false},
+					{to:1,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.1,duration:3000,easing:TWEEN.Easing.Linear.None,delay:20000,ending:false}
+				],
+				tweensArray:[],
+				begin:.1
+			},
+			{
+				pathDescription:'bvd lices > foch > pont, voie droite : arrêt au 2nd feu 2',
+				curve:{
+					points:[
+						{x:-24.75,y:0,z:-19.8},{x:-23.03,y:0,z:-15.88},{x:-21.23,y:0,z:-11.75},{x:-19.57,y:0,z:-7.84},{x:-17.58,y:0,z:-3.31},
+						{x:-15.5,y:0,z:1.02},{x:-12.88,y:0,z:3.48},{x:-9.02,y:0,z:6.38},{x:-5.57,y:0,z:8.91},{x:-2.1,y:0,z:11.48},
+						{x:.98,y:0,z:13.76},{x:5,y:0,z:14.16},{x:10.53,y:0,z:14.16},{x:14.29,y:0,z:14.57},{x:16.30,y:0,z:17.37},{x:17.4,y:0,z:21.4},
+						{x:20.17,y:0,z:24.76}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:.41,duration:11500,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:.532,duration:16000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.602,duration:18500,easing:TWEEN.Easing.Exponential.In,delay:5000,ending:false},
+					{to:1,duration:16000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.03,duration:1000,easing:TWEEN.Easing.Linear.None,delay:20000,ending:false}
+				],
+				tweensArray:[],
+				begin:.03
+			},
+			{
+				pathDescription:'bvd lices > foch > pont, voie centrale 1',
+				curve:{
+					points:[
+						{x:-24.29,y:0,z:-20.34},{x:-22.53,y:0,z:-16.21},{x:-20.75,y:0,z:-12.1},{x:-18.87,y:0,z:-7.74},{x:-16.94,y:0,z:-3.34},
+						{x:-15.06,y:0,z:.72},{x:-12.40,y:0,z:3.13},{x:-8.42,y:0,z:6.04},{x:-5.15,y:0,z:8.43},{x:-1.6,y:0,z:11.1},
+						{x:1.66,y:0,z:13.35},{x:4.82,y:0,z:13.57},{x:10.07,y:0,z:13.59},{x:14.36,y:0,z:14.07},{x:16.55,y:0,z:17.04},{x:17.71,y:0,z:21.04},
+						{x:20.63,y:0,z:24.38}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:30000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.2,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+				],
+				tweensArray:[],
+				begin:.2
+			},
+			{
+				pathDescription:'bvd lices > foch > pont, voie centrale 2',
+				curve:{
+					points:[
+						{x:-24.29,y:0,z:-20.34},{x:-22.53,y:0,z:-16.21},{x:-20.75,y:0,z:-12.1},{x:-18.87,y:0,z:-7.74},{x:-16.94,y:0,z:-3.34},
+						{x:-15.06,y:0,z:.72},{x:-12.40,y:0,z:3.13},{x:-8.42,y:0,z:6.04},{x:-5.15,y:0,z:8.43},{x:-1.6,y:0,z:11.1},
+						{x:1.66,y:0,z:13.35},{x:4.82,y:0,z:13.57},{x:10.07,y:0,z:13.59},{x:14.36,y:0,z:14.07},{x:16.55,y:0,z:17.04},{x:17.71,y:0,z:21.04},
+						{x:20.63,y:0,z:24.38}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:23000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.35,duration:21000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+				],
+				tweensArray:[],
+				begin:.35
+			},
+			{
+				pathDescription:'bvd lices > foch > pont, voie centrale : arrêt au 2nd feu 1',
+				curve:{
+					points:[
+						{x:-24.29,y:0,z:-20.34},{x:-22.53,y:0,z:-16.21},{x:-20.75,y:0,z:-12.1},{x:-18.87,y:0,z:-7.74},{x:-16.94,y:0,z:-3.34},
+						{x:-15.06,y:0,z:.72},{x:-12.40,y:0,z:3.13},{x:-8.42,y:0,z:6.04},{x:-5.15,y:0,z:8.43},{x:-1.6,y:0,z:11.1},
+						{x:1.66,y:0,z:13.35},{x:4.82,y:0,z:13.57},{x:10.07,y:0,z:13.59},{x:14.36,y:0,z:14.07},{x:16.55,y:0,z:17.04},{x:17.71,y:0,z:21.04},
+						{x:20.63,y:0,z:24.38}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:.49,duration:12000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:.544,duration:5000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.62,duration:14000,easing:TWEEN.Easing.Exponential.In,delay:19000,ending:false},
+					{to:1,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.1,duration:3000,easing:TWEEN.Easing.Linear.None,delay:21000,ending:false}
+				],
+				tweensArray:[],
+				begin:.1
+			},
+			{
+				pathDescription:'bvd lices > foch > pont, voie gauche : arrêt au 2nd feu 1',
+				curve:{
+					points:[
+						{x:-23.88,y:0,z:-21.02},{x:-21.91,y:0,z:-16.43},{x:-20.15,y:0,z:-12.38},{x:-18.25,y:0,z:-7.92},{x:-16.36,y:0,z:-3.62},
+						{x:-14.53,y:0,z:.39},{x:-11.19,y:0,z:3.25},{x:-7.97,y:0,z:5.6},{x:-4.84,y:0,z:7.87},{x:-1.06,y:0,z:10.66},{x:2.03,y:0,z:12.79},
+						{x:5.29,y:0,z:12.95},{x:10.07,y:0,z:12.98},{x:14.64,y:0,z:13.53},{x:16.9,y:0,z:16.75},{x:17.95,y:0,z:20.66},{x:21.02,y:0,z:24.04}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:.49,duration:12000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:.54,duration:5000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.62,duration:14000,easing:TWEEN.Easing.Exponential.In,delay:19000,ending:false},
+					{to:1,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.1,duration:3000,easing:TWEEN.Easing.Linear.None,delay:21000,ending:false}
+				],
+				tweensArray:[],
+				begin:.1
+			},
+			{
+				pathDescription:'bvd lices > foch > mairie > renaissance > justice, voie gauche 1',
+				curve:{
+					points:[
+						{x:-23.88,y:0,z:-21.02},{x:-21.91,y:0,z:-16.43},{x:-20.15,y:0,z:-12.38},{x:-18.25,y:0,z:-7.92},{x:-16.36,y:0,z:-3.62},
+						{x:-14.53,y:0,z:.39},{x:-11.19,y:0,z:3.25},{x:-7.97,y:0,z:5.6},{x:-4.84,y:0,z:7.87},{x:-1.06,y:0,z:10.66},{x:2.03,y:0,z:12.79},
+						{x:5.29,y:0,z:12.95},{x:10.07,y:0,z:12.98},{x:14,y:0,z:13.17},{x:16.35,y:0,z:14.94},{x:19,y:0,z:13.56},{x:19.49,y:0,z:9.96},
+						{x:20,y:0,z:5.8},{x:20.64,y:0,z:.72},{x:21.21,y:0,z:-3.3},{x:21.51,y:0,z:-6.61},{x:18.4,y:0,z:-8.14},{x:12.38,y:0,z:-10.77},
+						{x:7.32,y:0,z:-14.9},{x:4.31,y:0,z:-17.99},{x:2.44,y:0,z:-20.3},{x:-2.75,y:0,z:-23.78},{x:-8.34,y:0,z:-30.19}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:.28,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:.31,duration:6000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.34,duration:11000,easing:TWEEN.Easing.Exponential.In,delay:19000,ending:false},
+					{to:1,duration:38000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true}
+				],
+				tweensArray:[],
+				begin:0
+			},// à régler après gambetta+sabatier
+			{
+				pathDescription:'sabatier > gambetta > albert I, aucun arrêt 1',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.28,y:0,z:4.56},{x:1.35,y:0,z:8.28},
+						{x:-.83,y:0,z:11.66},{x:-3.78,y:0,z:14.08},{x:-6.77,y:0,z:16.01},{x:-9.87,y:0,z:18.18},{x:-13.64,y:0,z:20.58},{x:-16.51,y:0,z:22.4},
+						{x:-19.83,y:0,z:24.49}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:44000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true}
+				],
+				tweensArray:[],
+				begin:0
+			},
+			{
+				pathDescription:'sabatier > gambetta > albert I, aucun arrêt 2',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.28,y:0,z:4.56},{x:1.35,y:0,z:8.28},
+						{x:-.83,y:0,z:11.66},{x:-3.78,y:0,z:14.08},{x:-6.77,y:0,z:16.01},{x:-9.87,y:0,z:18.18},{x:-13.64,y:0,z:20.58},{x:-16.51,y:0,z:22.4},
+						{x:-19.83,y:0,z:24.49}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:41000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.075,duration:3000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+				],
+				tweensArray:[],
+				begin:.075
+			},
+			{
+				pathDescription:'sabatier > gambetta > albert I, aucun arrêt 3',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.28,y:0,z:4.56},{x:1.35,y:0,z:8.28},
+						{x:-.83,y:0,z:11.66},{x:-3.78,y:0,z:14.08},{x:-6.77,y:0,z:16.01},{x:-9.87,y:0,z:18.18},{x:-13.64,y:0,z:20.58},{x:-16.51,y:0,z:22.4},
+						{x:-19.83,y:0,z:24.49}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:43000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.05,duration:1000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+				],
+				tweensArray:[],
+				begin:.05
+			},
+			{
+				pathDescription:'sabatier > gambetta > albert I, début au feu 1',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.28,y:0,z:4.56},{x:1.35,y:0,z:8.28},
+						{x:-.83,y:0,z:11.66},{x:-3.78,y:0,z:14.08},{x:-6.77,y:0,z:16.01},{x:-9.87,y:0,z:18.18},{x:-13.64,y:0,z:20.58},{x:-16.51,y:0,z:22.4},
+						{x:-19.83,y:0,z:24.49}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:.65,duration:5000,easing:TWEEN.Easing.Cubic.In,delay:18000,ending:false},
+					{to:1,duration:15000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.55,duration:22000,easing:TWEEN.Easing.Linear.None,delay:23000,ending:false},
+					{to:.6,duration:5000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+				],
+				tweensArray:[],
+				begin:.6
+			},
+			{
+				pathDescription:'sabatier > gambetta > albert I, arrêt au feu 2',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.28,y:0,z:4.56},{x:1.35,y:0,z:8.28},
+						{x:-.83,y:0,z:11.66},{x:-3.78,y:0,z:14.08},{x:-6.77,y:0,z:16.01},{x:-9.87,y:0,z:18.18},{x:-13.64,y:0,z:20.58},{x:-16.51,y:0,z:22.4},
+						{x:-19.83,y:0,z:24.49}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:.635,duration:5000,easing:TWEEN.Easing.Cubic.In,delay:18000,ending:false},
+					{to:1,duration:16000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.535,duration:21000,easing:TWEEN.Easing.Linear.None,delay:23000,ending:false},
+					{to:.585,duration:5000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+				],
+				tweensArray:[],
+				begin:.585
+			},
+			{
+				pathDescription:'sabatier > gambetta > albert I',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.28,y:0,z:4.56},{x:1.35,y:0,z:8.28},
+						{x:-.83,y:0,z:11.66},{x:-3.78,y:0,z:14.08},{x:-6.77,y:0,z:16.01},{x:-9.87,y:0,z:18.18},{x:-13.64,y:0,z:20.58},{x:-16.51,y:0,z:22.4},
+						{x:-19.83,y:0,z:24.49}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:6000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.8,duration:38000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+				],
+				tweensArray:[],
+				begin:.8
+			},
+			{
+				pathDescription:'sabatier > gambetta > albert I',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.28,y:0,z:4.56},{x:1.35,y:0,z:8.28},
+						{x:-.83,y:0,z:11.66},{x:-3.78,y:0,z:14.08},{x:-6.77,y:0,z:16.01},{x:-9.87,y:0,z:18.18},{x:-13.64,y:0,z:20.58},{x:-16.51,y:0,z:22.4},
+						{x:-19.83,y:0,z:24.49}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:8000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.73,duration:36000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+				],
+				tweensArray:[],
+				begin:.73
+			},
+			{
+				pathDescription:'sabatier > gambetta > albert I',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.28,y:0,z:4.56},{x:1.35,y:0,z:8.28},
+						{x:-.83,y:0,z:11.66},{x:-3.78,y:0,z:14.08},{x:-6.77,y:0,z:16.01},{x:-9.87,y:0,z:18.18},{x:-13.64,y:0,z:20.58},{x:-16.51,y:0,z:22.4},
+						{x:-19.83,y:0,z:24.49}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.55,duration:29000,easing:TWEEN.Easing.Linear.None,delay:13000,ending:false},
+					{to:.6,duration:6000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.67,duration:6000,easing:TWEEN.Easing.Cubic.In,delay:15000,ending:false},
+					{to:1,duration:15000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:3000,ending:false},
+				],
+				tweensArray:[],
+				begin:1
+			},
+			{
+				pathDescription:'sabatier > gambetta > foch > pont 1',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.34,y:0,z:4.74},{x:2.55,y:0,z:7.67},
+						{x:.61,y:0,z:11.35},{x:2.77,y:0,z:13.8},{x:6.34,y:0,z:14.14},{x:10.53,y:0,z:14.16},{x:14.29,y:0,z:14.57},{x:16.30,y:0,z:17.37},
+						{x:17.4,y:0,z:21.4},{x:20.17,y:0,z:24.76}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:5000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.85,duration:39000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+				],
+				tweensArray:[],
+				begin:.85
+			},
+			{
+				pathDescription:'sabatier > gambetta > foch > pont : arrêt au feu 1',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.34,y:0,z:4.74},{x:2.55,y:0,z:7.67},
+						{x:.61,y:0,z:11.35},{x:2.77,y:0,z:13.8},{x:6.34,y:0,z:14.14},{x:10.53,y:0,z:14.16},{x:14.29,y:0,z:14.57},{x:16.30,y:0,z:17.37},
+						{x:17.4,y:0,z:21.4},{x:20.17,y:0,z:24.76}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.53,duration:29000,easing:TWEEN.Easing.Linear.None,delay:12000,ending:false},
+					{to:.58,duration:6000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.63,duration:6000,easing:TWEEN.Easing.Cubic.In,delay:15000,ending:false},
+					{to:1,duration:15000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:4000,ending:false},
+				],
+				tweensArray:[],
+				begin:.85
+			},
+			{
+				pathDescription:'sabatier > gambetta > foch > pont : arrêt au feu 1',
+				curve:{
+					points:[
+						{x:15.91,y:0,z:-25.23},{x:15.43,y:0,z:-19.76},{x:14.87,y:0,z:-15.82},{x:14.43,y:0,z:-12.56},{x:13.74,y:0,z:-9.58},
+						{x:12.25,y:0,z:-7.09},{x:10.59,y:0,z:-4.59},{x:8.62,y:0,z:-1.77},{x:6.56,y:0,z:1.2},{x:4.34,y:0,z:4.74},{x:2.55,y:0,z:7.67},
+						{x:.61,y:0,z:11.35},{x:2.77,y:0,z:13.8},{x:6.34,y:0,z:14.14},{x:10.53,y:0,z:14.16},{x:14.29,y:0,z:14.57},{x:16.30,y:0,z:17.37},
+						{x:17.4,y:0,z:21.4},{x:20.17,y:0,z:24.76}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
+					{to:.52,duration:29000,easing:TWEEN.Easing.Linear.None,delay:14000,ending:false},
+					{to:.57,duration:6000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.62,duration:6000,easing:TWEEN.Easing.Cubic.In,delay:15000,ending:false},
+					{to:1,duration:15000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:2000,ending:false},
+				],
+				tweensArray:[],
+				begin:.85
+			},
+			];
+	    addStreetCars();
+	    
+	    var treeCoordinates=[
+	        {x:6.5,y:.76,z:24.42,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-1.78,y:.76,z:9.38,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-2.65,y:.76,z:8.81,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-3.52,y:.76,z:8.21,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-4.34,y:.76,z:7.54,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-5.12,y:.76,z:7.07,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-5.97,y:.76,z:6.45,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-6.93,y:.76,z:5.87,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-7.78,y:.76,z:5.16,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-10.35,y:.76,z:3.3,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-10.68,y:.76,z:2.65,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:-12.99,y:.76,z:1.47,scaleX:1,scaleY:1,scaleZ:1},//front trees
+	        {x:-14.39,y:.76,z:2.77,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-13.52,y:.76,z:3.47,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-12.94,y:.76,z:3.94,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:-11.96,y:.76,z:4.73,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-10.56,y:.76,z:5.78,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-9.18,y:.76,z:6.76,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-8.1,y:.76,z:7.57,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-6.86,y:.76,z:8.51,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-5.6,y:.76,z:9.43,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-4.76,y:.76,z:10.05,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:-3.59,y:.76,z:10.89,scaleX:1,scaleY:1.1,scaleZ:1},//front of front trees
+	        {x:1.64,y:.76,z:11.61,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:2.63,y:.76,z:12.57,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:4.06,y:.76,z:12.53,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:5.31,y:.76,z:12.48,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:6.45,y:.76,z:12.49,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:7.76,y:.76,z:12.48,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:8.73,y:.76,z:12.48,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:7.8,y:.76,z:11.36,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:8.98,y:.76,z:11.36,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:10.18,y:.76,z:11.36,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:12.35,y:.76,z:11.36,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:-1.1,y:.76,z:13.56,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:1.03,y:.76,z:14.6,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:4.94,y:.76,z:14.6,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:6.15,y:.76,z:14.6,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:7.22,y:.76,z:14.6,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:8.3,y:.76,z:14.6,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:9.27,y:.76,z:14.6,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:10.28,y:.76,z:14.6,scaleX:1,scaleY:.8,scaleZ:1},//eastern boulevard trees
+	        {x:-14.77,y:.76,z:-.94,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-15.44,y:.76,z:-2.29,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-16.15,y:.76,z:-3.85,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-16.58,y:.76,z:-4.77,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-17,y:.76,z:-5.65,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-17.44,y:.76,z:-6.64,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-17.92,y:.76,z:-7.71,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-18.47,y:.76,z:-9.06,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-18.96,y:.76,z:-10.44,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-19.29,y:.76,z:-10.96,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-20.13,y:.76,z:-13.14,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-21.79,y:.76,z:-12.1,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-21.17,y:.76,z:-10.75,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-20.47,y:.76,z:-9.19,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-20.16,y:.76,z:-8.27,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-19.75,y:.76,z:-7.39,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-19.31,y:.76,z:-6.4,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-18.82,y:.76,z:-5.34,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-18.27,y:.76,z:-3.98,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-17.45,y:.76,z:-2.08,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-17.69,y:.76,z:-2.6,scaleX:1,scaleY:1,scaleZ:1},//western boulevard trees
+	        {x:-23.9,y:.76,z:-9.41,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:-25.38,y:.76,z:-9.53,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:-25.18,y:.76,z:-8.52,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-25.52,y:.76,z:-7.19,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-23.06,y:.76,z:-11.87,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:-22.44,y:.76,z:-10.21,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:-22.26,y:.76,z:-8.77,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-22.27,y:.76,z:-7.75,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-21.3,y:.76,z:-7.06,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-20.82,y:.76,z:-6.09,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:-20.19,y:.76,z:-5.09,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-19.66,y:.76,z:-3.7,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:-19.15,y:.76,z:-2.33,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-18.6,y:.76,z:-1.85,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-23.8,y:.76,z:-5.92,scaleX:1,scaleY:.6,scaleZ:1},
+	        {x:-23.95,y:.76,z:-4.46,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:-23.33,y:.76,z:-4.07,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-22.8,y:.76,z:-3.84,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-22.25,y:.76,z:-3.47,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-21.72,y:.76,z:-3.2,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-20.9,y:.76,z:-2.9,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-19.86,y:.76,z:-1,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-20.69,y:.76,z:-1.34,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-21.54,y:.76,z:-1.84,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-22.54,y:.76,z:-2.23,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-23.65,y:.76,z:-2.63,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-25.03,y:.76,z:-3.17,scaleX:1,scaleY:1,scaleZ:1},//frascaty trees
+	    
+	        {x:-5.44,y:.76,z:10.6,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:-1.91,y:.76,z:-9.31,scaleX:.4,scaleY:.5,scaleZ:.4},
+	        {x:6.8,y:.76,z:-5.8,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:5.32,y:.76,z:-7.66,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:5,y:.76,z:-7.03,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:9.5,y:.76,z:8.94,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:10.52,y:.76,z:9.2,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:11.665,y:.76,z:9.2,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:12.3,y:.76,z:9.2,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:11.16,y:.76,z:10,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:5.88,y:.76,z:25.94,scaleX:1,scaleY:.9,scaleZ:1},
+	        {x:5.6,y:.76,z:24.73,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:10.23,y:.76,z:7.47,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:11.23,y:.76,z:7.64,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:11.76,y:.76,z:6.91,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:12.6,y:.76,z:7.59,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:13.41,y:.76,z:6.98,scaleX:.5,scaleY:.4,scaleZ:.5},//gardens & schools trees
+	    
+	        {x:-13.2,y:.76,z:-6.25,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-12.32,y:.76,z:-5.65,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-13.52,y:.76,z:-5.26,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-13.8,y:.76,z:-4.22,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-12.59,y:.76,z:-4.62,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-14.58,y:.76,z:-5.87,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-12.39,y:.76,z:-7.04,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-14.07,y:.76,z:-6.87,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-15,y:.76,z:-6.86,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-15.07,y:.76,z:-7.66,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-14.06,y:.76,z:-8.08,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-12.99,y:.76,z:-8.06,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-12.22,y:.76,z:-8.56,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-13.12,y:.76,z:-9.17,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-12.62,y:.76,z:-10.05,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-14.34,y:.76,z:-9.08,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-15.39,y:.76,z:-8.68,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-15.85,y:.76,z:-9.78,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-14.7,y:.76,z:-10.09,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-13.59,y:.76,z:-10.2,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-13.9,y:.76,z:-11.29,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-15.12,y:.76,z:-11.2,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-16.16,y:.76,z:-10.8,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-14.83,y:.76,z:-13.31,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-15.97,y:.76,z:-12.79,scaleX:1,scaleY:1.1,scaleZ:1},
+	        {x:-17.1,y:.76,z:-12,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-17.88,y:.76,z:-13.25,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-16.73,y:.76,z:-14,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-16.15,y:.76,z:-14.9,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-17.8,y:.76,z:-16,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-19,y:.76,z:-16.6,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-18,y:.76,z:-17.5,scaleX:1,scaleY:1.2,scaleZ:1},
+	        {x:-18.6,y:.76,z:-22.5,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-19.7,y:.76,z:-22,scaleX:1,scaleY:1.3,scaleZ:1},
+	        {x:-18.5,y:.76,z:-21.6,scaleX:1,scaleY:1.3,scaleZ:1},//boulevard parc trees
+	    
+	        {x:-9.7,y:.76,z:-22,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:-7.82,y:.76,z:-14.44,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:-8.26,y:.76,z:-13.7,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:2.3,y:.76,z:-28,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:19,y:.76,z:-2.86,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:19,y:.76,z:-1.8,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:16.3,y:.76,z:-3.65,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:17.95,y:.76,z:-4.25,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:16.53,y:.76,z:-5.08,scaleX:1,scaleY:.7,scaleZ:1},
+	        {x:16.35,y:.76,z:22.6,scaleX:1.3,scaleY:.7,scaleZ:1.3},
+	        {x:15.49,y:.76,z:26.1,scaleX:1.3,scaleY:.7,scaleZ:1.3},
+	        {x:18.92,y:.76,z:24.75,scaleX:1.3,scaleY:.7,scaleZ:1.3},//rest of the city trees : clockwise from west to west
+	    
+	        {x:-7,y:.76,z:20.2,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-9,y:.76,z:21.6,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-8.42,y:.76,z:24.85,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-8.5,y:.76,z:25.9,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-6.36,y:.76,z:25.9,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-11.83,y:.76,z:25.6,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-13.4,y:.76,z:25.6,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-11.14,y:.76,z:27.5,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-16.1,y:.76,z:25.73,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-15.86,y:.76,z:26.15,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-15.5,y:.76,z:26.5,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-11.26,y:.76,z:28.92,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-10.34,y:.76,z:28.4,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-9.55,y:.76,z:29.48,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-15,y:.76,z:26,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-14.64,y:.76,z:26.35,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-19.5,y:.76,z:17.41,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-18.73,y:.76,z:17.87,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-17.47,y:.76,z:16.31,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-16.95,y:.76,z:14.12,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-16.91,y:.76,z:9.15,scaleX:1.1,scaleY:.6,scaleZ:1.1},
+	        {x:-21.44,y:.76,z:6.36,scaleX:1.1,scaleY:.6,scaleZ:1.1},//south little gardens trees
+	    
+	        {x:-16.36,y:.76,z:26.62,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:-10.21,y:.76,z:28.1,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:-8.89,y:.76,z:28.16,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:-13.6,y:.76,z:25.9,scaleX:.6,scaleY:.8,scaleZ:.6},
+	        {x:-11.73,y:.76,z:25.26,scaleX:.6,scaleY:1,scaleZ:.6},
+	        {x:-7,y:.76,z:28.2,scaleX:.6,scaleY:1,scaleZ:.6},
+	        {x:-7.63,y:.76,z:25.8,scaleX:.7,scaleY:.8,scaleZ:.7},
+	        {x:-14.75,y:.76,z:12.99,scaleX:.6,scaleY:1,scaleZ:.6},
+	        {x:-27.41,y:.76,z:12.07,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:-26.62,y:.76,z:12.31,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:-27.55,y:.76,z:12.64,scaleX:2,scaleY:1,scaleZ:2}//south taller or bigger gardens trees
+		    ];
+	    addTrees(); 
+	    
+	    var skyCylinder,skyEdges;
+		createSky(32);
+		
+		var lensFlares=addLensFlares(light,camera);
+		
+	    var paused=false;
+	    //setCPUSaver(10);
+	    
+	    animate();
+	    
+	    /*UI*/
+	    
+	    //interface
+	    var steps=[
+	            {
+	                dateFrom:'2011',
+	                dateTo:'JUN 2014',
+	                title:"Vente du terrain",
+	                description:"Déménagement de l'hôpital au Causse, vente du terrain puis désamiantage"
+	            },
+	            {
+	                dateFrom:'JUN 2014',
+	                dateTo:'JAN 2015',
+	                title:'Déconstruction et terrassement',
+	                description:'Déconstruction, terrassement et reliage de la voirie et des réseaux divers'
+	            },
+	            {
+	                dateFrom:'JAN 2015',
+	                dateTo:'JAN 2016',
+	                title:'Gros oeuvre',
+	                description:'Construction du parking, des résidences et commerces et aménagements du bâtiment Gambetta'
+	            },
+	        ];
+	    var compassScene,compassRenderer,compassCamera,updateCompass=true;//avoid declaring var here by creating its own animate function ?
+	    createUI();
+	    
+	    //debug
+	    //createDatGUI({light:false,skyCylinder:false});
+	    
+	    /*3D STUFF*/
+	    function updateWH(){
+	        headerHeight=header!=undefined?parseInt(getComputedStyle(header,null).height):0;
+	        footerHeight=footer!=undefined?parseInt(getComputedStyle(footer,null).height):0;
+	        asideWidth=aside!=undefined?parseInt(getComputedStyle(aside,null).width)+15:0;
+	        height=window.innerHeight-footerHeight-headerHeight;
+	        width=window.innerWidth-asideWidth;
+	        if(aside!=undefined)aside.style.maxHeight=aside.style.height=height-10+'px';
+	        if(canvasContainer!=undefined){
+	            canvasContainer.style.height=height+'px';
+	            canvasContainer.style.width=width+'px';
+	        }
+	        if(renderer!=undefined)renderer.setSize(width,height);
+	        if(camera!=undefined){
+	            var widthCam=20;
+	            var heightCam=widthCam*height/width;
+	            camera.top=heightCam;
+	            camera.bottom=-heightCam;
+	            camera.left=-widthCam;
+	            camera.right=widthCam;
+	            camera.aspect=width/height;
+	            camera.updateProjectionMatrix();
+	        }
+	        if(controls!=undefined)controls.handleResize();
+	        var UIContainer=document.querySelector('#UIContainer');
+	    }
+	    function usualStuff(){
+	        scene=new THREE.Scene();
+	    
+	        camera=new THREE.PerspectiveCamera(40,width/height,.4,150);
+	        camera.position.set(10,12,20);
+	        scene.add(camera);
+	        
+	        renderer=new THREE.WebGLRenderer({alpha:true});
+	        renderer.setSize(width,height);
+	        canvasContainer.style.cssText='height:'+height+'px;width:'+width+'px;left:'+asideWidth+'px;cursor:move;';
+	        canvasContainer.appendChild(renderer.domElement);
+	        renderer.domElement.style.position='relative';
+	        renderer.setClearColor(0x2E2EC1);
+			
+	        window.addEventListener('resize',updateWH,false);
+	        
+	        ambient=new THREE.AmbientLight(0xaaaaaa);
+	        light=new THREE.DirectionalLight(0xffffff);
+	        light.position.set(0,35,20);
+	        scene.add(light,ambient);
+	        
+	        controls=new THREE.TrackballControls(camera,renderer.domElement);
+	    	controls.noPan=true;
+	    	controls.rotateSpeed=.7;
+	    	controls.maxDistance=25;
+	    	
+	    	//set matrixAutoUpdate=false for city-objects
+	    	for(var i=0;i<meshes.length;i++){
+	    	    if(meshes[i].data.steps[0]==true&&i>7/*so cars are not added yet*/)scene.add(meshes[i]);
+	    	    var n=meshes[i].name;
+	    	    if(
+	    	        n!=='4x4'
+	    	        &&n!=='berline'
+	    	        &&n!=='sportive'
+	    	        &&n!=='citadine'
+	    	        &&n!=='camionette'
+	    	        &&n!=='kangoo'
+	    	        &&n!=='break'
+	    	        &&n!=='familiale'
+	    	        &&n!=='4x4_shadow'
+	    	        &&n!=='berline_shadow'
+	    	        &&n!=='sportive_shadow'
+	    	        &&n!=='citadine_shadow'
+	    	        &&n!=='camionette_shadow'
+	    	        &&n!=='kangoo_shadow'
+	    	        &&n!=='break_shadow'
+	    	        &&n!=='familiale_shadow'
+	    	        )meshes[i].matrixAutoUpdate=false;
+	    	}
+	    }
+		function addTrees(){
+		    //create foliage geometry
+	        var plane=new THREE.PlaneGeometry(1.7,2.5,1,1);
+	        
+	        var faceView=new THREE.Mesh(plane,new THREE.MeshBasicMaterial());
+	        var perpendicularView=new THREE.Mesh(plane,new THREE.MeshBasicMaterial());
+	        perpendicularView.rotation.y=Math.PI/2;
+	        perpendicularView.updateMatrixWorld();
+	    
+	        var treeGeometry=new THREE.Geometry();
+	        treeGeometry.merge(faceView.geometry,faceView.matrixWorld);
+	        treeGeometry.merge(perpendicularView.geometry,perpendicularView.matrixWorld);
+	        
+	        //mat
+	        data.textures[8].minFilter=THREE.LinearFilter;
+	        var treeMaterial=new THREE.MeshBasicMaterial({
+	                map:data.textures[8],
+	                transparent:true,
+	                side:THREE.DoubleSide,
+	                depthWrite:true,
+	                alphaTest:.7
+	            });
+	        
+	        var tree=new THREE.Mesh(treeGeometry,treeMaterial);
+	        
+	        //clone to each coordinates and scale
+	        var treesGeometry=new THREE.Geometry();
+	        var treeCoordinatesLength=treeCoordinates.length;
+	        for(var i=0;i<treeCoordinatesLength;i++){
+	            var treeY=treeCoordinates[i].y+(treeCoordinates[i].scaleY-1)*2.5/2;
+	            tree.position.set(treeCoordinates[i].x,treeY+.5,treeCoordinates[i].z);
+	            tree.scale.set(treeCoordinates[i].scaleX,treeCoordinates[i].scaleY,treeCoordinates[i].scaleZ);
+	            tree.rotation.y+=Math.random()*Math.PI*2;
+	            tree.updateMatrixWorld();
+	            treesGeometry.merge(tree.geometry.clone(),tree.matrixWorld);
+	        }
+	        var treesMesh=new THREE.Mesh(treesGeometry,treeMaterial);
+	        scene.add(treesMesh);
+		}
+		function addParkedCars(){
+			var parkedCarsCoordinatesLength=parkedCarsCoordinates.length;
+			var geometry=new THREE.Geometry();
+		    for(var i=0;i<parkedCarsCoordinatesLength;i++){
+				var index=randomCarIndex(parkedCars);
+				var car=parkedCars[index].car;
+				car.position.set(parkedCarsCoordinates[i].x,0,parkedCarsCoordinates[i].z);
+				car.rotation.y=parkedCarsCoordinates[i].rot/180*Math.PI;
+				car.updateMatrixWorld();
+				geometry.merge(car.geometry.clone(),car.matrixWorld);
+			}
+			var parkedCarsMesh=new THREE.Mesh(
+			    geometry,
+			    parkedCars[0].car.material
+			    );
+			scene.add(parkedCarsMesh);
+		}
+		function addStreetCars(){
+	        var streetCarsDataLength=streetCarsData.length;
+			for(var i=0;i<streetCarsDataLength;i++){
+				(function(i){
+					//path
+					var points=streetCarsData[i].curve.points;
+					var pointsLength=points.length;
+					for(var j=0;j<pointsLength;j++){
+						points[j]=new THREE.Vector3(points[j].x,0,points[j].z);
+					}
+					streetCarsData[i].curve.spline=new THREE.SplineCurve3(points);
+
+					//tweens
+					var tweens=streetCarsData[i].tweens;
+					var tweensArray=streetCarsData[i].tweensArray;
+					var tweensLength=tweens.length;
+					var position={l:streetCarsData[i].begin};
+	    			var index=randomCarIndex(streetCars);
+				    var car=streetCars[index].car.clone();
+
+					for(var k=0;k<tweensLength;k++){
+						(function(k){
+							tweensArray[k]=new TWEEN.Tween(position).to({l:tweens[k].to},tweens[k].duration)
+							.easing(tweens[k].easing)
+							.delay(tweens[k].delay)
+							.onUpdate(function(){
+								var pos=streetCarsData[i].curve.spline.getPoint(position.l);
+								car.position.set(pos.x,pos.y,pos.z);
+								car.lookAt(streetCarsData[i].curve.spline.getPoint(position.l+.001));
+							});
+						})(k)
+					}
+					for(var l=0;l<tweensLength;l++){
+						if(!tweens[l].ending){
+							if(l<(tweensLength-1)){(function(l){tweensArray[l].onComplete(function(){tweensArray[l+1].start()})})(l)}
+							else{(function(l){tweensArray[l].onComplete(function(){position.l=streetCarsData[i].begin;tweensArray[0].start()})})(l)}
+						}else{
+							if(l<(tweensLength-1)){(function(l){tweensArray[l].onComplete(function(){position.l=0;tweensArray[l+1].start()})})(l)}
+							else{(function(l){tweensArray[l].onComplete(function(){position.l=0;tweensArray[0].start()})})(l)}
+						}
+					}
+					scene.add(car);
+					var beginPos=streetCarsData[i].curve.spline.getPoint(streetCarsData[i].begin)
+					car.position.set(beginPos.x,beginPos.y,beginPos.z);
+					car.lookAt(streetCarsData[i].curve.spline.getPoint(streetCarsData[i].begin+.001));
+					tweensArray[0].start();
+				})(i);
+			}
+		}
+	    function createSky(skyWidth){
+	        var _skyWidth=skyWidth!==undefined?skyWidth:47;
+	        data.textures[9].minFilter=THREE.LinearFilter;
+	        skyCylinder=new THREE.Mesh(
+	            new THREE.CylinderGeometry(_skyWidth,_skyWidth,25,60,1,true),
+	            new THREE.MeshBasicMaterial({color:0xffffff,map:data.textures[9]})
+	            );
+	        skyEdges=new THREE.EdgesHelper(skyCylinder,0x000000);
+	        skyCylinder.position.y=9;
+	        skyCylinder.scale.x=-1;//so texture is flipped
+	        scene.add(skyCylinder);
+	        var plate=new THREE.Mesh(
+	            new THREE.CylinderGeometry(_skyWidth,_skyWidth,4,60,false),
+	            new THREE.MeshLambertMaterial({color:0x333333,side:THREE.DoubleSide,shading:THREE.FlatShading}));
+	        //scene.add(plate);
+	        plate.position.y=-2;
+	    }
+	    function addLensFlares(source,camera){
+			var textureFlare0 = data.textures[10],
+				textureFlare2 = data.textures[11],
+				textureFlare3 = data.textures[12],
+				flareColor=new THREE.Color(0xffffff);
+			flareColor.setHSL(.9,.9,1);
+			var lensFlare=new THREE.LensFlare(textureFlare0,500,0,THREE.AdditiveBlending,flareColor);
+			lensFlare.add(textureFlare2,3000,0,THREE.AdditiveBlending);
+			lensFlare.add(textureFlare2,1000,0,THREE.AdditiveBlending);
+			lensFlare.add(textureFlare3,60,0,THREE.AdditiveBlending);
+			lensFlare.add(textureFlare3,70,.7,THREE.AdditiveBlending);
+			lensFlare.add(textureFlare3,120,.9,THREE.AdditiveBlending);
+			lensFlare.add(textureFlare3,70,1,THREE.AdditiveBlending);
+			var vec=new THREE.Vector3().subVectors(source.position,camera.position);
+			lensFlare.position.set(source.position.x,source.position.y,source.position.z);
+			lensFlare.customUpdateCallback=lensFlareUpdateCallback;
+	    	scene.add(lensFlare);
+	    	function lensFlareUpdateCallback(object) {
+	    		var fl=object.lensFlares.length,flare,
+	    			vecX=-object.positionScreen.x*2,
+	    			vecY=-object.positionScreen.y*2;
+	    		for(var f=0;f<fl;f++){
+	    			flare=object.lensFlares[f];
+	    			flare.x=object.positionScreen.x+vecX*flare.distance;
+	    			flare.y=object.positionScreen.y+vecY*flare.distance;
+	    			flare.rotation=0;
+	    		}
+	    	}
+	    	return lensFlare
+		}
+	    function animate(){
+            window.requestAnimationFrame(animate);
+            if(!paused){
+                
+                //COMPASS
+                if(updateCompass){
+                    if(camera instanceof THREE.OrthographicCamera){
+                        compassCamera.position.set(0,2,0);
+                        compassCamera.up.set(0,0,-1);
+                    }else{
+                        compassCamera.position.copy(camera.position);
+                        compassCamera.position.normalize().multiplyScalar(2);
+                        compassCamera.up.copy(camera.up);
+                    }
+                    compassCamera.lookAt(compassScene.position);
+                    compassRenderer.render(compassScene,compassCamera);
+                }
+                
+                //SCENE
+                TWEEN.update();
+                
+                //CAMERA
+                controls.update();
+                
+                renderer.render(scene,camera);
+            }
+	    }
+	    function randomCarIndex(array){
+	        var divider=0;
+			var arrayLength=array.length;
+			for(var z=0;z<arrayLength;z++){
+				divider+=array[z].proba;
+			}
+			var randomNumber=Math.floor(Math.random()*divider);
+			var checkNumber=0;
+			var index;
+			for(var zz=0;zz<arrayLength;zz++){
+				checkNumber+=array[zz].proba;
+				if(randomNumber<checkNumber){index=zz;break}
+			}
+			return index
+	    }
+	    
+	    /*UI PART*/
+	    function createUI(){
+	        //Create Layout
+	        var UIContainer=document.createElement('div');
+	        var stepsContainer=document.createElement('div');
+	        var leftPanelContainer=document.createElement('div');
+	        var rightPanelContainer=document.createElement('div');
+	        UIContainer.id='UIContainer';
+	        UIContainer.className='extendON';
+	        stepsContainer.id='stepsContainer';
+	        leftPanelContainer.id='leftPanelContainer';
+	        rightPanelContainer.id='rightPanelContainer';
+	        leftPanelContainer.className=rightPanelContainer.className='panelContainer';
+	        leftPanelContainer.innerHTML=rightPanelContainer.innerHTML=stepsContainer.innerHTML="<p class=panel-title></p><span class=valign-panel></span>";
+	        rightPanelContainer.firstElementChild.innerHTML='Informations';
+	        stepsContainer.firstElementChild.innerHTML='Etapes';
+	        leftPanelContainer.firstElementChild.innerHTML='Contrôles';
+	        UIContainer.appendChild(leftPanelContainer);
+	        UIContainer.appendChild(stepsContainer);
+	        UIContainer.appendChild(rightPanelContainer);
+	        canvasContainer.appendChild(UIContainer);
+	        UIContainer.addEventListener('click',function(e){e.stopPropagation()},false);
+	        
+	        //Append infos buttons
+	        var showInfos=false;
+	        var showTraffic=false;
+	        var showPLU=false;
+	        var showCadastre=false;
+	        
+	        var traffic=createTrafficButton();
+	        var PLU=createPLUButton();
+	        var informations=createInfoButton();
+	        var cadastre=createCadastreButton();
+	        
+	        rightPanelContainer.appendChild(informations.domElement);
+	        rightPanelContainer.appendChild(traffic.domElement);
+	        rightPanelContainer.appendChild(PLU.domElement);
+	        rightPanelContainer.appendChild(cadastre.domElement);
+	        
+	        //Append views buttons
+	        var compassTween=true;
+	        var viewMassPlan=false;
+	        var viewFP=false;
+	        var viewGeol=false;
+	        var viewNormal=false;
+	        leftPanelContainer.appendChild(createCompassButton());
+	        leftPanelContainer.appendChild(createWalkButton());
+	        leftPanelContainer.appendChild(createMassPlanButton());
+	        leftPanelContainer.appendChild(createGeolButton());
+	        leftPanelContainer.appendChild(createAnimationButton());
+	        addExtendButton();
+	        
+	        //Steps
+	        createStepsUI()
+	        
+	        function addExtendButton(){
+	            var span=document.createElement('span');
+	            span.id='extendON';
+	            UIContainer.appendChild(span);
+	            span.addEventListener('click',function(e){
+	                e.stopPropagation();
+	                updateCompass=!updateCompass;
+	                if(span.id=='extendOFF'){
+	                    span.id=UIContainer.className='extendON';
+	                }else{
+	                    span.id=UIContainer.className='extendOFF';
+	                }
+	            },false)
+	        }
+	        function createCompassButton(innerRadius,height,color){
+	            
+	            compassRenderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
+	            compassRenderer.setSize(40,40);
+	            compassRenderer.domElement.className='item ready';
+	            
+	            compassScene=new THREE.Scene();
+	            compassCamera=new THREE.PerspectiveCamera(70,50/50,.1,100);
+	            var compass=createCompassMesh(innerRadius,height,color);
+	            compassScene.add(compass,compassCamera);
+	            
+	            tweenOnClick();
+	            
+	            function createCompassMesh(innerRadius,height,color){
+	                var _innerRadius=(innerRadius===undefined)?.25:innerRadius;
+	                var innerX=Math.cos(Math.PI/4)*_innerRadius;
+	                var innerY=Math.sin(Math.PI/4)*_innerRadius;
+	                var _height=(height===undefined)?.2:height;
+	                var _color=(color===undefined)?0xffffff:color;
+	                var material=new THREE.MeshBasicMaterial({color:_color,side:THREE.DoubleSide});
+	                //first cross
+	                var firstCross=new THREE.Geometry(),
+	                    vertices=[],faces=[];
+	                vertices.push(
+	                    {x:0,y:_height,z:0},
+	                    {x:innerX,y:0,z:-innerY},
+	                    {x:1,y:0,z:0},{x:innerX,y:0,z:innerY},
+	                    {x:0,y:0,z:1},{x:-innerX,y:0,z:innerY},
+	                    {x:-1,y:0,z:0},{x:-innerX,y:0,z:-innerY}
+	                );
+	                faces.push(
+	                    {a:0,b:1,c:2},{a:0,b:2,c:3},{a:0,b:3,c:4},{a:0,b:4,c:5},{a:0,b:5,c:6},{a:0,b:6,c:7},
+	                    {a:1,b:2,c:3},{a:3,b:4,c:5},{a:5,b:6,c:7},{a:1,b:5,c:3},{a:1,b:7,c:5}
+	                );
+	                var vLength=vertices.length,fLength=faces.length;
+	                for(var i=0;i<vLength;i++){
+	                    var v=vertices[i];
+	                    firstCross.vertices.push(new THREE.Vector3(v.x,v.y,v.z));
+	                }
+	                for(var i=0;i<fLength;i++){
+	                    var f=faces[i];
+	                    firstCross.faces.push(new THREE.Face3(f.a,f.b,f.c));
+	                }
+	                var firstCross=new THREE.Mesh(firstCross,material);
+	                
+	                //north tail
+	                var northTailGeo=new THREE.Geometry(),
+	                    vertices=[],faces=[];
+	                vertices.push(
+	                    {x:0,y:_height,z:0},
+	                    {x:-innerX,y:0,z:-innerY},
+	                    {x:0,y:0,z:-1},{x:innerX,y:0,z:-innerY}
+	                );
+	                faces.push(
+	                    {a:0,b:1,c:2},{a:0,b:2,c:3},{a:2,b:3,c:1}
+	                );
+	                var vLength=vertices.length,fLength=faces.length;
+	                for(var i=0;i<vLength;i++){
+	                    var v=vertices[i];
+	                    northTailGeo.vertices.push(new THREE.Vector3(v.x,v.y,v.z));
+	                }
+	                for(var i=0;i<fLength;i++){
+	                    var f=faces[i];
+	                    northTailGeo.faces.push(new THREE.Face3(f.a,f.b,f.c));
+	                }
+	                var northTail=new THREE.Mesh(northTailGeo,new THREE.MeshBasicMaterial({color:0xff0000,side:THREE.DoubleSide}));
+	                firstCross.add(northTail);
+	                //second cross
+	                var secondCrossGeo=new THREE.Geometry(),
+	                    vertices=[],faces=[];
+	                vertices.push(
+	                    {x:0,y:_height,z:0},
+	                    {x:0,y:0,z:-1},{x:innerX,y:0,z:-innerY},
+	                    {x:1,y:0,z:0},{x:innerX,y:0,z:innerY},
+	                    {x:0,y:0,z:1},{x:-innerX,y:0,z:innerY},
+	                    {x:-1,y:0,z:0},{x:-innerX,y:0,z:-innerY}
+	                );
+	                faces.push(
+	                    {a:0,b:1,c:2},{a:0,b:2,c:3},{a:0,b:3,c:4},{a:0,b:4,c:5},{a:0,b:5,c:6},{a:0,b:6,c:7},
+	                    {a:0,b:7,c:8},{a:0,b:8,c:1},{a:1,b:8,c:2},{a:7,b:6,c:8},{a:6,b:5,c:4},{a:4,b:3,c:2},{a:2,b:8,c:4},{a:4,b:8,c:6}
+	                );
+	                var vLength=vertices.length,fLength=faces.length;
+	                for(var i=0;i<vLength;i++){
+	                    var v=vertices[i];
+	                    secondCrossGeo.vertices.push(new THREE.Vector3(v.x,v.y,v.z));
+	                }
+	                for(var i=0;i<fLength;i++){
+	                    var f=faces[i];
+	                    secondCrossGeo.faces.push(new THREE.Face3(f.a,f.b,f.c));
+	                }
+	                var secondCross=new THREE.Mesh(secondCrossGeo,material);
+	                secondCross.rotation.y=Math.PI/4;
+	                secondCross.scale.set(.7,.7,.7);
+	                firstCross.add(secondCross);
+	                return firstCross;
+	            }
+	            function tweenOnClick(){
+	                
+	                var pos={x:camera.position.x,y:camera.position.y,z:camera.position.z,xup:camera.up.x,yup:camera.up.y,zup:camera.up.z};
+	                var tweenCamera=new TWEEN.Tween(pos).to({x:0,y:7,z:24,xup:0,yup:1,zup:0},1000)
+	                .easing(TWEEN.Easing.Cubic.Out)
+	                .onUpdate(function(){
+	                    camera.position.x=pos.x;
+	                    camera.position.y=pos.y;
+	                    camera.position.z=pos.z;
+	                    camera.up.x=pos.xup;
+	                    camera.up.y=pos.yup;
+	                    camera.up.z=pos.zup;
+	                });
+	                
+	                compassRenderer.domElement.addEventListener('click',cameraAtNorth,false);
+	                
+	                function cameraAtNorth(){
+	                if(compassTween){
+	                    pos.x=camera.position.x;
+	                    pos.y=camera.position.y;
+	                    pos.z=camera.position.z;
+	                    pos.xup=camera.up.x;
+	                    pos.yup=camera.up.y;
+	                    pos.zup=camera.up.z;
+	                    tweenCamera.start();
+	                }
+	            }
+	                
+	            }
+	            
+	            return compassRenderer.domElement;
+	        }
+	        function createWalkButton(){
+	            var span=document.createElement('span');
+	            span.className='item not-ready';
+	            span.style.backgroundImage="url('img/walk.png')";
+	            return span
+	        }
+	        function createTrafficButton(){
+	            var span=document.createElement('span');
+	            span.className='item not-ready';
+	            span.style.backgroundImage="url('img/car.png')";
+	           
+	            return {domElement:span}
+	        }
+	        function createGeolButton(){
+	            var span=document.createElement('span');
+	            span.className='item not-ready';
+	            span.style.backgroundImage="url('img/geol.png')";
+	            return span
+	        }
+	        function createMassPlanButton(){
+	            var span=document.createElement('span');
+	            span.className='item';
+	            span.style.backgroundImage="url('img/planmasse40.png')";
+	            
+	            var persp=camera;
+	            var widthCam=20;
+	            var heightCam=widthCam*height/width;
+	            var orthog=new THREE.OrthographicCamera(-widthCam,widthCam,heightCam,-heightCam,.1,40);
+	            
+	            orthog.up=new THREE.Vector3(0,.1,-.7).normalize();
+	            orthog.position.set(0,5,0);
+	            orthog.lookAt(scene.position);
+	            orthog.updateProjectionMatrix();
+	            
+	            span.addEventListener('click',function(e){
+	                e.stopPropagation();
+	                if(!viewMassPlan){
+	                    viewMassPlan=true;
+	                    compassTween=false;
+	                    camera=orthog;
+	                    controls.enabled=false;
+	                    updateWH();
+	                    span.style.cssText="background:blue url('img/planmasse40.png');";
+	                    canvasContainer.style.cursor='auto';
+	                }else{
+	                    viewMassPlan=false;
+	                    compassTween=true;
+	                    camera=persp;
+	                    controls.enabled=true;
+	                    updateWH();
+	                    span.style.cssText="background:#000 url('img/planmasse40.png');";
+	                    canvasContainer.style.cursor='move';
+	                }
+	            },false);
+	            
+	            return span
+	        }
+	        function createInfoButton(){
+	            var span=document.createElement('span');
+	            span.className='item';
+	            span.innerHTML='<p>i</p>';
+	            span.style.cssText='font:italic 33px Times New Roman;color:#fff;';
+	            span.firstElementChild.style.marginLeft='-2px';
+	            
+	            span.addEventListener('click',function(e){
+	                e.stopPropagation();
+	                closeOtherInfosThan(showInfos);
+	                showInfos=!showInfos;
+	                if(showInfos){
+	                    closeOtherInfosThan(showInfos);
+	                    setTimeout(function(){
+	                        window.addEventListener('mousemove',raycast,false);
+	                        window.addEventListener('click',displayInfos,false);
+	                        window.addEventListener('mousedown',checkMouseMove,true);
+	                    },200);//so if PLU was ON, it waits the PLU.OFF() to finish
+	                    this.style.cssText+='background:blue;';
+	                }else{
+	                    window.removeEventListener('mousemove',raycast,false);
+	                    window.removeEventListener('click',displayInfos,false);
+	                    window.removeEventListener('mousedown',checkMouseMove,true);
+	                    if(INTERSECTED)INTERSECTED.material.color.set(0xffffff);
+	                    INTERSECTED=null;
+	                    this.style.cssText='font:italic 33px Times New Roman;color:#fff;';
+	                	canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
+	                }
+	            },false);
+
+	            var raycaster= new THREE.Raycaster();
+	            var mouse = new THREE.Vector2();
+	            var INTERSECTED=null;
+	            var mouseMove=false;
+	            function raycast(e) {
+	                if(!mouseMove){
+	                    mouse.x=(e.clientX/window.innerWidth)*2-1;
+	                	mouse.y=-(e.clientY/window.innerHeight)*2+1;
+	                	raycaster.setFromCamera( mouse, camera );
+	                	var interest=false;
+	                	var intersects = raycaster.intersectObjects( scene.children );
+	                	for(var i=0;i<intersects.length;i++){
+	                	    if(intersects[i].object.data!=undefined){
+	                	        if(intersects[i].object.data.infos!=undefined){
+	                	            interest=i;break
+	                	        }
+	                	    }
+	                	}
+	                	if(interest!==false){
+	                	    if(INTERSECTED){
+	                	        if(INTERSECTED===intersects[interest].object)return;
+	                	        INTERSECTED.material.color.set(0xffffff);
+	                	    }
+	            	        INTERSECTED=intersects[interest].object;
+	                	    INTERSECTED.material.color.set(0xaaaaff);
+	                	    canvasContainer.style.cursor='pointer';
+	                	}else{
+	                	    if(INTERSECTED)INTERSECTED.material.color.set(0xffffff);
+	                	    INTERSECTED=null;
+	                	    canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
+	                	}
+	                }
+	            }
+	            function displayInfos(){
+	                if(INTERSECTED && INTERSECTED.data.infos!=undefined && !mouseMove){
+	                    
+	            	    INTERSECTED.material.color.set(0xaaaaff);//for mobile devices where there is no mousemove
+	                    window.removeEventListener('click',displayInfos,false)
+	                    paused=true;
+	                    
+	                    var div=document.createElement('div');
+	                    var greyScreen2=document.createElement('div');
+	                    var close=document.createElement('button');
+	                    
+	                    greyScreen2.className='greyScreen';
+	                    div.className='display-infos';
+	                    close.className='display-infos-button';
+	                    
+	                    div.innerHTML="<h3 class='display-infos-title'>"+INTERSECTED.data.infos.title+
+	                        "</h3><br/><br/><p class='display-infos-description'>"+INTERSECTED.data.infos.description+"</p>";
+	                    close.innerHTML='close';
+	                    
+	                    div.appendChild(close);
+	                    greyScreen2.appendChild(div);
+	                    document.body.appendChild(greyScreen2);
+	                    
+	                    close.addEventListener('click',function(e){
+	                        e.stopPropagation();
+	                        paused=false;document.body.removeChild(greyScreen2);
+	                        setTimeout(function(){window.addEventListener('click',displayInfos,false)},0);
+	                    });
+	                }
+	            }
+	            function closeInfos(){
+	                window.removeEventListener('mousedown',checkMouseMove,true);
+	                window.removeEventListener('mousemove',raycast,false)
+	                window.removeEventListener('click',displayInfos,false)
+	                if(INTERSECTED)INTERSECTED.material.color.set(0xffffff);
+	                INTERSECTED=null;
+	                span.style.cssText='font:italic 33px Times New Roman;color:#fff;';
+	                canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
+	                showInfos=false;
+	            }
+	            function checkMouseMove(){
+	                mouseMove=false;
+	                window.addEventListener('mousemove',mouseMoveTrue,true);
+	                window.addEventListener('mouseup',checkMouseUp,true);
+	                window.removeEventListener('mousedown',checkMouseMove,true);
+	            }
+	            function mouseMoveTrue(){
+	                if(canvasContainer.style.cursor==='pointer'){
+	                    canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
+	                }
+	                mouseMove=true;
+	            }
+	            function checkMouseUp(){
+	                setTimeout(function(){
+	                    mouseMove=false;
+	                    if(INTERSECTED)canvasContainer.style.cursor='pointer';
+	                },0);
+	                window.removeEventListener('mouseup',checkMouseUp,true);
+	                window.removeEventListener('mousemove',mouseMoveTrue,true);
+	                window.addEventListener('mousedown',checkMouseMove,true);
+	            }
+	            
+	            return {domElement:span,close:closeInfos}
+	        }
+	        function createPLUButton(){
+	            var span=document.createElement('span');
+	            span.className='item';
+	            span.innerHTML='<p>PLU</p>';
+	            span.style.font='normal 12px Arial';
+	            span.style.color='#fff';
+	            span.firstElementChild.style.marginTop='13px';
+	            
+	            var PLUAreas=createPLU();
+	            PLUAreas.UA.mesh.data={PLU:{
+	                title:"Informations sur la zone UA",
+	                description:"la zone UA recouvre l'écusson"
+	            }};
+	            PLUAreas.UAa.mesh.data={PLU:{
+	                title:"Informations sur la zone UAa",
+	                description:"la zone UAa recouvre la zone de l'ancien hôpital Gabarrou, actual Carré Gambetta"
+	            }};
+	            PLUAreas.UB.mesh.data={PLU:{
+	                title:"Informations sur la zone UB",
+	                description:"la zone UB ..."
+	            }};
+	            
+	            span.addEventListener('click',function(e){
+	                e.stopPropagation();
+	                closeOtherInfosThan(showPLU);
+	                showPLU=!showPLU;
+	                if(showPLU){
+	                    PLUAreas.UA.ON();PLUAreas.UAa.ON();PLUAreas.UB.ON();
+	                    span.style.cssText+='background:blue;';
+	                    setTimeout(function(){
+	                        window.addEventListener('mousemove',PLU_raycast,false);
+	                        window.addEventListener('click',PLU_displayInfos,false);
+	                        window.addEventListener('mousedown',checkMouseMove,true);
+	                    },200)//so PLU animation finishes before
+	                }else{
+	                    PLUAreas.UA.OFF();PLUAreas.UAa.OFF();PLUAreas.UB.OFF();
+	                    window.removeEventListener('mousemove',PLU_raycast,false);
+	                    window.removeEventListener('click',PLU_displayInfos,false);
+	                    window.removeEventListener('mousedown',checkMouseMove,true);
+	                    if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x555588);
+	                    PLU_INTERSECTED=null;
+	                    span.style.cssText='font:normal 12px Arial;color:#fff';
+	                    canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
+	                }
+	            },false);
+	            
+	            var PLU_raycaster= new THREE.Raycaster();
+	            var PLU_mouse = new THREE.Vector2();
+	            var PLU_INTERSECTED=null;
+	            var mouseMove=false;
+	            function PLU_raycast(e){
+	                if(!mouseMove){
+	                	PLU_mouse.x=(e.clientX/window.innerWidth)*2-1;
+	                	PLU_mouse.y=-(e.clientY/window.innerHeight)*2+1;
+	                	PLU_raycaster.setFromCamera( PLU_mouse, camera );
+	                	var intersects = PLU_raycaster.intersectObjects( scene.children );
+	                	var interest=false;
+	                	for(var i=0;i<intersects.length;i++){
+	                	    if(intersects[i].object.data!=undefined){
+	                	        if(intersects[i].object.data.PLU!=undefined){
+	                	            interest=i;break
+	                	        }
+	                	    }
+	                	}
+	                	if(interest!==false){
+	                	    if(PLU_INTERSECTED){
+	                	        if(PLU_INTERSECTED===intersects[interest].object)return;
+	                	        PLU_INTERSECTED.material.color.set(0x333366);
+	                	    }
+	                	    PLU_INTERSECTED=intersects[interest].object;
+	                    	PLU_INTERSECTED.material.color.set(0x555588);
+	                    	canvasContainer.style.cursor='pointer';
+	                	}else{
+	                	    if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x333366);
+	                	    PLU_INTERSECTED=null;
+	                	    canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
+	                	}
+	                }
+	            }
+	            function PLU_displayInfos(){
+	                if(PLU_INTERSECTED&&!mouseMove){
+	                    
+	            	    PLU_INTERSECTED.material.color.set(0x555588);//for mobile devices where there is no mousemove
+	                    window.removeEventListener('click',PLU_displayInfos,false)
+	                    paused=true;
+	                    
+	                    var div=document.createElement('div');
+	                    var greyScreen2=document.createElement('div');
+	                    var close=document.createElement('button');
+	                    
+	                    greyScreen2.className='greyScreen';
+	                    div.className='display-infos';
+	                    close.className='display-infos-button';
+	                    
+	                    div.innerHTML="<h3 class='display-infos-title'>"+PLU_INTERSECTED.data.PLU.title+
+	                        "</h3><br/><br/><p class='display-infos-description'>"+PLU_INTERSECTED.data.PLU.description+"</p>";
+	                    close.innerHTML='close';
+	                    
+	                    div.appendChild(close);
+	                    greyScreen2.appendChild(div);
+	                    document.body.appendChild(greyScreen2);
+	                    
+	                    close.addEventListener('click',function(e){
+	                        e.stopPropagation();
+	                        paused=false;document.body.removeChild(greyScreen2);
+	                        setTimeout(function(){window.addEventListener('click',PLU_displayInfos,false)},0);
+	                    });
+	                }
+	            }
+	            function checkMouseMove(){
+	                mouseMove=false;
+	                window.addEventListener('mousemove',mouseMoveTrue,true);
+	                window.addEventListener('mouseup',checkMouseUp,true);
+	                window.removeEventListener('mousedown',checkMouseMove,true);
+	            }
+	            function mouseMoveTrue(){
+	                mouseMove=true;
+	                if(canvasContainer.style.cursor==='pointer')canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
+	            }
+	            function checkMouseUp(){
+	                setTimeout(function(){
+	                    mouseMove=false;
+	                    if(PLU_INTERSECTED)canvasContainer.style.cursor='pointer';
+	                },0);
+	                window.removeEventListener('mouseup',checkMouseUp,true);
+	                window.removeEventListener('mousemove',mouseMoveTrue,true);
+	                window.addEventListener('mousedown',checkMouseMove,true);
+	            }
+	            function createPLU(){
+	                //UA
+	                var UAPoints=[
+	                        {x:16.2,z:12.1},{x:1.76,z:11.73},{x:0,z:11.1},{x:-11.53,z:18.77},//extfaces
+	                        {x:-31.2,z:4.88},{x:-28.6,z:-13.6},{x:-16.36,z:-26.88},{x:6.42,z:-30.9},{x:25.36,z:-18.78},{x:30.85,z:4.26},{x:21.52,z:22.8},
+	                        {x:.34,z:10.29},{x:-13.9,z:.47},{x:-5.29,z:-8.72},{x:6.48,z:-4.26},{x:9.2,z:-2.53}//fromUAa>intfaces
+	                        ],
+	                    UAPointsLength=UAPoints.length,
+	                    UAMaxHeight=2;
+	                var UAGeometry=new THREE.Geometry();
+	                for(var i=0;i<UAPointsLength;i++){
+	                    UAGeometry.vertices.push(new THREE.Vector3(UAPoints[i].x,UAMaxHeight,UAPoints[i].z));
+	                }
+	                for(var i=0;i<UAPointsLength;i++){
+	                    UAGeometry.vertices.push(new THREE.Vector3(UAPoints[i].x,0,UAPoints[i].z));
+	                }
+	                UAGeometry.faces.push(
+	                    new THREE.Face3(0,16,17),new THREE.Face3(0,17,1),new THREE.Face3(1,17,18),new THREE.Face3(1,18,2),
+	                    new THREE.Face3(2,18,19),new THREE.Face3(2,19,3),
+	                    new THREE.Face3(11,28,27),new THREE.Face3(11,12,28),new THREE.Face3(12,29,28),new THREE.Face3(12,13,29),
+	                    new THREE.Face3(13,30,29),new THREE.Face3(13,14,30),new THREE.Face3(14,31,30),new THREE.Face3(14,15,31),
+	                    new THREE.Face3(15,27,31),new THREE.Face3(15,11,27),
+	                    new THREE.Face3(0,1,11),new THREE.Face3(1,2,11),new THREE.Face3(2,12,11),new THREE.Face3(2,3,12),
+	                    new THREE.Face3(3,4,12),new THREE.Face3(4,5,12),new THREE.Face3(5,6,12),new THREE.Face3(6,13,12),
+	                    new THREE.Face3(6,7,13),new THREE.Face3(7,8,13),new THREE.Face3(13,8,14),new THREE.Face3(8,9,14),
+	                    new THREE.Face3(9,15,14),new THREE.Face3(9,10,15),new THREE.Face3(0,11 ,15),new THREE.Face3(0,15,10),
+	                    new THREE.Face3(26,16,10),new THREE.Face3(16,0,10)
+	                    );
+	                UAGeometry.computeFaceNormals();
+	                var UAMaterial=new THREE.MeshLambertMaterial({color:0x333366,transparent:true,opacity:0,side:THREE.DoubleSide});
+	                var UAMesh=new THREE.Mesh(UAGeometry,UAMaterial);
+	                UAMesh.name="UA";
+	                var UASprite=makeTextSprite('UA');
+	                UASprite.position.set(2,2.5,-12);
+	                UAMesh.add(UASprite);
+	                UAMesh.scale.y=.01;
+	                var UA={
+	                    mesh:UAMesh,
+	                    ON:function(){
+	                        scene.add(UAMesh);
+	                        (function UAMeshON(){
+	                            if((UAMesh.scale.y)<1||(UAMesh.material.opacity)<.6){
+	                                if(UAMesh.scale.y<1)UAMesh.scale.y+=.05;
+	                                if(UAMesh.material.opacity<.6)UAMesh.material.opacity+=.025;
+	                                window.requestAnimationFrame(UAMeshON)
+	                            }
+	                        })()
+	                    },
+	                    OFF:function(){
+	                        (function UAMeshOFF(){
+	                            if(UAMesh.scale.y>.05||UAMesh.material.opacity>0){
+	                                if(UAMesh.scale.y>.01)UAMesh.scale.y-=.05;
+	                                if(UAMesh.material.opacity>0)UAMesh.material.opacity-=.025;
+	                                window.requestAnimationFrame(UAMeshOFF)
+	                            }else{scene.remove(UAMesh)}
+	                        })()
+	                    }
+	                };
+	                
+	                //UAa
+	                var UAaPoints=[{x:.37,z:9.45},{x:-12.9,z:.37},{x:-5.48,z:-7.88},{x:6.34,z:-3.8},{x:8.43,z:-2.5}],
+	                    UAaPointsLength=UAaPoints.length,
+	                    UAaMaxHeight=2.54;
+	                var UAaGeometry=new THREE.Geometry();
+	                for(var i=0;i<UAaPointsLength;i++){
+	                    UAaGeometry.vertices.push(new THREE.Vector3(UAaPoints[i].x,UAaMaxHeight,UAaPoints[i].z));
+	                }
+	                for(var i=0;i<UAaPointsLength;i++){
+	                    UAaGeometry.vertices.push(new THREE.Vector3(UAaPoints[i].x,0,UAaPoints[i].z));
+	                }
+	                UAaGeometry.faces.push(
+	                    new THREE.Face3(0,1,2),new THREE.Face3(0,2,3),new THREE.Face3(0,3,4),
+	                    new THREE.Face3(0,5,6),new THREE.Face3(0,6,1),new THREE.Face3(1,6,7),new THREE.Face3(1,7,2),new THREE.Face3(2,7,8),
+	                    new THREE.Face3(2,8,3),new THREE.Face3(3,8,9),new THREE.Face3(3,9,4),new THREE.Face3(4,9,5),new THREE.Face3(4,5,0)
+	                    );
+	                UAaGeometry.computeFaceNormals();
+	                var UAaMaterial=new THREE.MeshLambertMaterial({color:0x555599,transparent:true,opacity:0,side:THREE.DoubleSide});
+	                var UAaMesh=new THREE.Mesh(UAaGeometry,UAaMaterial);
+	                UAaMesh.name="UAa";
+	                var UAaSprite=makeTextSprite('UAa');
+	                UAaSprite.position.set(0,2.5,0);
+	                UAaMesh.add(UAaSprite);
+	                UAaMesh.scale.y=.01;
+	                var UAa={
+	                    mesh:UAaMesh,
+	                    ON:function(){
+	                        scene.add(UAaMesh);
+	                        (function UAaMeshON(){
+	                            if((UAaMesh.scale.y)<1||(UAaMesh.material.opacity)<.6){
+	                                if(UAaMesh.scale.y<1)UAaMesh.scale.y+=.05;
+	                                if(UAaMesh.material.opacity<.6)UAaMesh.material.opacity+=.025;
+	                                window.requestAnimationFrame(UAaMeshON)
+	                            }
+	                        })()
+	                    },
+	                    OFF:function(){
+	                        (function UAaMeshOFF(){
+	                            if(UAaMesh.scale.y>.05||UAaMesh.material.opacity>0){
+	                                if(UAaMesh.scale.y>.01)UAaMesh.scale.y-=.05;
+	                                if(UAaMesh.material.opacity>0)UAaMesh.material.opacity-=.025;
+	                                window.requestAnimationFrame(UAaMeshOFF)
+	                            }else{scene.remove(UAaMesh)}
+	                        })()
+	                    }
+	                };
+	                
+	                //UB
+	                var UBPoints=[
+	                    {x:-31.14,z:3.57},{x:-11.25,z:19.4},{x:-.99,z:13.04},{x:1.03,z:13.43},{x:13.77,z:13.43},
+	                    {x:20,z:23.7},{x:0,z:31.5},{x:-21.8,z:22.4}
+	                    ],
+	                    UBPointsLength=UBPoints.length,
+	                    UBMaxHeight=1.75;
+	                var UBGeometry=new THREE.Geometry();
+	                for(var i=0;i<UBPointsLength;i++){
+	                    UBGeometry.vertices.push(new THREE.Vector3(UBPoints[i].x,UBMaxHeight,UBPoints[i].z));
+	                }
+	                for(var i=0;i<UBPointsLength;i++){
+	                    UBGeometry.vertices.push(new THREE.Vector3(UBPoints[i].x,0,UBPoints[i].z));
+	                }
+	                UBGeometry.faces.push(
+	                    new THREE.Face3(0,1,8),new THREE.Face3(1,8,9),new THREE.Face3(1,2,10),new THREE.Face3(1,10,9),new THREE.Face3(2,3,10),
+	                    new THREE.Face3(3,10,11),new THREE.Face3(3,4,11),new THREE.Face3(4,11,12),new THREE.Face3(4,5,12),new THREE.Face3(5,12,13),//sides
+	                    new THREE.Face3(0,1,7),new THREE.Face3(1,7,6),new THREE.Face3(1,2,6),new THREE.Face3(2,3,6),new THREE.Face3(3,4,6),
+	                    new THREE.Face3(4,5,6)//top
+	                    );
+	                UBGeometry.computeFaceNormals();
+	                var UBMaterial=new THREE.MeshLambertMaterial({color:0x111144,transparent:true,opacity:0,side:THREE.DoubleSide});
+	                var UBMesh=new THREE.Mesh(UBGeometry,UBMaterial);
+	                UBMesh.name="UB";
+	                var UBSprite=makeTextSprite('UB');
+	                UBSprite.position.set(4,2,16);
+	                UBMesh.add(UBSprite);
+	                UBMesh.scale.y=.01;
+	                var UB={
+	                    mesh:UBMesh,
+	                    ON:function(){
+	                        scene.add(UBMesh);
+	                        (function UBMeshON(){
+	                            if((UBMesh.scale.y)<1||(UBMesh.material.opacity)<.6){
+	                                if(UBMesh.scale.y<1)UBMesh.scale.y+=.05;
+	                                if(UBMesh.material.opacity<.6)UBMesh.material.opacity+=.025;
+	                                window.requestAnimationFrame(UBMeshON)
+	                            }
+	                        })()
+	                    },
+	                    OFF:function(){
+	                        (function UBMeshOFF(){
+	                            if(UBMesh.scale.y>.05||UBMesh.material.opacity>0){
+	                                if(UBMesh.scale.y>.01)UBMesh.scale.y-=.05;
+	                                if(UBMesh.material.opacity>0)UBMesh.material.opacity-=.025;
+	                                window.requestAnimationFrame(UBMeshOFF)
+	                            }else{scene.remove(UBMesh)}
+	                        })()
+	                    }
+	                };
+	                
+	                function makeTextSprite(message){
+	                	var canvas=document.createElement('canvas');
+	                	var context=canvas.getContext('2d');
+	                	
+	                	context.font="Bold 18px Arial";
+	                	context.fillStyle="rgba(0,0,0,1)";
+	                	context.strokeStyle="rgba(255,255,255,1)";
+	                	context.lineWidth=2;
+	                	context.fillText('zone '+message,4,22);
+	                	
+	                	var padding=5;
+	                	
+	                	var texture=new THREE.Texture(canvas);
+	                	texture.minFilter=THREE.LinearFilter;
+	                	texture.needsUpdate=true;
+	                	
+	                	var sprite=new THREE.Sprite(new THREE.SpriteMaterial({ 
+	                    	    map:texture, 
+	                    		useScreenCoordinates:false,
+	                    		depthTest:false
+	                    	    })
+	                        );
+	                    sprite.material.map.offset.set(-.5,0);
+	                	sprite.scale.set(10,5,5);
+	                	return sprite;
+	                }
+	                
+	                return {UA:UA,UAa:UAa,UB:UB};
+	                
+	            }
+	            function closePLU(){
+	                if(showPLU){
+	                    showPLU=false;
+	                    PLUAreas.UA.OFF();PLUAreas.UAa.OFF();PLUAreas.UB.OFF();
+	                }
+	                window.removeEventListener('mousemove',PLU_raycast,false);
+	                window.removeEventListener('click',PLU_displayInfos,false);
+	                window.removeEventListener('mousedown',checkMouseMove,true);
+	                span.style.cssText='font:normal 12px Arial;color:#fff';
+	                if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x333366);
+	                PLU_INTERSECTED=null;
+	                canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
+	            }
+	            
+	            return {domElement:span,close:closePLU}
+	        }
+	        function createCadastreButton(){
+	            var span=document.createElement('span');
+	            span.className='item not-ready cadastre';
+	            
+	            var p=document.createElement('p');
+	            p.style.cssText='margin-top:13px;font:normal 10px Arial;color:#fff';
+	            p.innerHTML='Cadastre';
+	            span.appendChild(p);
+	            
+	            return {domElement:span}
+	        }
+	        function createAnimationButton(){
+	            var span=document.createElement('span');
+	            span.className='item not-ready';
+	            span.id='play';
+	            return span
+	        }
+	        function createStepsUI(){
+	            var stepsLength=steps.length;
+	            var sliderContainer=document.createElement('div');
+	            sliderContainer.id='gambetta-sliderContainer';
+	            var slider=document.createElement('div');
+	            slider.id='gambetta-slider';
+	            stepsContainer.appendChild(sliderContainer);
+	            sliderContainer.appendChild(slider);
+	            for(var i=0;i<stepsLength;i++){
+	                var dateFrom=document.createElement('p');dateFrom.innerHTML=steps[i].dateFrom;
+	                var dateTo=document.createElement('p');dateTo.innerHTML=steps[i].dateTo;
+	                dateFrom.className=dateTo.className='slider-stepDate';
+	                var title=document.createElement('p');title.innerHTML=steps[i].title;
+	                title.className='slider-stepTitle';
+	                var description=document.createElement('p');description.innerHTML=steps[i].description;
+	                description.className='slider-stepDescription';
+	                var step=document.createElement('div');
+	                step.className='slider-step';
+	                var infos=document.createElement('div');
+	                infos.className='slider-stepMain';
+	                infos.appendChild(title);infos.appendChild(description);
+	                step.appendChild(dateFrom);step.appendChild(infos);step.appendChild(dateTo);
+	                slider.appendChild(step);
+	            }
+	            var valign=document.createElement('span');
+	            valign.className='valign-sliderStep';
+	            slider.appendChild(valign);
+	            var buttonBefore=document.createElement('span');
+	            var buttonAfter=document.createElement('span');
+	            buttonBefore.className=buttonAfter.className='slider-buttons';
+	            buttonBefore.id='buttonBefore';buttonAfter.id='buttonAfter';
+	            sliderContainer.appendChild(buttonBefore);
+	            sliderContainer.appendChild(buttonAfter);
+	            buttonBefore.addEventListener('click',oneStepBefore,false);
+	            buttonAfter.addEventListener('click',oneStepBeyond,false);
+	            window.addEventListener('resize',resizeStepContainer,false);
+	            var actualStep=0;
+	            function oneStepBeyond(e){
+	                e.stopPropagation();
+	                if(actualStep<(stepsLength-1)){
+	                    actualStep+=1;
+	                    var stepsContainerWidth=parseInt(getComputedStyle(stepsContainer,null).width)+10;
+	                    slider.style.left=-(stepsContainerWidth-10)*actualStep+'px';
+	                    buttonAfter.style.borderLeftColor=actualStep==(stepsLength-1)?'#555':'wheat';
+	                    buttonBefore.style.borderRightColor=actualStep==0?'#555':'wheat';
+	                    for(var i=0;i<meshes.length;i++){
+	                        var mesh=meshes[i];
+	                        if(mesh.data.steps[actualStep]==true&&mesh.data.steps[actualStep-1]==false)addMesh(mesh);
+	                        if(mesh.data.steps[actualStep]==false&&mesh.data.steps[actualStep-1]==true)removeMesh(mesh);
+	                    }
+	                }
+	            }
+	            function oneStepBefore(e){
+	                e.stopPropagation();
+	                if(actualStep>0){
+	                    actualStep-=1;
+	                    var stepsContainerWidth=parseInt(getComputedStyle(stepsContainer,null).width)+10;
+	                    slider.style.left=-(stepsContainerWidth-10)*actualStep+'px';
+	                    buttonBefore.style.borderRightColor=actualStep==0?'#555':'wheat';
+	                    buttonAfter.style.borderLeftColor=actualStep==(stepsLength-1)?'#555':'wheat';
+	                    for(var i=0;i<meshes.length;i++){
+	                        var mesh=meshes[i];
+	                        if(mesh.data.steps[actualStep]==true&&mesh.data.steps[actualStep+1]==false)addMesh(mesh);
+	                        if(mesh.data.steps[actualStep]==false&&mesh.data.steps[actualStep+1]==true)removeMesh(mesh);
+	                    }
+	                }
+	            }
+	            function addMesh(mesh){
+	                if(mesh.material.depthTest==false)return;
+	                scene.add(mesh);
+	                mesh.material.transparent=true;
+	                mesh.material.opacity=0;
+	                (function fadeIn(){
+	                    if((mesh.material.opacity+=.07)<1){
+	                        mesh.material.color.set(0x00ff00);
+	                        window.requestAnimationFrame(fadeIn);
+	                    }else{mesh.material.transparent=false;mesh.material.color.set(0xffffff)}
+	                })();
+	            }
+	            function removeMesh(mesh){
+	                mesh.material.transparent=true;
+	                (function fadeOut(){
+	                    if((mesh.material.opacity-=.07)>0){
+	                        window.requestAnimationFrame(fadeOut);
+	                        mesh.material.color.set(0xff0000)
+	                    }else{scene.remove(mesh)}
+	                })();
+	            }
+	            function resizeStepContainer(){
+	                var stepsContainerWidth=parseInt(getComputedStyle(stepsContainer,null).width)+10;
+	                slider.style.left=-(stepsContainerWidth-10)*actualStep+'px';
+	            }
+	        }
+	        function closeOtherInfosThan(arg){
+	            if(showInfos!=arg&&showInfos)informations.close();
+	            if(showPLU!=arg&&showPLU)PLU.close();
+	        }
+	        function closeOtherViewsThan(arg){
+	            if(showInfos!=arg&&showInfos)informations.close();
+	            if(showPLU!=arg&&showPLU)PLU.close();
+	        }
+	    }
+	    function setCPUSaver(seconds){
+	        var counter=new Date();
+	        var mouse={x:0,y:0};
+	        var mouseDown=false;
+	        checkCounter();
+	        window.addEventListener('mousemove',resetCounter,false);
+	        window.addEventListener('mousedown',mouseDownTrue,true);
+	        window.addEventListener('touchmove',resetCounter,false);
+	        window.addEventListener('touchstart',mouseDownTrue,true);
+	        function checkCounter(){
+	            var now=new Date();
+	            if((now-counter)>=(seconds*1000)&&!mouseDown){
+	                pause(seconds)
+	            }else{
+	                window.requestAnimationFrame(checkCounter)
+	            }
+	        };
+	        function resetCounter(e){
+	            if(mouse.x!==e.clientX||mouse.y!==e.clientY){//because strangely mousemove are autotriggered twice at the end of each second
+	                counter=new Date();
+	                mouse.x=e.clientX;
+	                mouse.y=e.clientY;
+	            }
+	        }
+	        function mouseDownTrue(){
+	            counter=new Date();
+	            mouseDown=true;
+	            window.removeEventListener('mousedown',mouseDownTrue,true);
+	            window.removeEventListener('touchstart',mouseDownTrue,true);
+	            window.addEventListener('mouseup',mouseDownFalse,true);
+	            window.addEventListener('touchend',mouseDownFalse,true);
+	        }
+	        function mouseDownFalse(){
+	            mouseDown=false;
+	            counter=new Date();
+	            window.removeEventListener('mouseup',mouseDownFalse,true);
+	            window.removeEventListener('touchend',mouseDownFalse,true);
+	            window.addEventListener('mousedown',mouseDownTrue,true);
+	            window.addEventListener('touchstart',mouseDownTrue,true);
+	        }
+	        function pause(seconds){
+	            paused=true;
+	            var greyScreen=document.createElement('div');
+	            var infos=document.createElement('div');
+	            infos.innerHTML="<u>Rendu 3D mis en pause</u><br/><br/>"+seconds+"secondes se sont écoulées sans action de votre part.<br/><br/> "
+	            var comeBack=document.createElement('button');
+	            comeBack.innerHTML='reprendre';
+	            //infos.appendChild(comeBack);
+	            //greyScreen.appendChild(infos);
+	            greyScreen.className='greyScreen';
+	            document.body.appendChild(greyScreen);
+	            greyScreen.addEventListener('mousemove',greyScreenOff,false);
+	            greyScreen.addEventListener('touchstart',greyScreenOff,false);
+	            function greyScreenOff(e){
+	                if(mouse.x!==e.clientX||mouse.y!==e.clientY){//because strangely mousemove are autotriggered twice at the end of each second
+	                    paused=false;
+	                    document.body.removeChild(greyScreen);
+	                    greyScreen.removeEventListener('mousemove',greyScreenOff,false);
+	                    greyScreen.removeEventListener('touchstart',greyScreenOff,false);
+	                    counter=new Date();
+	                    checkCounter();
+	                    mouse.x=e.clientX;
+	                    mouse.y=e.clientY;
+	                }
+	            }
+	        }
+	    }
+	    function createDatGUI(obj){
+	        if(obj===undefined)return;
+	        
+	        var gui=new dat.GUI();
+	        var params={
+	                light_intensity:light.intensity,
+	                light_positionX:light.position.x,
+	                light_positionY:light.position.y,
+	                light_positionZ:light.position.z,
+	                sky_scaleY:skyCylinder.scale.y,
+	                skyEdges:false
+	            };
+	        
+	        if(obj.light===true){
+	            var gui_dirLight=gui.addFolder('directionalLight');
+	            gui_dirLight.add(params,'light_intensity',0,5,.1).onChange(function(){light.intensity=params.light_intensity});
+	            gui_dirLight.add(params,'light_positionX',-40,40,1).onChange(function(){
+	                light.position.x=params.light_positionX;
+	        		if(lensFlares!==undefined){
+	        		    var vec=new THREE.Vector3().copy(light.position);
+	        		    lensFlares.position.set(vec.x,vec.y,vec.z);
+	        		}
+	            });
+	            gui_dirLight.add(params,'light_positionY',0,70,1).onChange(function(){
+	                light.position.y=params.light_positionY;
+	        		if(lensFlares!==undefined){
+	        		    var vec=new THREE.Vector3().copy(light.position);
+	        		    lensFlares.position.set(vec.x,vec.y,vec.z);
+	        		}
+	            });
+	            gui_dirLight.add(params,'light_positionZ',0,40,1).onChange(function(){
+	                light.position.z=params.light_positionZ;
+	        		if(lensFlares!==undefined){
+	        		    var vec=new THREE.Vector3().copy(light.position);
+	        		    lensFlares.position.set(vec.x,vec.y,vec.z);
+	        		}
+	            });
+	        }
+	        if(obj.skyCylinder===true){
+	            var gui_skyCylinder=gui.addFolder('skyCylinder');
+	            gui_skyCylinder.add(params,'sky_scaleY',0,5,.05).onChange(function(){
+	                skyCylinder.scale.y=params.sky_scaleY
+	            });
+	            gui_skyCylinder.add(params,'skyEdges',false).onChange(function(){
+	                params.skyEdges?scene.add(skyEdges):scene.remove(skyEdges);
+	            });
+	        }
+	    }
+	}
+	</script>
+</body>
+</html>

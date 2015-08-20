@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>N-BODY</title>
+	</head>
+	<body style=padding:0;margin:0;overflow:hidden;  >
+		<script src='../libs/three.js'></script>
+		<script src='../libs/controls/TrackballControls.js'></script>
+
+		<!-- Random Shaders -->
+		<script type="x-shader/x-vertex" id="randVert">
+			varying vec2 vUv;
+
+			void main() {
+				vUv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="randFrag">
+			varying vec2 vUv;
+
+
+			float rand(vec2 co){
+				return fract(sin(dot(co.xy, vec2(12.8273, 67.245))) * 53726.17623);
+			}
+
+			void main() {
+				vec3 col;
+				col.g = rand(vec2(vUv.x, vUv.y + 1.0));
+				col.b = rand(vec2(vUv.x, vUv.y + 2.0));
+				col.r = rand(vec2(vUv.xy));
+				col = col - 0.5;
+
+				gl_FragColor = vec4(col, 1.0);
+			}
+		</script>
+		<!-- End Random Shaders -->
+
+		<!-- Velocity Shaders -->
+		<script type="x-shader/x-vertex" id="velVert">
+			varying vec2 vUv;
+
+			void main() {
+				vUv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="velFrag">
+			varying vec2 vUv;
+			uniform sampler2D velTex;
+			uniform sampler2D posTex;
+			uniform float total;
+
+			const float pix=1./64.;
+			void main() {
+				vec3 velocity = texture2D(velTex, vUv).xyz;
+				vec3 pos = texture2D(posTex, vUv).xyz;
+				for(float i=0.;i<1.;i+=pix){
+					for(float j=0.;j<1.;j+=pix){
+						vec3 d=texture2D(posTex,vec2(i,j)).xyz-pos;
+						float a=.00005/(dot(d,d));
+						d=a*d.xyz;///(total*total);
+						velocity+=d;
+					}
+				}
+				
+				gl_FragColor = vec4( velocity, 1.0 );
+			}
+		</script>
+		<!-- End Velocity Shaders -->
+
+		<!-- Position Shaders -->
+		<script type="x-shader/x-vertex" id="posVert">
+			varying vec2 vUv;
+
+			void main() {
+				vUv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="posFrag">
+			varying vec2 vUv;
+			uniform sampler2D velTex;
+			uniform sampler2D posTex;
+
+			void main() {
+				vec3 velocity = texture2D(velTex, vUv).rgb;
+				vec3 pos = texture2D(posTex, vUv).rgb;
+				pos += velocity;
+				gl_FragColor = vec4( pos, 1.0 );
+			}
+		</script>
+		<!-- End Position Shaders -->
+
+		<!-- Display Shaders -->
+		<script type="x-shader/x-vertex" id="dispVert">
+			uniform sampler2D posTex;
+			uniform float pointSize;
+			vec4 mvPosition;
+
+			void main() {
+				mvPosition = modelViewMatrix*vec4(position,1.0);
+	        	gl_PointSize = pointSize / length( mvPosition.xyz );
+				vec3 pos = texture2D(posTex, position.xy).rgb;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="dispFrag">
+			uniform sampler2D text;
+			void main() {
+				vec4 color=texture2D(text,gl_PointCoord);
+				gl_FragColor = vec4(color);
+			}
+		</script>
+		<!-- End Display Shaders -->
+
+		<script>
+			var renderer,camera,scene,particles,controls;
+
+			init();
+			function init(){
+				scene=new THREE.Scene();
+				camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.5,1000);
+				renderer=new THREE.WebGLRenderer({alpha:true});
+				renderer.setClearColor(0x000000)
+				renderer.setSize(innerWidth,innerHeight);
+				document.body.appendChild(renderer.domElement);
+				controls=new THREE.TrackballControls(camera,renderer.domElement);
+				controls.rotateSpeed=8;
+
+				var axisHelper=new THREE.AxisHelper(1);
+				scene.add(axisHelper);
+
+				camera.position.set(1,1,200);
+
+				//PARTICLES
+				var size= 64,
+					pointSize= 3000,
+					gravityFactor= 0.5;
+
+			    var renderTargets = {
+			      velocity: [
+			        new THREE.WebGLRenderTarget(size,size,{format:THREE.RGBFormat,generateMipmaps:false,magFilter:THREE.NearestFilter,minFilter:THREE.NearestFilter,type:THREE.FloatType}),
+			        new THREE.WebGLRenderTarget(size,size,{format:THREE.RGBFormat,generateMipmaps:false,magFilter:THREE.NearestFilter,minFilter:THREE.NearestFilter,type:THREE.FloatType})
+			      ],
+			      position: [
+			        new THREE.WebGLRenderTarget(size,size,{format:THREE.RGBFormat,generateMipmaps:false,magFilter:THREE.NearestFilter,minFilter:THREE.NearestFilter,type:THREE.FloatType}),
+			        new THREE.WebGLRenderTarget(size,size,{format:THREE.RGBFormat,generateMipmaps:false,magFilter:THREE.NearestFilter,minFilter:THREE.NearestFilter,type:THREE.FloatType})
+			      ]
+			    };
+
+			    var shaders = {
+			      velocityVertex: window.document.getElementById( 'velVert' ).textContent,
+			      velocityFragment: window.document.getElementById( 'velFrag' ).textContent,
+			      positionVertex: window.document.getElementById( 'posVert' ).textContent,
+			      positionFragment: window.document.getElementById( 'posFrag' ).textContent,
+			      displayVertex: window.document.getElementById( 'dispVert' ).textContent,
+			      displayFragment: window.document.getElementById( 'dispFrag' ).textContent,
+			      randomVertex: window.document.getElementById( 'randVert' ).textContent,
+			      randomFragment: window.document.getElementById( 'randFrag' ).textContent
+			    };
+
+				var uniforms = {
+					velocity: {
+					  velTex: {type: "t", value: renderTargets.velocity[0]},
+					  posTex: {type: "t", value: renderTargets.position[0]}
+					},
+					position: {
+					  velTex: {type: "t", value: renderTargets.velocity[0]},
+					  posTex: {type: "t", value: renderTargets.position[0]}
+					},
+					display: {
+					  pointSize: {type: "f", value: pointSize},
+					  posTex: {type: "t", value: renderTargets.position[0]},
+					  text:{type:"t",value:THREE.ImageUtils.loadTexture('star.png')},
+					  total:{type:"f",value:size}
+					}
+				}
+
+			    var shaderMaterials = {
+			      velocity: new THREE.ShaderMaterial({
+			      	vertexShader:shaders.velocityVertex,
+			      	fragmentShader:shaders.velocityFragment,
+			      	uniforms:uniforms.velocity
+			      	}),
+			      position: new THREE.ShaderMaterial({
+			      	uniforms:uniforms.position,
+			      	vertexShader:shaders.positionVertex,
+			      	fragmentShader:shaders.positionFragment
+			      	}),
+			      random: new THREE.ShaderMaterial({
+			      	vertexShader:shaders.randomVertex,
+			      	fragmentShader:shaders.randomFragment
+			      	}),
+			      display: new THREE.ShaderMaterial({
+			      	vertexShader:shaders.displayVertex, 
+			      	fragmentShader:shaders.displayFragment, 
+			      	uniforms:uniforms.display,
+			      	transparent:true,
+			      	depthTest:false
+			      	})
+			    };
+
+			    var scenes = {
+			      velocity: new THREE.Scene(),
+			      position: new THREE.Scene(),
+			      display: scene,
+			      random: new THREE.Scene()
+			    };
+
+			    scenes.velocity.add(
+			    	new THREE.Mesh(
+					    new THREE.PlaneBufferGeometry( size, size ),
+					    shaderMaterials.velocity
+			    	));
+			    scenes.position.add(
+			    	new THREE.Mesh(
+					    new THREE.PlaneBufferGeometry( size, size ),
+					    shaderMaterials.position
+			    	));
+			    scenes.random.add(
+			    	new THREE.Mesh(
+					    new THREE.PlaneBufferGeometry( size, size ),
+					    shaderMaterials.random
+			    	));
+
+			    var points = new THREE.Geometry();
+			    for (var i = 0; i < size * size; i++) {
+			      var pos = new THREE.Vector3((i % size)/size, Math.floor(i/size)/size , 0);
+			      points.vertices.push(pos);
+			    }
+
+
+
+			    scenes.display.add(
+			    	new THREE.PointCloud(points, shaderMaterials.display)
+			    	);
+
+			    //debug
+			    /*
+			    scenes.display.add(
+			    	new THREE.Mesh(
+					    new THREE.PlaneBufferGeometry( size, size ),
+					    shaderMaterials.velocity
+			    	));
+			    scenes.display.add(
+			    	new THREE.Mesh(
+					    new THREE.PlaneBufferGeometry( size, size ),
+					    shaderMaterials.position
+			    	));
+				*/
+
+			    var processCamera = new THREE.OrthographicCamera(-size/2, size/2, size/2, -size/2, -1, 0);
+				var buffer = 0;
+
+			    //start with random values
+			    renderer.render(scenes.random, processCamera, renderTargets.position[buffer]);
+			    //renderer.render(scenes.random, processCamera, renderTargets.velocity[buffer]);
+
+				animate();
+
+				function animate(){
+					requestAnimationFrame(animate);
+					renderer.render(scene,camera);
+					controls.update();
+
+					var newBuffer = (buffer+1)%2;
+					uniforms.velocity.velTex.value = renderTargets.velocity[buffer];
+					uniforms.position.posTex.value = renderTargets.position[buffer];
+					renderer.render(scenes.velocity, processCamera, renderTargets.velocity[newBuffer]);
+
+					uniforms.position.velTex.value = renderTargets.velocity[newBuffer];
+					uniforms.position.posTex.value = renderTargets.position[buffer];
+					renderer.render(scenes.position, processCamera, renderTargets.position[newBuffer]);
+
+					uniforms.display.posTex.value = renderTargets.position[newBuffer];
+
+					buffer = newBuffer;
+				}
+			}
+		</script>
+	</body>
+</html>
