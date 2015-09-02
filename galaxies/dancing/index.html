@@ -109,7 +109,7 @@
 			//pointsize = f(gas)
 			gas=sin(-length(position)/20.);
 			if(gas<0.)gas=0.;
-			gl_PointSize=pixelRatio*size*(1.+gas*2.)/length(mvPosition.xyz);
+			gl_PointSize=pixelRatio*size*(1.+gas*1.)/length(mvPosition.xyz);
 
 		}
 
@@ -154,7 +154,7 @@
 			//pointsize = f(gas)
 			gas=sin(-length(position)/20.);
 			if(gas<0.)gas=0.;
-			gl_PointSize=pixelRatio*size*(1.+gas*2.)/length(mvPosition.xyz);
+			gl_PointSize=pixelRatio*size*(1.+gas*1.)/length(mvPosition.xyz);
 
 		}
 
@@ -292,6 +292,7 @@
 			controls=new THREE.TrackballControls(camera,renderer.domElement);
 			controls.rotateSpeed=5;
 			controls.noPan=true;
+			controls.maxDistance=3800;
 
 
 			//deep field
@@ -299,7 +300,7 @@
 				vertexShader:document.getElementById('simplevShader').textContent,
 				fragmentShader:document.getElementById('simplefShader').textContent,
 				uniforms:{
-					size:{type:'f',value:5},
+					size:{type:'f',value:6},
 					pixelRatio:{type:"f",value:innerHeight}
 				},
 				transparent:true,
@@ -310,7 +311,7 @@
 				vertexShader:document.getElementById('simplevShader2').textContent,
 				fragmentShader:document.getElementById('simplefShader2').textContent,
 				uniforms:{
-					size:{type:'f',value:5},
+					size:{type:'f',value:6},
 					pixelRatio:{type:"f",value:innerHeight}
 				},
 				transparent:true,
@@ -332,7 +333,7 @@
 				vertexShader:document.getElementById('vShader').textContent,
 				fragmentShader:document.getElementById('fShader').textContent,
 				uniforms:{
-					size:{type:'f',value:3},
+					size:{type:'f',value:5},
 					pixelRatio:{type:"f",value:innerHeight},
 					f0:{type:'f',value:0},
 					f1:{type:'f',value:0},
