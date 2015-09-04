@@ -3,7 +3,7 @@
 	<title>Hubble deep field</title>
 </head>
 <body style="margin:0;overflow:hidden;background:url('opo0416c.jpg');background-size:100% auto; ">
-	<a class=twitter href="http://twitter.com/home?status=%23Hubble%20A%20definitive%20proof%20of%20advanced%20life%2C%20billions%20of%20light%20years%20from%20us%20!%20astrak.github.io%2Fgalaxies%2Fdancing%2Findex.html%0A" style='position:absolute; bottom:10px;right:10px;font-family:Arial;color:#33c;margin-right:-500px;transition:margin-right 500ms ease;' target='_blank'>Surprise your friends on twitter !</a>
+	<a class=twitter href="http://twitter.com/home?status=%23Hubble%20A%20definitive%20proof%20of%20advanced%20life%2C%20billions%20of%20light%20years%20from%20us%20!%20astrak.github.io%2Fgalaxies%2Fdancing%2Findex.html%0A" style='position:absolute; bottom:10px;right:10px;font-family:Arial;color:#33c;margin-right:-500px;transition:margin-right 500ms ease;' target='_blank'>Share on twitter !</a>
 	<script src='../../libs/three.js'></script>
 	<script src='../../libs/controls/TrackballControls.js'></script>
 
@@ -228,17 +228,17 @@
 			/* 1. Loading screen */
 
 			var darkdiv=document.createElement('div');
-			darkdiv.style.cssText='position:absolute;width:100%;height:100%;background:#333;opacity:.5;text-align:center;color:#fff'
+			darkdiv.style.cssText='position:absolute;width:100%;height:100%;text-align:center;color:#fff;font-family:Arial;'
 			document.body.appendChild(darkdiv);
 			var loader=document.createElement('p');
-			loader.innerHTML='Hubble just captured this definitive proof of intelligent life<br/> Billions of light years from us<br/><br/>Loading...';
-			loader.style.cssText='position:relative;top:30%;background:#222;padding:10px;width:50%;margin:auto;'
+			loader.innerHTML='Hubble just captured this definitive proof of intelligent life.<br/> Billions of light years from us.<br/><br/><span class=loader></span><br/>Loading...';
+			loader.style.cssText='position:relative;top:30%;background:#222;padding:20px;width:50%;margin:auto;'
 			darkdiv.appendChild(loader);
 
 			/*2. Music Part */
 
 			//url
-			var url='Patrick Hernandez - Born to Be Alive.mp3';
+			var url='http://astrak.github.io/galaxies/dancing/Patrick Hernandez - Born to Be Alive.mp3';
 
 			//creates a source, analyser node, connect it to destination
 			var ctx = new AudioContext();
@@ -256,7 +256,14 @@
 			var request = new XMLHttpRequest();
 			request.open("GET", url, true);
 			request.responseType = "arraybuffer";
-			request.onprogress=function(e){console.log(e.loaded/e.total)}
+			request.onprogress=function(e){
+				var span=document.querySelector('.loader');
+				span.style.width=e.loaded/e.total*100+'%';
+				span.style.height='2px';
+				span.style.background='orange';
+				span.style.position='absolute';
+				span.style.left='0';
+			}
 			request.onload = function(e) {
 				ctx.decodeAudioData(	
 					this.response, 
@@ -266,12 +273,37 @@
 						darkdiv.style.cursor='pointer';
 						darkdiv.onclick=function(){
 							document.body.removeChild(darkdiv);
-							setTimeout(function(){source.start()},1000);
-							setTimeout(function(){document.querySelector('a.twitter').style.marginRight='0px';},10000);
+							setTimeout(function(){
+								source.start();
+								source.loop=true;
+									var i=0;
+								setInterval(function(){
+									if(i>7)i=0;
+									var positions=[
+										{x:400,y:-150,z:130},
+										{x:400,y:1000,z:300},
+										{x:500,y:-50,z:-130},
+										{x:0,y:100,z:3000},
+										{x:600,y:-100,z:-300},
+										{x:500,y:4000,z:-500},
+										{x:600,y:-100,z:500},
+										{x:-200,y:200,z:-500}
+									]
+									camera.position.copy(positions[i]);
+									i++
+								},7000)
+								renderer.domElement.style.cursor='move';
+							},1000);
+							setTimeout(function(){
+								document.querySelector('a.twitter').style.marginRight='0px';
+							},10000);
+							setTimeout(function(){
+								document.querySelector('a.more').style.marginRight='0px';
+							},15000);
 						}
 					}, 
 					function onFailure() {
-						alert("Decoding the audio buffer failed");
+						console.log("Decoding the audio buffer failed");
 					}
 				);
 			};
@@ -319,7 +351,7 @@
 				blending:THREE.AdditiveBlending
 			});
 
-			for(var i=0;i<300;i++){
+			for(var i=0;i<600;i++){
 				var mesh=new THREE.PointCloud(newGalaxy(2000),Math.random()>.5?simpleGalaxyMaterial:simpleGalaxyMaterial2);
 				scene.add(mesh);
 				mesh.position.set(Math.random()*10000-5000,Math.random()*10000-5000,Math.random()*10000-5000);
@@ -356,7 +388,7 @@
 			galaxy.rotation.x=-1;
 			galaxy.rotation.z=.2;
 			galaxy.rotation.y=-.4;
-			galaxy.position.set(400,-100,0)
+			galaxy.position.set(300,-100,0)
 
 			animate();
 		}
@@ -370,6 +402,7 @@
 				galaxy.rotation.z+=val;
 				time+=1;
 				galaxyMaterial.uniforms.time.value=time;
+				camera.position.x+=1.
 			}
 			controls.update();
 
