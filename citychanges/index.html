@@ -1869,32 +1869,14 @@
 	                return firstCross;
 	            }
 	            function tweenOnClick(){
-	                
-	                var pos={x:camera.position.x,y:camera.position.y,z:camera.position.z,xup:camera.up.x,yup:camera.up.y,zup:camera.up.z};
-	                var tweenCamera=new TWEEN.Tween(pos).to({x:0,y:7,z:24,xup:0,yup:1,zup:0},1000)
-	                .easing(Power3.easeOut)
-	                .onUpdate(function(){
-	                    camera.position.x=pos.x;
-	                    camera.position.y=pos.y;
-	                    camera.position.z=pos.z;
-	                    camera.up.x=pos.xup;
-	                    camera.up.y=pos.yup;
-	                    camera.up.z=pos.zup;
-	                });
-	                
+
 	                compassRenderer.domElement.addEventListener('click',cameraAtNorth,false);
 	                
 	                function cameraAtNorth(){
-	                if(compassTween){
-	                    pos.x=camera.position.x;
-	                    pos.y=camera.position.y;
-	                    pos.z=camera.position.z;
-	                    pos.xup=camera.up.x;
-	                    pos.yup=camera.up.y;
-	                    pos.zup=camera.up.z;
-	                    tweenCamera.start();
-	                }
-	            }
+	                	var pos={x:0,y:9,z:24};
+		                if(camera.position.x==pos.x&&camera.position.y==pos.y&&camera.position.z==pos.z || camera instanceof THREE.OrthographicCamera )return;
+	                	TweenLite.to(camera.position,.7,{x:pos.x,y:pos.y,z:pos.z});
+		            }
 	                
 	            }
 	            
@@ -2252,22 +2234,12 @@
 	                    mesh:UAMesh,
 	                    ON:function(){
 	                        scene.add(UAMesh);
-	                        (function UAMeshON(){
-	                            if((UAMesh.scale.y)<1||(UAMesh.material.opacity)<.6){
-	                                if(UAMesh.scale.y<1)UAMesh.scale.y+=.05;
-	                                if(UAMesh.material.opacity<.6)UAMesh.material.opacity+=.025;
-	                                window.requestAnimationFrame(UAMeshON)
-	                            }
-	                        })()
+	                        TweenLite.to(UAMesh.scale,.7,{y:1});
+	                        TweenLite.to(UAMesh.material,.7,{opacity:.6});
 	                    },
 	                    OFF:function(){
-	                        (function UAMeshOFF(){
-	                            if(UAMesh.scale.y>.05||UAMesh.material.opacity>0){
-	                                if(UAMesh.scale.y>.01)UAMesh.scale.y-=.05;
-	                                if(UAMesh.material.opacity>0)UAMesh.material.opacity-=.025;
-	                                window.requestAnimationFrame(UAMeshOFF)
-	                            }else{scene.remove(UAMesh)}
-	                        })()
+	                        TweenLite.to(UAMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UAMesh)}});
+	                        TweenLite.to(UAMesh.material,.7,{opacity:0});
 	                    }
 	                };
 	                
@@ -2299,22 +2271,12 @@
 	                    mesh:UAaMesh,
 	                    ON:function(){
 	                        scene.add(UAaMesh);
-	                        (function UAaMeshON(){
-	                            if((UAaMesh.scale.y)<1||(UAaMesh.material.opacity)<.6){
-	                                if(UAaMesh.scale.y<1)UAaMesh.scale.y+=.05;
-	                                if(UAaMesh.material.opacity<.6)UAaMesh.material.opacity+=.025;
-	                                window.requestAnimationFrame(UAaMeshON)
-	                            }
-	                        })()
+	                        TweenLite.to(UAaMesh.scale,.7,{y:1});
+	                        TweenLite.to(UAaMesh.material,.7,{opacity:.6});
 	                    },
 	                    OFF:function(){
-	                        (function UAaMeshOFF(){
-	                            if(UAaMesh.scale.y>.05||UAaMesh.material.opacity>0){
-	                                if(UAaMesh.scale.y>.01)UAaMesh.scale.y-=.05;
-	                                if(UAaMesh.material.opacity>0)UAaMesh.material.opacity-=.025;
-	                                window.requestAnimationFrame(UAaMeshOFF)
-	                            }else{scene.remove(UAaMesh)}
-	                        })()
+	                        TweenLite.to(UAaMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UAaMesh)}});
+	                        TweenLite.to(UAaMesh.material,.7,{opacity:0});
 	                    }
 	                };
 	                
@@ -2350,22 +2312,12 @@
 	                    mesh:UBMesh,
 	                    ON:function(){
 	                        scene.add(UBMesh);
-	                        (function UBMeshON(){
-	                            if((UBMesh.scale.y)<1||(UBMesh.material.opacity)<.6){
-	                                if(UBMesh.scale.y<1)UBMesh.scale.y+=.05;
-	                                if(UBMesh.material.opacity<.6)UBMesh.material.opacity+=.025;
-	                                window.requestAnimationFrame(UBMeshON)
-	                            }
-	                        })()
+	                        TweenLite.to(UBMesh.scale,.7,{y:1});
+	                        TweenLite.to(UBMesh.material,.7,{opacity:.6});
 	                    },
 	                    OFF:function(){
-	                        (function UBMeshOFF(){
-	                            if(UBMesh.scale.y>.05||UBMesh.material.opacity>0){
-	                                if(UBMesh.scale.y>.01)UBMesh.scale.y-=.05;
-	                                if(UBMesh.material.opacity>0)UBMesh.material.opacity-=.025;
-	                                window.requestAnimationFrame(UBMeshOFF)
-	                            }else{scene.remove(UBMesh)}
-	                        })()
+	                        TweenLite.to(UBMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UBMesh)}});
+	                        TweenLite.to(UBMesh.material,.7,{opacity:0});
 	                    }
 	                };
 	                
@@ -2504,21 +2456,30 @@
 	                scene.add(mesh);
 	                mesh.material.transparent=true;
 	                mesh.material.opacity=0;
-	                (function fadeIn(){
-	                    if((mesh.material.opacity+=.07)<1){
-	                        mesh.material.color.set(0x00ff00);
-	                        window.requestAnimationFrame(fadeIn);
-	                    }else{mesh.material.transparent=false;mesh.material.color.set(0xffffff)}
-	                })();
+	                TweenLite.to(mesh.material,.7,{
+	                	opacity:1,
+	                	onUpdate:function(){
+	                		if(mesh.material.opacity<1){
+	                			mesh.material.color.set(0x00ff00)
+	                		}else{
+	                			mesh.material.transparent=false;
+	                			mesh.material.color.set(0xffffff)
+	                		}
+	                	}
+	                });
 	            }
 	            function removeMesh(mesh){
 	                mesh.material.transparent=true;
-	                (function fadeOut(){
-	                    if((mesh.material.opacity-=.07)>0){
-	                        window.requestAnimationFrame(fadeOut);
-	                        mesh.material.color.set(0xff0000)
-	                    }else{scene.remove(mesh)}
-	                })();
+	                TweenLite.to(mesh.material,.7,{
+	                	opacity:0,
+	                	onUpdate:function(){
+	                		if(mesh.material.opacity>0){
+	                        	mesh.material.color.set(0xff0000)
+	                		}else{
+	                			scene.remove(mesh)
+	                		}
+	                	}
+	                });
 	            }
 	            function resizeStepContainer(){
 	                var stepsContainerWidth=parseInt(getComputedStyle(stepsContainer,null).width)+10;
