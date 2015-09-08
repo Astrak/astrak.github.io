@@ -17895,6 +17895,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 	this.maxMorphTargets = 8;
 	this.maxMorphNormals = 4;
 
+	// shadowmapping
+
+	this.shadowMapNeedsUpdate = true;
+
 	// flags
 
 	this.autoScaleCubemaps = true;
@@ -25539,8 +25543,10 @@ THREE.ShadowMapPlugin = function ( _renderer, _lights, _webglObjects, _webglObje
 
 	this.render = function ( scene, camera ) {
 
-		if ( _renderer.shadowMapEnabled === false ) return;
-
+		if ( _renderer.shadowMapEnabled === false  || _renderer.shadowMapNeedsUpdate===false ) return;
+		
+		_renderer.shadowMapNeedsUpdate = false
+		
 		var i, il, j, jl, n,
 
 		shadowMap, shadowMatrix, shadowCamera,

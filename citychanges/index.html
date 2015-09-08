@@ -22,6 +22,8 @@
 	<script src='../libs/three.js'></script>
 	<script src='../libs/tween.js'></script>
 	<script src='../libs/controls/TrackballControls_modified.js'></script>
+	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TweenMax.min.js'></script>
+	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TimelineLite.min.js'></script>
 	<script>
 	initLoadScreen();
 	function getResources(){
@@ -30,27 +32,27 @@
 	        textures:[
 	            'hospitaltest141',
 	            'gambetta2test095',
-	            'gambettatest186',
-	            'hugotest177',
+	            'gambettatest187',
+	            'hugotest181',
 	            'chantier1test018',
 	            'chantiertest043',
 	            'commercestest019',
 	            'nouveauxbat048',
 	            'platane10',
-	            'gridtest033',
+	            'gridtest047',
 	            'lensflare1_uncache',
 	            'lensflare2',
 	            'lensflare3',
 	            'routestest090',
 	            'trottoirstest042',
 	            'carstest041',
-	            'gardenstest028',
-	            'gambettacitytest294'
+	            'gardenstest033',
+	            'gambettacitytest299'
 	            ],
 	        geometries:[
 	            'hospital',
 	            'hugo',
-	            'gambettacity13',
+	            'gambettacity19',
 	            'gambetta',
 	            'gambetta2',
 	            'chantier',
@@ -62,7 +64,7 @@
 	            'residences',
 	            'RPA',
 	            'gardens2',
-	            'routes4',
+	            'routes5',
 	            'trottoirs4',
 	            '4x4_shadow',
 	            'citadine_shadow',
@@ -482,10 +484,10 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:.15,duration:6000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:.22,duration:19000,easing:TWEEN.Easing.Exponential.Out,delay:0,ending:false},
-					{to:.35,duration:8000,easing:TWEEN.Easing.Exponential.In,delay:0,ending:false},
-					{to:1,duration:11000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true}
+					{to:.15,duration:6000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:.22,duration:19000,easing:Expo.easeOut,delay:0,ending:false},
+					{to:.35,duration:8000,easing:Expo.easeIn,delay:0,ending:false},
+					{to:1,duration:11000,easing:Power0.easeNone,delay:0,ending:true}
 				],
 				tweensArray:[],
 				begin:0
@@ -497,11 +499,11 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:2000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.15,duration:6000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:.202,duration:19000,easing:TWEEN.Easing.Exponential.Out,delay:0,ending:false},
-					{to:.332,duration:8000,easing:TWEEN.Easing.Exponential.In,delay:0,ending:false},
-					{to:.9,duration:9000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+					{to:1,duration:2000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.15,duration:6000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:.202,duration:19000,easing:Expo.easeOut,delay:0,ending:false},
+					{to:.332,duration:8000,easing:Expo.easeIn,delay:0,ending:false},
+					{to:.9,duration:9000,easing:Power0.easeNone,delay:0,ending:false}
 				],
 				tweensArray:[],
 				begin:.9
@@ -518,8 +520,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:28000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.4,duration:16000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+					{to:1,duration:28000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.4,duration:16000,easing:Power0.easeNone,delay:0,ending:false}
 				],
 				tweensArray:[],
 				begin:.4
@@ -536,8 +538,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:34000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.2,duration:10000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+					{to:1,duration:34000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.2,duration:10000,easing:Power0.easeNone,delay:0,ending:false}
 				],
 				tweensArray:[],
 				begin:.2
@@ -554,11 +556,11 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:.45,duration:12000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:.55,duration:18000,easing:TWEEN.Easing.Exponential.Out,delay:0,ending:false},
-					{to:.62,duration:15000,easing:TWEEN.Easing.Exponential.In,delay:6000,ending:false},
-					{to:1,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.1,duration:3000,easing:TWEEN.Easing.Linear.None,delay:20000,ending:false}
+					{to:.45,duration:12000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:.55,duration:18000,easing:Expo.easeOut,delay:0,ending:false},
+					{to:.62,duration:15000,easing:Expo.easeIn,delay:6000,ending:false},
+					{to:1,duration:14000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.1,duration:3000,easing:Power0.easeNone,delay:20000,ending:false}
 				],
 				tweensArray:[],
 				begin:.1
@@ -575,11 +577,11 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:.41,duration:11500,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:.532,duration:16000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
-					{to:.602,duration:18500,easing:TWEEN.Easing.Exponential.In,delay:5000,ending:false},
-					{to:1,duration:16000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.03,duration:1000,easing:TWEEN.Easing.Linear.None,delay:20000,ending:false}
+					{to:.41,duration:11500,easing:Power0.easeNone,delay:0,ending:false},
+					{to:.532,duration:16000,easing:Power3.easeOut,delay:0,ending:false},
+					{to:.602,duration:18500,easing:Expo.easeIn,delay:5000,ending:false},
+					{to:1,duration:16000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.03,duration:1000,easing:Power0.easeNone,delay:20000,ending:false}
 				],
 				tweensArray:[],
 				begin:.03
@@ -596,8 +598,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:30000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.2,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+					{to:1,duration:30000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.2,duration:14000,easing:Power0.easeNone,delay:0,ending:false}
 				],
 				tweensArray:[],
 				begin:.2
@@ -614,8 +616,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:23000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.35,duration:21000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false}
+					{to:1,duration:23000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.35,duration:21000,easing:Power0.easeNone,delay:0,ending:false}
 				],
 				tweensArray:[],
 				begin:.35
@@ -632,11 +634,11 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:.49,duration:12000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:.544,duration:5000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
-					{to:.62,duration:14000,easing:TWEEN.Easing.Exponential.In,delay:19000,ending:false},
-					{to:1,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.1,duration:3000,easing:TWEEN.Easing.Linear.None,delay:21000,ending:false}
+					{to:.49,duration:12000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:.544,duration:5000,easing:Power3.easeOut,delay:0,ending:false},
+					{to:.62,duration:14000,easing:Expo.easeIn,delay:19000,ending:false},
+					{to:1,duration:14000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.1,duration:3000,easing:Power0.easeNone,delay:21000,ending:false}
 				],
 				tweensArray:[],
 				begin:.1
@@ -652,11 +654,11 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:.49,duration:12000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:.54,duration:5000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
-					{to:.62,duration:14000,easing:TWEEN.Easing.Exponential.In,delay:19000,ending:false},
-					{to:1,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.1,duration:3000,easing:TWEEN.Easing.Linear.None,delay:21000,ending:false}
+					{to:.49,duration:12000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:.54,duration:5000,easing:Power3.easeOut,delay:0,ending:false},
+					{to:.62,duration:14000,easing:Expo.easeIn,delay:19000,ending:false},
+					{to:1,duration:14000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.1,duration:3000,easing:Power0.easeNone,delay:21000,ending:false}
 				],
 				tweensArray:[],
 				begin:.1
@@ -674,10 +676,10 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:.28,duration:14000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:.31,duration:6000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
-					{to:.34,duration:11000,easing:TWEEN.Easing.Exponential.In,delay:19000,ending:false},
-					{to:1,duration:38000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true}
+					{to:.28,duration:14000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:.31,duration:6000,easing:Power3.easeOut,delay:0,ending:false},
+					{to:.34,duration:11000,easing:Expo.easeIn,delay:19000,ending:false},
+					{to:1,duration:38000,easing:Power0.easeNone,delay:0,ending:true}
 				],
 				tweensArray:[],
 				begin:0
@@ -694,7 +696,7 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:44000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true}
+					{to:1,duration:44000,easing:Power0.easeNone,delay:0,ending:true}
 				],
 				tweensArray:[],
 				begin:0
@@ -711,8 +713,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:41000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.075,duration:3000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:1,duration:41000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.075,duration:3000,easing:Power0.easeNone,delay:0,ending:false},
 				],
 				tweensArray:[],
 				begin:.075
@@ -729,8 +731,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:43000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.05,duration:1000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:1,duration:43000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.05,duration:1000,easing:Power0.easeNone,delay:0,ending:false},
 				],
 				tweensArray:[],
 				begin:.05
@@ -747,10 +749,10 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:.65,duration:5000,easing:TWEEN.Easing.Cubic.In,delay:18000,ending:false},
-					{to:1,duration:15000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.55,duration:22000,easing:TWEEN.Easing.Linear.None,delay:23000,ending:false},
-					{to:.6,duration:5000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.65,duration:5000,easing:Power3.easeIn,delay:18000,ending:false},
+					{to:1,duration:15000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.55,duration:22000,easing:Power0.easeNone,delay:23000,ending:false},
+					{to:.6,duration:5000,easing:Power3.easeOut,delay:0,ending:false},
 				],
 				tweensArray:[],
 				begin:.6
@@ -767,10 +769,10 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:.635,duration:5000,easing:TWEEN.Easing.Cubic.In,delay:18000,ending:false},
-					{to:1,duration:16000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.535,duration:21000,easing:TWEEN.Easing.Linear.None,delay:23000,ending:false},
-					{to:.585,duration:5000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
+					{to:.635,duration:5000,easing:Power3.easeIn,delay:18000,ending:false},
+					{to:1,duration:16000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.535,duration:21000,easing:Power0.easeNone,delay:23000,ending:false},
+					{to:.585,duration:5000,easing:Power3.easeOut,delay:0,ending:false},
 				],
 				tweensArray:[],
 				begin:.585
@@ -787,8 +789,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:6000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.8,duration:38000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:1,duration:6000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.8,duration:38000,easing:Power0.easeNone,delay:0,ending:false},
 				],
 				tweensArray:[],
 				begin:.8
@@ -805,8 +807,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:8000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.73,duration:36000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:1,duration:8000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.73,duration:36000,easing:Power0.easeNone,delay:0,ending:false},
 				],
 				tweensArray:[],
 				begin:.73
@@ -823,12 +825,12 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.55,duration:29000,easing:TWEEN.Easing.Linear.None,delay:13000,ending:false},
-					{to:.6,duration:6000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
-					{to:.67,duration:6000,easing:TWEEN.Easing.Cubic.In,delay:15000,ending:false},
-					{to:1,duration:15000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:3000,ending:false},
+					{to:1,duration:0,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.55,duration:29000,easing:Power0.easeNone,delay:13000,ending:false},
+					{to:.6,duration:6000,easing:Power3.easeOut,delay:0,ending:false},
+					{to:.67,duration:6000,easing:Power3.easeIn,delay:15000,ending:false},
+					{to:1,duration:15000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:1,duration:0,easing:Power0.easeNone,delay:3000,ending:false},
 				],
 				tweensArray:[],
 				begin:1
@@ -845,8 +847,8 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:5000,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.85,duration:39000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
+					{to:1,duration:5000,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.85,duration:39000,easing:Power0.easeNone,delay:0,ending:false},
 				],
 				tweensArray:[],
 				begin:.85
@@ -863,12 +865,12 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.53,duration:29000,easing:TWEEN.Easing.Linear.None,delay:12000,ending:false},
-					{to:.58,duration:6000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
-					{to:.63,duration:6000,easing:TWEEN.Easing.Cubic.In,delay:15000,ending:false},
-					{to:1,duration:15000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:4000,ending:false},
+					{to:1,duration:0,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.53,duration:29000,easing:Power0.easeNone,delay:12000,ending:false},
+					{to:.58,duration:6000,easing:Power3.easeOut,delay:0,ending:false},
+					{to:.63,duration:6000,easing:Power3.easeIn,delay:15000,ending:false},
+					{to:1,duration:15000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:1,duration:0,easing:Power0.easeNone,delay:4000,ending:false},
 				],
 				tweensArray:[],
 				begin:.85
@@ -885,19 +887,43 @@
 					spline:undefined
 				},
 				tweens:[
-					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:0,ending:true},
-					{to:.52,duration:29000,easing:TWEEN.Easing.Linear.None,delay:14000,ending:false},
-					{to:.57,duration:6000,easing:TWEEN.Easing.Cubic.Out,delay:0,ending:false},
-					{to:.62,duration:6000,easing:TWEEN.Easing.Cubic.In,delay:15000,ending:false},
-					{to:1,duration:15000,easing:TWEEN.Easing.Linear.None,delay:0,ending:false},
-					{to:1,duration:0,easing:TWEEN.Easing.Linear.None,delay:2000,ending:false},
+					{to:1,duration:0,easing:Power0.easeNone,delay:0,ending:true},
+					{to:.52,duration:29000,easing:Power0.easeNone,delay:14000,ending:false},
+					{to:.57,duration:6000,easing:Power3.easeOut,delay:0,ending:false},
+					{to:.62,duration:6000,easing:Power3.easeIn,delay:15000,ending:false},
+					{to:1,duration:15000,easing:Power0.easeNone,delay:0,ending:false},
+					{to:1,duration:0,easing:Power0.easeNone,delay:2000,ending:false},
 				],
 				tweensArray:[],
 				begin:.85
 			},
 			];
 	    addStreetCars();
-	    
+
+	    /*var people=[
+	    	{
+	    		pathDescription:'sicard > gambetta',
+				curve:{
+					points:[
+						{x:-6.98,y:0,z:4.51},{x:0,y:0,z:9.37},{x:0,y:0,z:20}
+						],
+					spline:undefined
+				},
+				tweens:[
+					{to:1,duration:5000,easing:Power0.easeNone,delay:0,ending:true},
+				],
+				tweensArray:[],
+				begin:0
+	    	}
+	    	];
+	    var date=0;
+	    var person;
+	    new THREE.JSONLoader().load('JSON/skinned_girl22.json',function(geometry){
+			person=new THREE.SkinnedMesh(geometry,new THREE.MeshBasicMaterial({color:0x444444,skinning:true}));
+	    	setTimeout(function(){addPeople(person,geometry)},3000);
+		});*/
+		// wait github answer for issue about cloning skinned meshes
+
 	    var treeCoordinates=[
 	        {x:6.5,y:.76,z:24.42,scaleX:1,scaleY:.8,scaleZ:1},
 	        {x:-1.78,y:.76,z:9.38,scaleX:1,scaleY:.8,scaleZ:1},
@@ -952,6 +978,15 @@
 	        {x:-18.96,y:.76,z:-10.44,scaleX:1,scaleY:1,scaleZ:1},
 	        {x:-19.29,y:.76,z:-10.96,scaleX:1,scaleY:1,scaleZ:1},
 	        {x:-20.13,y:.76,z:-13.14,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-20.85,y:.76,z:-15.05,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-21.6,y:.76,z:-17.1,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-22.62,y:.76,z:-19.1,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-23.3,y:.76,z:-20.76,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-22.62,y:.76,z:-19.1,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-24.6,y:.76,z:-18.2,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-24,y:.76,z:-16.8,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-23.15,y:.76,z:-15.15,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-22.44,y:.76,z:-13.5,scaleX:1,scaleY:1,scaleZ:1},
 	        {x:-21.79,y:.76,z:-12.1,scaleX:1,scaleY:1,scaleZ:1},
 	        {x:-21.17,y:.76,z:-10.75,scaleX:1,scaleY:1,scaleZ:1},
 	        {x:-20.47,y:.76,z:-9.19,scaleX:1,scaleY:1,scaleZ:1},
@@ -989,6 +1024,12 @@
 	        {x:-22.54,y:.76,z:-2.23,scaleX:1,scaleY:1,scaleZ:1},
 	        {x:-23.65,y:.76,z:-2.63,scaleX:1,scaleY:1,scaleZ:1},
 	        {x:-25.03,y:.76,z:-3.17,scaleX:1,scaleY:1,scaleZ:1},//frascaty trees
+
+	        {x:-30.1,y:.76,z:-5.72,scaleX:1,scaleY:.8,scaleZ:1},
+	        {x:-29.8,y:.76,z:-7.45,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-29.2,y:.76,z:-9.4,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-28.8,y:.76,z:-11.36,scaleX:1,scaleY:1,scaleZ:1},
+	        {x:-28.05,y:.76,z:-13.38,scaleX:1,scaleY:1,scaleZ:1},//behind frascaty
 	    
 	        {x:-5.44,y:.76,z:10.6,scaleX:.5,scaleY:.4,scaleZ:.5},
 	        {x:-1.91,y:.76,z:-9.31,scaleX:.4,scaleY:.5,scaleZ:.4},
@@ -1090,7 +1131,151 @@
 	        {x:-14.75,y:.76,z:12.99,scaleX:.6,scaleY:1,scaleZ:.6},
 	        {x:-27.41,y:.76,z:12.07,scaleX:2,scaleY:1,scaleZ:2},
 	        {x:-26.62,y:.76,z:12.31,scaleX:2,scaleY:1,scaleZ:2},
-	        {x:-27.55,y:.76,z:12.64,scaleX:2,scaleY:1,scaleZ:2}//south taller or bigger gardens trees
+	        {x:-27.55,y:.76,z:12.64,scaleX:2,scaleY:1,scaleZ:2},//south taller or bigger gardens trees
+
+
+	        {x:21.19,y:.76,z:15.9,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:21,y:.76,z:16.6,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:20.4,y:.76,z:17.5,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:20.3,y:.76,z:18.35,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:20.3,y:.76,z:19.38,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:19.8,y:.76,z:20.3,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:20.1,y:.76,z:21.25,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:20.84,y:.76,z:22,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:23.8,y:.76,z:20.6,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:22.3,y:.76,z:20.45,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:21,y:.76,z:20.25,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:21.8,y:.76,z:19.17,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:22.6,y:.76,z:18.44,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:26.2,y:.76,z:17.38,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:24.8,y:.76,z:17.2,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:23.4,y:.76,z:17.1,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:22.4,y:.76,z:15.6,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:23.85,y:.76,z:15.6,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:25.82,y:.76,z:15.6,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:19.65,y:.76,z:16,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:19.4,y:.76,z:17.2,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:19.2,y:.76,z:18.35,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:19.14,y:.76,z:20.21,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:27.73,y:.76,z:14.95,scaleX:2,scaleY:1,scaleZ:2},
+	        {x:27.25,y:.76,z:15.83,scaleX:2,scaleY:1,scaleZ:2},//lenotre kids big
+
+	        {x:20.9,y:.76,z:4.52,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.86,y:.76,z:5.02,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.81,y:.76,z:5.59,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.74,y:.76,z:6.17,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.72,y:.76,z:6.66,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.67,y:.76,z:7.27,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.58,y:.76,z:7.91,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.55,y:.76,z:8.49,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.34,y:.76,z:9.86,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.3,y:.76,z:10.43,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.21,y:.76,z:11.02,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.16,y:.76,z:11.6,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.12,y:.76,z:12.11,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.06,y:.76,z:12.66,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20,y:.76,z:13.33,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:20.02,y:.76,z:14.03,scaleX:.5,scaleY:.4,scaleZ:.5},//lenotre front
+
+	        {x:29.62,y:.1,z:4.23,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.52,y:.1,z:4.78,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.5,y:.1,z:5.56,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.5,y:.1,z:6.19,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.4,y:.1,z:6.85,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.3,y:.1,z:7.54,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.26,y:.1,z:8.18,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.17,y:.1,z:8.83,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.06,y:.1,z:9.73,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.05,y:.1,z:10.7,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.06,y:.1,z:11.57,scaleX:1.2,scaleY:.85,scaleZ:1.2},
+	        {x:29.05,y:.1,z:12.41,scaleX:1.2,scaleY:.85,scaleZ:1.2},//lenotre back haie
+
+	        {x:22.67,y:.76,z:4.38,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.2,y:.76,z:5,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22,y:.76,z:6.06,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.85,y:.76,z:6.67,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.7,y:.76,z:7.51,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.64,y:.76,z:8.31,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.2,y:.76,z:9.02,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.03,y:.76,z:8.68,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.2,y:.76,z:7.5,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.27,y:.76,z:6.74,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.24,y:.76,z:5.93,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.54,y:.76,z:4.95,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.67+3.95,y:.76,z:4.38,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.2+3.95,y:.76,z:5,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22+3.95,y:.76,z:6.06,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.85+3.95,y:.76,z:6.67,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.7+3.95,y:.76,z:7.51,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.64+3.95,y:.76,z:8.31,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.2+3.95,y:.76,z:9.02,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.03+3.95,y:.76,z:8.68,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.2+3.95,y:.76,z:7.5,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.27+3.95,y:.76,z:6.74,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.24+3.95,y:.76,z:5.93,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:24.54+3.95,y:.76,z:4.95,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.36,y:.76,z:10.17,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.35,y:.76,z:10.99,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.3,y:.76,z:12.05,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.07,y:.76,z:13.28,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21,y:.76,z:13.87,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21,y:.76,z:14.62,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.36,y:.76,z:10.17,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.35,y:.76,z:10.99,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.3,y:.76,z:12.05,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.07,y:.76,z:13.28,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21,y:.76,z:13.87,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21,y:.76,z:14.62,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.36+6.6,y:.76,z:10.17,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.35+6.6,y:.76,z:10.99,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.3+6.6,y:.76,z:12.05,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.07+6.6,y:.76,z:13.28,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21+6.6,y:.76,z:13.87,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21+6.6,y:.76,z:14.62,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.36+6.6,y:.76,z:10.17,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.35+6.6,y:.76,z:10.99,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.3+6.6,y:.76,z:12.05,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.07+6.6,y:.76,z:13.28,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21+6.6,y:.76,z:13.87,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21+6.6,y:.76,z:14.62,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.7,y:.76,z:10,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:23.86,y:.76,z:10,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:23.8,y:.76,z:10.75,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:23,y:.76,z:11.28,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.35,y:.76,z:12.03,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.17,y:.76,z:13.07,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.75,y:.76,z:13.95,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:23.6,y:.76,z:14.3,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:23.5,y:.76,z:15,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:22.52,y:.76,z:15,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:21.56,y:.76,z:15,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:26.93,y:.76,z:15,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:25.9,y:.76,z:15,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:25.12,y:.76,z:15,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:25.12,y:.76,z:14.36,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:25.86,y:.76,z:14.14,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:26.77,y:.76,z:13.5,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:26.75,y:.76,z:12.22,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:26.28,y:.76,z:11.44,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:25.4,y:.76,z:10.8,scaleX:.5,scaleY:.4,scaleZ:.5},//lenotre inside
+
+	        {x:10.5,y:.76,z:29.26,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:9.5,y:.76,z:29.4,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:8.5,y:.76,z:29.6,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:7.5,y:.76,z:29.8,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:6.5,y:.76,z:30,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:5.5,y:.76,z:30.2,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:4.5,y:.76,z:30.4,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:3.5,y:.76,z:30.6,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:2.5,y:.76,z:30.8,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:1.5,y:.76,z:31,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:0.5,y:.76,z:31.2,scaleX:.5,scaleY:.4,scaleZ:.5},//behind big dirty christian school
+
+	        {x:8.73,y:.76,z:-11.9,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:8.5,y:.76,z:-11.47,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:8.3,y:.76,z:-11.08,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:8,y:.76,z:-10.5,scaleX:.5,scaleY:.4,scaleZ:.5},
+	        {x:7.8,y:.76,z:-10.16,scaleX:.5,scaleY:.4,scaleZ:.5},//little parking next school north gambetta
 		    ];
 	    addTrees(); 
 	    
@@ -1175,19 +1360,33 @@
 			
 	        window.addEventListener('resize',updateWH,false);
 	        
-	        ambient=new THREE.AmbientLight(0xaaaaaa);
-	        light=new THREE.DirectionalLight(0xffffff);
+	        ambient=new THREE.AmbientLight(0x888888);
+	        light=new THREE.DirectionalLight(0xffffff,1.3);
 	        light.position.set(0,35,20);
+	        light.shadowDarkness=1;
 	        scene.add(light,ambient);
 	        
 	        controls=new THREE.TrackballControls(camera,renderer.domElement);
-	    	controls.noPan=true;
+	    	//controls.noPan=true;
 	    	controls.rotateSpeed=.7;
-	    	controls.maxDistance=25;
+	    	//controls.maxDistance=25;
+
+	    	//lightmap (rendered once in a modified threejs version)
+	    	/*renderer.shadowMapEnabled=true;
+	    	light.castShadow=true;
+	    	light.shadowCameraFar=60;
+	    	light.shadowCameraTop=25;
+	    	light.shadowCameraNear=light.shadowCameraRight=25;
+	    	light.shadowCameraBottom=light.shadowCameraLeft=-25;
+	    	light.shadowMapWidth=light.shadowMapHeight=1024;
+	    	light.shadowDarkness=.5;*/
+
+
 	    	
 	    	//set matrixAutoUpdate=false for city-objects
 	    	for(var i=0;i<meshes.length;i++){
 	    	    if(meshes[i].data.steps[0]==true&&i>7/*so cars are not added yet*/)scene.add(meshes[i]);
+	    	    //if(i>7&&i<11||i>19)meshes[i].castShadow=meshes[i].receiveShadow=true;
 	    	    var n=meshes[i].name;
 	    	    if(
 	    	        n!=='4x4'
@@ -1264,6 +1463,7 @@
 			    parkedCars[0].car.material
 			    );
 			scene.add(parkedCarsMesh);
+			//parkedCarsMesh.receiveShadow=parkedCarsMesh.castShadow=true;
 		}
 		function addStreetCars(){
 	        var streetCarsDataLength=streetCarsData.length;
@@ -1272,9 +1472,7 @@
 					//path
 					var points=streetCarsData[i].curve.points;
 					var pointsLength=points.length;
-					for(var j=0;j<pointsLength;j++){
-						points[j]=new THREE.Vector3(points[j].x,0,points[j].z);
-					}
+					for(var j=0;j<pointsLength;j++)points[j]=new THREE.Vector3(points[j].x,0,points[j].z);
 					streetCarsData[i].curve.spline=new THREE.SplineCurve3(points);
 
 					//tweens
@@ -1284,35 +1482,129 @@
 					var position={l:streetCarsData[i].begin};
 	    			var index=randomCarIndex(streetCars);
 				    var car=streetCars[index].car.clone();
+				    var tl=new TimelineLite();
 
 					for(var k=0;k<tweensLength;k++){
 						(function(k){
-							tweensArray[k]=new TWEEN.Tween(position).to({l:tweens[k].to},tweens[k].duration)
-							.easing(tweens[k].easing)
-							.delay(tweens[k].delay)
-							.onUpdate(function(){
-								var pos=streetCarsData[i].curve.spline.getPoint(position.l);
-								car.position.set(pos.x,pos.y,pos.z);
-								car.lookAt(streetCarsData[i].curve.spline.getPoint(position.l+.001));
-							});
-						})(k)
+							var complete=function(){
+								if(tweens[k].ending)position.l=0;
+								if(k==tweensLength-1)tl.restart();
+							}
+							tl.add(
+								new TweenLite(
+									position,
+									tweens[k].duration/1000,//initially the time values were given in milliseconds, i write this for being in a hurry
+									{
+										l:tweens[k].to,
+										ease:tweens[k].easing,
+										onUpdate:function(){
+											var pos=streetCarsData[i].curve.spline.getPoint(position.l);
+											car.position.set(pos.x,pos.y,pos.z);
+											car.lookAt(streetCarsData[i].curve.spline.getPoint(position.l+.001));	
+										},
+										onComplete:complete,
+										delay:tweens[k].delay/1000
+									}
+								)
+							);
+						})(k);
 					}
-					for(var l=0;l<tweensLength;l++){
+
+					/*for(var l=0;l<tweensLength;l++){
 						if(!tweens[l].ending){
-							if(l<(tweensLength-1)){(function(l){tweensArray[l].onComplete(function(){tweensArray[l+1].start()})})(l)}
-							else{(function(l){tweensArray[l].onComplete(function(){position.l=streetCarsData[i].begin;tweensArray[0].start()})})(l)}
+							if(l<(tweensLength-1)){
+								(function(l){	
+									tweensArray[l].onComplete(function(){
+										tweensArray[l+1].start();
+									});
+								})(l);
+							}else{
+								(function(l){
+									tweensArray[l].onComplete(function(){
+										position.l=streetCarsData[i].begin;
+										tweensArray[0].start();
+									});
+								})(l);
+							}
 						}else{
-							if(l<(tweensLength-1)){(function(l){tweensArray[l].onComplete(function(){position.l=0;tweensArray[l+1].start()})})(l)}
-							else{(function(l){tweensArray[l].onComplete(function(){position.l=0;tweensArray[0].start()})})(l)}
+							if(l<(tweensLength-1)){
+								(function(l){
+									tweensArray[l].onComplete(function(){
+										position.l=0;
+										tweensArray[l+1].start();
+									});
+								})(l);
+							}else{
+								(function(l){
+									tweensArray[l].onComplete(function(){
+										position.l=0;
+										tweensArray[0].start();
+									});
+								})(l);
+							}
 						}
-					}
+					}*/
 					scene.add(car);
 					var beginPos=streetCarsData[i].curve.spline.getPoint(streetCarsData[i].begin)
 					car.position.set(beginPos.x,beginPos.y,beginPos.z);
 					car.lookAt(streetCarsData[i].curve.spline.getPoint(streetCarsData[i].begin+.001));
-					tweensArray[0].start();
 				})(i);
 			}
+		}
+		function addPeople(a,b){
+			var peopleLength=people.length;
+			for(var i=0;i<peopleLength;i++){
+				(function(i){
+					//path
+					var points=people[i].curve.points;
+					var pointsLength=points.length;
+					for(var j=0;j<pointsLength;j++)points[j]=new THREE.Vector3(points[j].x,0,points[j].z);
+					people[i].curve.spline=new THREE.SplineCurve3(points);
+
+					//tweens
+					var tweens=people[i].tweens;
+					var tweensArray=people[i].tweensArray;
+					var tweensLength=tweens.length;
+					var position={l:people[i].begin};
+	    			var guy=a.clone();
+
+				    var tl=new TimelineLite();
+
+					for(var k=0;k<tweensLength;k++){
+						(function(k){
+							var complete=function(){
+								if(tweens[k].ending)position.l=0;
+								if(k==tweensLength-1)tl.restart();
+							}
+							tl.add(
+								new TweenLite(
+									position,
+									tweens[k].duration/1000,//initially the time values were given in milliseconds, i write this for being in a hurry
+									{
+										l:tweens[k].to,
+										ease:tweens[k].easing,
+										onUpdate:function(){
+											var pos=people[i].curve.spline.getPoint(position.l);
+											guy.position.set(pos.x,pos.y,pos.z);
+											guy.lookAt(people[i].curve.spline.getPoint(position.l+.001));	
+										},
+										onComplete:complete,
+										delay:tweens[k].delay/1000
+									}
+								)
+							);
+						})(k);
+					}
+					scene.add(guy);
+					animation=new THREE.Animation(guy,b.animations[0]);
+					animation.interpolationType=THREE.AnimationHandler.CATMULLROM;
+					animation.play();
+					var beginPos=people[i].curve.spline.getPoint(people[i].begin)
+					guy.position.set(beginPos.x,beginPos.y,beginPos.z);
+					guy.lookAt(people[i].curve.spline.getPoint(people[i].begin+.001));
+					setTimeout(function(){scene.add(a.clone())},1000)
+				})(i);
+			}	        
 		}
 	    function createSky(skyWidth){
 	        var _skyWidth=skyWidth!==undefined?skyWidth:47;
@@ -1384,6 +1676,13 @@
                 
                 //CAMERA
                 controls.update();
+
+                //PEOPLE
+				var now=new Date()
+				delay=now-date;
+				date=now;
+
+				THREE.AnimationHandler.update(delay/300);
                 
                 renderer.render(scene,camera);
             }
@@ -1573,7 +1872,7 @@
 	                
 	                var pos={x:camera.position.x,y:camera.position.y,z:camera.position.z,xup:camera.up.x,yup:camera.up.y,zup:camera.up.z};
 	                var tweenCamera=new TWEEN.Tween(pos).to({x:0,y:7,z:24,xup:0,yup:1,zup:0},1000)
-	                .easing(TWEEN.Easing.Cubic.Out)
+	                .easing(Power3.easeOut)
 	                .onUpdate(function(){
 	                    camera.position.x=pos.x;
 	                    camera.position.y=pos.y;
