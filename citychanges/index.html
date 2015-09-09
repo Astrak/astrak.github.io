@@ -1372,21 +1372,21 @@
 	    	//controls.maxDistance=25;
 
 	    	//lightmap (rendered once in a modified threejs version)
-	    	/*renderer.shadowMapEnabled=true;
+	    	renderer.shadowMapEnabled=true;
 	    	light.castShadow=true;
 	    	light.shadowCameraFar=60;
 	    	light.shadowCameraTop=25;
 	    	light.shadowCameraNear=light.shadowCameraRight=25;
 	    	light.shadowCameraBottom=light.shadowCameraLeft=-25;
-	    	light.shadowMapWidth=light.shadowMapHeight=1024;
-	    	light.shadowDarkness=.5;*/
+	    	light.shadowMapWidth=light.shadowMapHeight=2048;
+	    	light.shadowDarkness=.5;
 
 
 	    	
 	    	//set matrixAutoUpdate=false for city-objects
 	    	for(var i=0;i<meshes.length;i++){
 	    	    if(meshes[i].data.steps[0]==true&&i>7/*so cars are not added yet*/)scene.add(meshes[i]);
-	    	    //if(i>7&&i<11||i>19)meshes[i].castShadow=meshes[i].receiveShadow=true;
+	    	    if(i>7&&i<11||i>19)meshes[i].castShadow=meshes[i].receiveShadow=true;
 	    	    var n=meshes[i].name;
 	    	    if(
 	    	        n!=='4x4'
@@ -1445,6 +1445,7 @@
 	            treesGeometry.merge(tree.geometry.clone(),tree.matrixWorld);
 	        }
 	        var treesMesh=new THREE.Mesh(treesGeometry,treeMaterial);
+	        treesMesh.castShadow=treesMesh.receiveShadow=true;
 	        scene.add(treesMesh);
 		}
 		function addParkedCars(){
@@ -1905,37 +1906,29 @@
 	            var span=document.createElement('span');
 	            span.className='item';
 	            span.style.backgroundImage="url('img/planmasse40.png')";
-	            
-	            var persp=camera;
-	            var widthCam=20;
-	            var heightCam=widthCam*height/width;
-	            var orthog=new THREE.OrthographicCamera(-widthCam,widthCam,heightCam,-heightCam,.1,40);
-	            
-	            orthog.up=new THREE.Vector3(0,.1,-.7).normalize();
-	            orthog.position.set(0,5,0);
-	            orthog.lookAt(scene.position);
-	            orthog.updateProjectionMatrix();
-	            
-	            span.addEventListener('click',function(e){
-	                e.stopPropagation();
-	                if(!viewMassPlan){
-	                    viewMassPlan=true;
-	                    compassTween=false;
-	                    camera=orthog;
-	                    controls.enabled=false;
-	                    updateWH();
-	                    span.style.cssText="background:blue url('img/planmasse40.png');";
-	                    canvasContainer.style.cursor='auto';
-	                }else{
-	                    viewMassPlan=false;
-	                    compassTween=true;
-	                    camera=persp;
-	                    controls.enabled=true;
-	                    updateWH();
-	                    span.style.cssText="background:#000 url('img/planmasse40.png');";
-	                    canvasContainer.style.cursor='move';
-	                }
-	            },false);
+	            console.log(camera)
+	            var massPlan=false,initialPos;
+
+	            span.addEventListener('click',cameraTransition,false);
+
+	            function cameraTransition(){
+	            	span.removeEventListener('click',cameraTransition,false);
+	            	setTimeout(function(){span.addEventListener('click',cameraTransition,false)},2100);
+	            	if(!massPlan){
+	            		controls.enabled=false;
+	            		initialPos={x:camera.position.x,y:camera.position.y,z:camera.position.z};
+	            		TweenLite.to(camera.position,2,{x:0,y:100,z:0,ease:Power2.easeOut});
+	            		TweenLite.to(camera.up,2,{x:0,y:0,z:-1,ease:Power2.easeOut});
+	            		TweenLite.to(camera,2,{fov:13,ease:Power3.easeOut,onUpdate:function(){camera.updateProjectionMatrix()}});
+	            	}else{
+	            		TweenLite.to(camera.position,2,{x:initialPos.x,y:initialPos.y,z:initialPos.z,ease:Power2.easeInOut,onComplete:function(){
+	            			controls.enabled=true;
+	            		}});
+	            		TweenLite.to(camera.up,2,{x:0,y:1,z:0,ease:Power2.easeInOut});
+	            		TweenLite.to(camera,2,{fov:40,ease:Power3.easeInOut,onUpdate:function(){camera.updateProjectionMatrix()}});
+	            	}
+	            	massPlan=!massPlan;
+	            }
 	            
 	            return span
 	        }
