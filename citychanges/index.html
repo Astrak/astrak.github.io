@@ -20,8 +20,8 @@
 	</div>
 	<div class=canvas-container></div>
 	<script src='../libs/three.js'></script>
-	<script src='../libs/tween.js'></script>
 	<script src='../libs/controls/TrackballControls_modified.js'></script>
+	<script src='../../three/examples/js/controls/FlyControls.js'></script>
 	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TweenMax.min.js'></script>
 	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TimelineLite.min.js'></script>
 	<script>
@@ -420,7 +420,7 @@
 	    
 	    var meshes=data.meshes;
 	    
-	    var scene, camera, light, ambient, renderer, controls ;
+	    var scene, camera, light, ambient, renderer, controls, walkControls, walk=false, clock=new THREE.Clock();
 	    usualStuff();
 	    
 	    var parkedCars=[
@@ -916,7 +916,6 @@
 				begin:0
 	    	}
 	    	];
-	    var date=0;
 	    var person;
 	     /*new THREE.JSONLoader().load('JSON/skinned_girl22.json',function(geometry){
 			person=new THREE.SkinnedMesh(geometry,new THREE.MeshBasicMaterial({color:0x444444,skinning:true}));
@@ -1283,9 +1282,6 @@
 		createSky(32);
 		
 		var lensFlares=addLensFlares(light,camera);
-		
-	    var paused=false;
-	    //setCPUSaver(10);
 	    
 	    animate();
 	    
@@ -1370,9 +1366,11 @@
 	    	//controls.noPan=true;
 	    	controls.rotateSpeed=.7;
 	    	//controls.maxDistance=25;
+	    	walkControls=new THREE.FlyControls(camera,renderer.domElement);
+
 
 	    	//lightmap (rendered once in a modified threejs version)
-	    	renderer.shadowMapEnabled=true;
+	    	//renderer.shadowMapEnabled=true;
 	    	light.castShadow=true;
 	    	light.shadowCameraFar=60;
 	    	light.shadowCameraTop=25;
@@ -1655,38 +1653,32 @@
 	    	return lensFlare
 		}
 	    function animate(){
+
+	    	var delta = clock.getDelta();
+
             window.requestAnimationFrame(animate);
-            if(!paused){
                 
-                //COMPASS
-                if(updateCompass){
-                    if(camera instanceof THREE.OrthographicCamera){
-                        compassCamera.position.set(0,2,0);
-                        compassCamera.up.set(0,0,-1);
-                    }else{
-                        compassCamera.position.copy(camera.position);
-                        compassCamera.position.normalize().multiplyScalar(2);
-                        compassCamera.up.copy(camera.up);
-                    }
-                    compassCamera.lookAt(compassScene.position);
-                    compassRenderer.render(compassScene,compassCamera);
-                }
-                
-                //SCENE
-                TWEEN.update();
-                
-                //CAMERA
-                controls.update();
-
-                //PEOPLE
-				var now=new Date()
-				delay=now-date;
-				date=now;
-
-				THREE.AnimationHandler.update(delay/300);
-                
-                renderer.render(scene,camera);
+            //COMPASS
+            if(updateCompass){
+                compassCamera.position.copy(camera.position);
+                compassCamera.position.normalize().multiplyScalar(2);
+                compassCamera.up.copy(camera.up);
+                compassCamera.lookAt(compassScene.position);
+                compassRenderer.render(compassScene,compassCamera);
             }
+
+            //CAMERA
+            if(walk){
+            	walkControls.update()
+            }else {
+            	controls.update(delta);
+            }
+
+            //PEOPLE
+
+			THREE.AnimationHandler.update(delta/300);
+            
+            renderer.render(scene,camera);
 	    }
 	    function randomCarIndex(array){
 	        var divider=0;
@@ -1885,8 +1877,44 @@
 	        }
 	        function createWalkButton(){
 	            var span=document.createElement('span');
-	            span.className='item not-ready';
+	            span.className='item';
 	            span.style.backgroundImage="url('img/walk.png')";
+
+	            var initialPos;
+
+	            span.addEventListener('click',toggleWalk,false);
+
+	            function toggleWalk(){
+	            	span.removeEventListener('click',toggleWalk,false);
+	            	setTimeout(function(){span.addEventListener('click',toggleWalk,false)},2100);
+	            	if(!walk){
+	            		//button style
+	                    span.style.cssText+='background-color:blue;';
+
+	                    //3D
+	            		controls.enabled=false;
+	            		initialPos={x:camera.position.x,y:camera.position.y,z:camera.position.z};
+	            		TweenLite.to(camera.position,2,{x:-1.89,y:.25,z:8.17,ease:Power2.easeOut,onComplete:function(){
+	            			walk=true;
+	            		}});
+	            		TweenLite.to(camera.up,2,{x:0,y:1,z:0,ease:Power2.easeOut});//if clicked from massplan view
+	            		TweenLite.to(camera,2,{fov:100,near:.1,ease:Power3.easeOut,onUpdate:function(){camera.updateProjectionMatrix()}});
+
+	            	}else{
+
+	            		//button style
+	                    span.style.cssText="background-image:url('img/walk.png')";
+
+	                    //3D
+	            		walk=false;
+	            		TweenLite.to(camera.position,2,{x:initialPos.x,y:initialPos.y,z:initialPos.z,ease:Power2.easeInOut,onComplete:function(){
+	            			controls.enabled=true;
+	            		}});
+	            		TweenLite.to(camera,2,{fov:40,near:.4,ease:Power3.easeInOut,onUpdate:function(){camera.updateProjectionMatrix()}});
+	            	}
+	            } 
+
+
 	            return span
 	        }
 	        function createTrafficButton(){
@@ -1906,7 +1934,7 @@
 	            var span=document.createElement('span');
 	            span.className='item';
 	            span.style.backgroundImage="url('img/planmasse40.png')";
-	            console.log(camera)
+
 	            var massPlan=false,initialPos;
 
 	            span.addEventListener('click',cameraTransition,false);
@@ -1915,12 +1943,20 @@
 	            	span.removeEventListener('click',cameraTransition,false);
 	            	setTimeout(function(){span.addEventListener('click',cameraTransition,false)},2100);
 	            	if(!massPlan){
+	            		//button style
+	                    span.style.cssText+='background-color:blue;';
+
+	                    //3D
 	            		controls.enabled=false;
 	            		initialPos={x:camera.position.x,y:camera.position.y,z:camera.position.z};
 	            		TweenLite.to(camera.position,2,{x:0,y:100,z:0,ease:Power2.easeOut});
 	            		TweenLite.to(camera.up,2,{x:0,y:0,z:-1,ease:Power2.easeOut});
 	            		TweenLite.to(camera,2,{fov:13,ease:Power3.easeOut,onUpdate:function(){camera.updateProjectionMatrix()}});
 	            	}else{
+	            		//button style
+	                    span.style.cssText="background-image:url('img/planmasse40.png')";
+
+	                    //3D
 	            		TweenLite.to(camera.position,2,{x:initialPos.x,y:initialPos.y,z:initialPos.z,ease:Power2.easeInOut,onComplete:function(){
 	            			controls.enabled=true;
 	            		}});
@@ -2488,73 +2524,6 @@
 	            if(showPLU!=arg&&showPLU)PLU.close();
 	        }
 	    }
-	    function setCPUSaver(seconds){
-	        var counter=new Date();
-	        var mouse={x:0,y:0};
-	        var mouseDown=false;
-	        checkCounter();
-	        window.addEventListener('mousemove',resetCounter,false);
-	        window.addEventListener('mousedown',mouseDownTrue,true);
-	        window.addEventListener('touchmove',resetCounter,false);
-	        window.addEventListener('touchstart',mouseDownTrue,true);
-	        function checkCounter(){
-	            var now=new Date();
-	            if((now-counter)>=(seconds*1000)&&!mouseDown){
-	                pause(seconds)
-	            }else{
-	                window.requestAnimationFrame(checkCounter)
-	            }
-	        };
-	        function resetCounter(e){
-	            if(mouse.x!==e.clientX||mouse.y!==e.clientY){//because strangely mousemove are autotriggered twice at the end of each second
-	                counter=new Date();
-	                mouse.x=e.clientX;
-	                mouse.y=e.clientY;
-	            }
-	        }
-	        function mouseDownTrue(){
-	            counter=new Date();
-	            mouseDown=true;
-	            window.removeEventListener('mousedown',mouseDownTrue,true);
-	            window.removeEventListener('touchstart',mouseDownTrue,true);
-	            window.addEventListener('mouseup',mouseDownFalse,true);
-	            window.addEventListener('touchend',mouseDownFalse,true);
-	        }
-	        function mouseDownFalse(){
-	            mouseDown=false;
-	            counter=new Date();
-	            window.removeEventListener('mouseup',mouseDownFalse,true);
-	            window.removeEventListener('touchend',mouseDownFalse,true);
-	            window.addEventListener('mousedown',mouseDownTrue,true);
-	            window.addEventListener('touchstart',mouseDownTrue,true);
-	        }
-	        function pause(seconds){
-	            paused=true;
-	            var greyScreen=document.createElement('div');
-	            var infos=document.createElement('div');
-	            infos.innerHTML="<u>Rendu 3D mis en pause</u><br/><br/>"+seconds+"secondes se sont écoulées sans action de votre part.<br/><br/> "
-	            var comeBack=document.createElement('button');
-	            comeBack.innerHTML='reprendre';
-	            //infos.appendChild(comeBack);
-	            //greyScreen.appendChild(infos);
-	            greyScreen.className='greyScreen';
-	            document.body.appendChild(greyScreen);
-	            greyScreen.addEventListener('mousemove',greyScreenOff,false);
-	            greyScreen.addEventListener('touchstart',greyScreenOff,false);
-	            function greyScreenOff(e){
-	                if(mouse.x!==e.clientX||mouse.y!==e.clientY){//because strangely mousemove are autotriggered twice at the end of each second
-	                    paused=false;
-	                    document.body.removeChild(greyScreen);
-	                    greyScreen.removeEventListener('mousemove',greyScreenOff,false);
-	                    greyScreen.removeEventListener('touchstart',greyScreenOff,false);
-	                    counter=new Date();
-	                    checkCounter();
-	                    mouse.x=e.clientX;
-	                    mouse.y=e.clientY;
-	                }
-	            }
-	        }
-	    }
 	    function createDatGUI(obj){
 	        if(obj===undefined)return;
 	        
@@ -2603,6 +2572,64 @@
 	            });
 	        }
 	    }
+
+	    //walk controls
+/*
+	    function WalkControls(obj,domElement){
+	    	
+	    	this.enabled=true;
+
+	    	this.target=new THREE.Vector3(-1,.25,7.5);
+
+	    	var _this=this;
+
+	    	function rotate ( e ) {
+
+	    		if ( ! _this.enabled ) return;
+
+	    		var mouse = {};
+
+            	mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+            	mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+
+            	var target = new THREE.Vector3().copy( _this.target ).sub( obj.position );
+
+            	var quat = new THREE.Quaternion();
+
+            	var angle = - mouse.x / 10;
+
+            	var axis = new THREE.Vector3( 0, 1, 0 );
+
+            	quat.setFromAxisAngle( axis, angle );
+
+            	target.applyQuaternion( quat );
+
+            	target.add( obj.position );
+
+            	_this.target = target;
+
+            	camera.lookAt( target );
+
+	    	}
+
+	    	function move () {
+
+	    		if ( ! _this.enabled ) return;
+
+	    		var straight = new THREE.Vector3().subVectors( _this.target, obj.position );
+
+	    		obj.position.add( straight ).multiplyScalar( .02 );
+	    		_this.target.add( straight ).multiplyScalar( .02 );
+
+	    	}
+
+	    	domElement.addEventListener('touchmove',rotate,false);
+	    	domElement.addEventListener('mousemove',rotate,false);
+	    	domElement.addEventListener('click',move,false);
+
+
+
+	    }*/
 	}
 	</script>
 </body>
