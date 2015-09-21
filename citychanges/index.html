@@ -21,7 +21,7 @@
 	<div class=canvas-container></div>
 	<script src='../libs/three.js'></script>
 	<script src='../libs/controls/TrackballControls_modified.js'></script>
-	<script src='../../three/examples/js/controls/FlyControls.js'></script>
+	<!--<script src='../../three/examples/js/controls/FlyControls.js'></script>-->
 	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TweenMax.min.js'></script>
 	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TimelineLite.min.js'></script>
 	<script>
@@ -1366,11 +1366,11 @@
 	    	//controls.noPan=true;
 	    	controls.rotateSpeed=.7;
 	    	//controls.maxDistance=25;
-	    	walkControls=new THREE.FlyControls(camera,renderer.domElement);
+	    	//walkControls=new THREE.FlyControls(camera,renderer.domElement);
 
 
 	    	//lightmap (rendered once in a modified threejs version)
-	    	//renderer.shadowMapEnabled=true;
+	    	renderer.shadowMapEnabled=true;
 	    	light.castShadow=true;
 	    	light.shadowCameraFar=60;
 	    	light.shadowCameraTop=25;
@@ -1882,7 +1882,7 @@
 
 	            var initialPos;
 
-	            span.addEventListener('click',toggleWalk,false);
+	            //span.addEventListener('click',toggleWalk,false);
 
 	            function toggleWalk(){
 	            	span.removeEventListener('click',toggleWalk,false);
