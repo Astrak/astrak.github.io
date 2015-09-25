@@ -1,0 +1,419 @@
+<!Doctype html>
+<html>
+	<head>
+		<title>How do you run ?</title>
+		<script src=../libs/threer72.js></script>
+		<script src=../libs/controls/OrbitControls.js></script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js'></script>
+		<style>
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+			button,input{
+			    font:normal 30px Impact;
+			    border-radius:10px 10px 0px 0px;
+			    border:solid 1px darkslategrey;
+			    outline:0;
+			    position:absolute;
+			    bottom:0;
+			    width:150px;
+			    height:60px;
+			    left:50%;
+			    margin-left:-75px;
+			    color:chocolate;
+			    cursor:pointer;
+			    letter-spacing:1px;
+			    transition:all 200ms ease;
+			    background:darkslategrey;
+			 	-webkit-appearance: none; 
+			}
+			button:hover{
+			    letter-spacing:3px;
+			    border:solid 1px chocolate;
+			}
+			input{
+				bottom:70px;
+				background:none;
+				border:none;
+			}
+
+			/**********************************/
+			/** SLIDER STYLE FROM CSS TRICKS **/
+			/**********************************/
+
+			/** 1. REMOVE AUTOMATIC STYLES **/
+			input[type=range]::-webkit-slider-thumb {
+			  -webkit-appearance: none;
+			}
+			input[type=range]:focus {
+			  outline: none;
+			}
+			input[type=range]::-ms-track {
+			  cursor: pointer;
+			  background: transparent; /* Hides the slider so custom styles can be added */
+			  border-color: transparent;
+			  color: transparent;
+			}
+
+			/** 2. THE THUMB **/
+			input[type=range]::-webkit-slider-thumb {
+			  -webkit-appearance: none;
+			  height: 30px;
+			  width: 30px;
+			  border-radius: 50%;
+			  background: chocolate;
+			  margin-top: -11px; /* needed in Chrome, not in Firefox and IE */
+			  box-shadow:2px 0px 3px #000;
+			}
+			input[type=range]::-moz-range-thumb {
+			  height: 30px;
+			  width: 30px;
+			  border-radius: 50%;
+			  background: chocolate;
+			  box-shadow:2px 0px 3px #000;
+			  border:none;
+			}
+			input[type=range]::-ms-thumb {
+			  height: 30px;
+			  width: 30px;
+			  border-radius: 50%;
+			  background: chocolate;
+			  box-shadow:2px 0px 3px #000;
+			  border:none;
+			}
+
+			/* 3. THE TRACK */
+			input[type=range]::-webkit-slider-runnable-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: darkslategrey;
+			  border-radius: 1.3px;
+			}
+			input[type=range]:focus::-webkit-slider-runnable-track {
+			  background: darkslategrey;
+			}
+			input[type=range]::-moz-range-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: darkslategrey;
+			  border-radius: 1.3px;
+			}
+			input[type=range]::-ms-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: transparent;
+			  border-color: transparent;
+			  border-width: 16px 0;
+			  color: transparent;
+			}
+			input[type=range]::-ms-fill-lower {
+			  background: darkslategrey;
+			  border-radius: 2.6px;
+			}
+			input[type=range]:focus::-ms-fill-lower {
+			  background: darkslategrey;
+			}
+			input[type=range]::-ms-fill-upper {
+			  background: darkslategrey;
+			  border-radius: 2.6px;
+			}
+			input[type=range]:focus::-ms-fill-upper {
+			  background: darkslategrey;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			var renderer, scene, camera, controls, clock;
+			var spot, plane, jogger, cycle, cycleLine, animation, slider, button;
+			var othoCam1, orthoCam2, useScissor=false;
+			var loader=new THREE.JSONLoader();
+			var tl=new TimelineLite();
+			var tween={width:0,width1:1,target:.72};
+
+			loadModel();
+
+			function loadModel(){
+				loader.load('jogger_cyclearriere_footprint_low.json',function(geometry){
+					setScene(geometry);
+				});				
+			}
+
+			function setScene(geo){
+				renderer=new THREE.WebGLRenderer();
+				renderer.setSize(innerWidth,innerHeight);
+				renderer.enableScissorTest(true);
+				renderer.setViewport(0,0,innerWidth,innerHeight);
+				renderer.setScissor(0,0,innerWidth,innerHeight);
+				document.body.appendChild(renderer.domElement);
+
+				scene=new THREE.Scene();
+
+				clock=new THREE.Clock();
+
+				//main cam
+				camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,10);
+				camera.position.set(1.3,1.3,1.6);
+				camera.lookAt(0,tween.target);
+				//side cam
+				orthoCam1=new THREE.OrthographicCamera(-1,1,1,0,.1,3);
+				orthoCam1.position.set(1,0,0);
+				orthoCam1.lookAt(scene.position);
+				//scene.add(new THREE.CameraHelper(orthoCam1));
+				//bottom cam
+				orthoCam2=new THREE.OrthographicCamera(-.25*innerWidth/innerHeight,.25*innerWidth/innerHeight,.4,-.4,.1,1);
+				orthoCam2.position.set(0,-1,0);
+				orthoCam2.up.set(0,0,1);
+				orthoCam2.lookAt(scene.position);
+				//scene.add(new THREE.CameraHelper(orthoCam2));
+
+				controls=new THREE.OrbitControls(camera,renderer.domElement);
+				///controls.enablePan=controls.enableZoom=false;
+				controls.minDistance=1;
+				controls.maxDistance=4;
+				controls.target.set(0,tween.target,0);
+
+				addPlane();
+				addJogger(geo);
+
+				setLighting();
+
+				animate();
+
+				window.addEventListener('resize',function(){
+					camera.aspect=tween.width1*innerWidth/innerHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize(innerWidth,innerHeight);
+					renderer.setViewport(0,0,innerWidth,innerHeight);
+					renderer.setScissor(0,0,innerWidth,innerHeight);
+				},false)
+			}
+			
+			function setLighting(){
+				spot=new THREE.SpotLight(0xffffff,2,5);
+				spot.position.set(-.2,3,.3);
+				scene.add(spot);
+
+				renderer.shadowMap.enabled=true;
+				spot.castShadow=true;
+				//spot.shadowCameraVisible=true;
+				spot.shadowCameraFov=27;
+				spot.shadowCameraNear=1.3;
+				spot.shadowCameraFar=3.2;
+				spot.shadowMapWidth=spot.shadowMapHeight=256;//above a new shadow appear that the bias cant correct
+
+				spot.shadowBias=0.02;
+				spot.shadowDarkness=.8;
+
+				plane.receiveShadow=true;
+				jogger.castShadow=true;	
+			}
+
+			function addPlane(){
+				plane=new THREE.Mesh(
+					new THREE.PlaneGeometry(5,5,20,20),
+					new THREE.MeshLambertMaterial({
+						color:0x2f4f4f,
+						side:THREE.DoubleSide
+					})
+					);
+				plane.rotation.x=-Math.PI/2;
+				scene.add(plane);
+			}
+
+			function addJogger(geometry){
+				jogger=new THREE.SkinnedMesh(
+					geometry,
+					new THREE.MeshLambertMaterial({
+						color:0xaa9944,
+						skinning:true,
+						emissive:0x554422
+				}));
+
+				scene.add(jogger);
+
+				animation=new THREE.Animation(jogger,geometry.animations[0]);
+				animation.interpolationType=THREE.AnimationHandler.CATMULLROM;
+				animation.play();
+				animation.timeScale=1.7;
+
+				
+				/*loader.load('model/hair.json',function(g){
+					var hair=new THREE.Mesh(geometry,new THREE.MeshPhongMaterial({color:0x221a00,shininess:10}));
+					jogger.skeleton.bones[62].add(hair);
+				});*/	
+				addCycleHelper();
+				setSpeedSlider();
+				setViewsSwitcher();
+			}
+
+			function setSpeedSlider(){
+				animation.timeScale=2.2;
+				slider=document.createElement('input');
+			    slider.type='range';
+			    slider.min=-Math.abs(animation.timeScale);slider.max=Math.abs(animation.timeScale);slider.step=0.001;
+			    slider.value=animation.timeScale;
+			    document.body.appendChild(slider);
+
+			    slider.addEventListener('input',function(){
+					animation.timeScale=slider.value;			    	
+			    },false);
+			}
+
+			function setViewsSwitcher(){
+				button=document.createElement('button');
+				button.innerHTML='analyse';
+				document.body.appendChild(button);
+
+				var update=function(){
+					cycle.material.opacity=tween.width;
+					controls.target.set(0,tween.target,0);
+					camera.aspect=tween.width1*innerWidth/innerHeight;
+					camera.updateProjectionMatrix();
+					orthoCam2.left=-2*tween.width/innerWidth;
+					orthoCam2.right=2*tween.width/innerWidth;
+					//orthoCam2.updateProjectionMatrix();
+					//TODO : update orthographic cams
+				}
+
+				tl.to(tween,1,{
+					width1:.5,
+					width:.5,
+					target:.85,
+					ease:Power3.easeInOut,
+					onUpdate:update
+				}).pause();
+
+				button.addEventListener('click',function(){
+					var state=tl.progress();
+					this.innerHTML=state<1?'< back':'analyse';
+					state<1?tl.play():tl.reverse();
+				});
+			}
+
+			function addCycleHelper(){//this could be written better. TODO : show any other bone movement.
+				var b0=new THREE.Object3D();//hips
+				var b1=new THREE.Object3D();//thigh
+				var b2=new THREE.Object3D();//shin
+				var b3=new THREE.Object3D();//foot
+				b0.add(b1);b1.add(b2);b2.add(b3);
+				var a=animation.data.hierarchy;
+				var helper=new THREE.Mesh(
+					new THREE.SphereGeometry(.02,5,5),
+					new THREE.MeshBasicMaterial({color:0xff0000,depthTest:false})
+					);
+				var arr1=[],arr2=[];
+				for(var i=0;i<a[2].keys.length;i++){
+
+					b0.position.set(a[0].keys[i].pos[0],a[0].keys[i].pos[1],a[0].keys[i].pos[2]);
+			    	b0.position.applyQuaternion(a[0].keys[i].rot);
+
+			    	b1.position.set(a[1].keys[i].pos[0],a[1].keys[i].pos[1],a[1].keys[i].pos[2]);
+
+			    	b2.position.set(a[2].keys[i].pos[0],a[2].keys[i].pos[1],a[2].keys[i].pos[2]);
+			    	b2.position.applyQuaternion(a[1].keys[i].rot);
+			    	
+			    	b3.position.set(a[3].keys[i].pos[0],a[3].keys[i].pos[1],a[3].keys[i].pos[2]);
+
+			    	b3.position.applyQuaternion(new THREE.Quaternion().copy(a[1].keys[i].rot).multiply(a[2].keys[i].rot));
+
+					helper.position.copy(b3.position);
+					helper.position.add(b1.position);
+					helper.position.add(b2.position);
+					helper.position.add(b0.position);
+
+					arr1.push(new THREE.Vector3().copy(helper.position));
+					helper.position.x=-helper.position.x;
+					arr2.push(new THREE.Vector3().copy(helper.position));
+				}
+
+				//transform the keyframes in a smooth curve
+				var curve1=new THREE.CatmullRomCurve3(arr1);
+				arr1=curve1.getPoints(50);
+				var curve2=new THREE.CatmullRomCurve3(arr2);
+				arr2=curve2.getPoints(50);
+
+				//then the cycle
+				var g=new THREE.Geometry();
+				for(var i=0;i<arr1.length;i++){
+					g.vertices.push(arr1[i]);
+					g.vertices.push(arr2[i]);
+				}
+				for(var i=0;i<arr1.length;i++){
+					g.faces.push(new THREE.Face3((i*2)%(2*arr1.length),(i*2+1)%(2*arr1.length),(i*2+2)%(2*arr1.length)));
+					g.faces.push(new THREE.Face3((i*2+1)%(2*arr1.length),(i*2+3)%(2*arr1.length),(i*2+2)%(2*arr1.length)));
+				}
+				/*g.computeBoundingBox();
+				var center=g.boundingBox.center();
+				g.center();
+				var l=g.vertices.length;
+				for(var i=0;i<l;i++){
+					var v=new THREE.Vector3().copy(g.vertices[i]);
+					var ref=new THREE.Vector3().copy(center);
+					ref.x+=v.x;
+					var d=new THREE.Vector3().subVectors(v,ref);
+					d.setLength(d.length()-.1);
+					d.add(ref);
+					g.vertices.push(d);
+				}
+				for(var i=0;i<l;i++){
+					g.faces.push(new THREE.Face3(
+						(i)%l+l,
+						(i+2)%l+l,
+						(i+1)%l+l
+						));
+					g.faces.push(new THREE.Face3(
+						(i+1)%l+l,
+						(i+2)%l+l,
+						(i+3)%l+l
+						));
+				}*/
+				g.computeFaceNormals();
+				cycle=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:0xd2691e,transparent:true,opacity:0,side:THREE.DoubleSide}));
+				//cycle.position.copy(center);
+				scene.add(cycle)
+			}
+
+			function animate(){
+				requestAnimationFrame(animate);
+				THREE.AnimationHandler.update(clock.getDelta());
+				controls.update();
+				render();
+			}
+
+			function render(){
+				if(typeof jogger !== 'undefined' )jogger.material.emissive.set(0x554422);
+				plane.material.emissive.set(0x000000);
+				spot.shadowDarkness=.8;
+				//main view
+				renderer.setViewport(0,0,tween.width1*innerWidth,innerHeight);
+				renderer.setScissor(0,0,(1-tween.width)*innerWidth,innerHeight);
+				renderer.setClearColor(0x000000);
+				renderer.render(scene,camera);
+				//side view
+				spot.shadowDarkness=0;
+				renderer.setViewport((1-tween.width)*innerWidth,.5*innerHeight,tween.width*innerWidth,.5*innerHeight);
+				renderer.setScissor((1-tween.width)*innerWidth,.5*innerHeight,tween.width*innerWidth,.5*innerHeight);
+				renderer.setClearColor(0x333333);
+				renderer.render(scene,orthoCam1);
+				//bottom view
+				if(typeof jogger !== 'undefined' )jogger.material.emissive.set(0xd2691e);
+				plane.material.emissive.set(0x222222);
+				renderer.setViewport((1-tween.width)*innerWidth,0,tween.width*innerWidth,.5*innerHeight);
+				renderer.setScissor((1-tween.width)*innerWidth,0,tween.width*innerWidth,.5*innerHeight);
+				renderer.render(scene,orthoCam2);
+			}
+		</script>
+	</body>
+</html>

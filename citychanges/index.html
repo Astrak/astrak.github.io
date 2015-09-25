@@ -1351,6 +1351,7 @@
 	        renderer.setSize(width,height);
 	        canvasContainer.style.cssText='height:'+height+'px;width:'+width+'px;left:'+asideWidth+'px;cursor:move;';
 	        canvasContainer.appendChild(renderer.domElement);
+	        console.log(renderer)
 	        renderer.domElement.style.position='relative';
 	        renderer.setClearColor(0x2E2EC1);
 			
@@ -1363,9 +1364,9 @@
 	        scene.add(light,ambient);
 	        
 	        controls=new THREE.TrackballControls(camera,renderer.domElement);
-	    	//controls.noPan=true;
+	    	controls.noPan=true;
 	    	controls.rotateSpeed=.7;
-	    	//controls.maxDistance=25;
+	    	controls.maxDistance=25;
 	    	//walkControls=new THREE.FlyControls(camera,renderer.domElement);
 
 
@@ -1866,7 +1867,7 @@
 	                compassRenderer.domElement.addEventListener('click',cameraAtNorth,false);
 	                
 	                function cameraAtNorth(){
-	                	var pos={x:0,y:9,z:24};
+	                	var pos={x:0,y:12,z:23};
 		                if(camera.position.x==pos.x&&camera.position.y==pos.y&&camera.position.z==pos.z || camera instanceof THREE.OrthographicCamera )return;
 	                	TweenLite.to(camera.position,.7,{x:pos.x,y:pos.y,z:pos.z});
 		            }
@@ -1947,6 +1948,7 @@
 	                    span.style.cssText+='background-color:blue;';
 
 	                    //3D
+	                    controls.maxDistance=100;
 	            		controls.enabled=false;
 	            		initialPos={x:camera.position.x,y:camera.position.y,z:camera.position.z};
 	            		TweenLite.to(camera.position,2,{x:0,y:100,z:0,ease:Power2.easeOut});
@@ -1958,7 +1960,7 @@
 
 	                    //3D
 	            		TweenLite.to(camera.position,2,{x:initialPos.x,y:initialPos.y,z:initialPos.z,ease:Power2.easeInOut,onComplete:function(){
-	            			controls.enabled=true;
+	            			controls.enabled=true;controls.maxDistance=25;
 	            		}});
 	            		TweenLite.to(camera.up,2,{x:0,y:1,z:0,ease:Power2.easeInOut});
 	            		TweenLite.to(camera,2,{fov:40,ease:Power3.easeInOut,onUpdate:function(){camera.updateProjectionMatrix()}});

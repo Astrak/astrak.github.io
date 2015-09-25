@@ -14,8 +14,9 @@
 		}
 		hr{
 			margin:30px 0 30px 0;
+			padding:0px;
 		}
-		ul{
+		ul.portfolio{
 			list-style-type:none;
 			padding:0;
 			width:70%;
@@ -31,16 +32,33 @@
 		a,p{
 			color:chocolate;
 		}
-		
+		#log{
+			padding:10px;
+			color:black;
+			text-align: left;
+			width:100%;
+			margin:auto;
+		}
+		#log ul, #log li{
+			margin:0px;
+			padding:0px;
+		}
+		#log li{
+			margin-left:15px;
+		}
 	</style>
 </head>
 <body>
 
-	<h1>Atrahasis' showcase</h1>
+	<h1>Atrahasis' portfolio</h1>
 	<p>Realtime, smartphone-friendly 3D apps</p>
+	<p id='log'></p>
 
 	<hr/>
-	<ul>
+	<ul class='portfolio'>
+
+		<li><a href='jogging/index.html'><img alt='Sport improving' title='Sport improving' height=200 src='img/5.jpg'/>
+		<p class='img legend'>How do you run ?</p><p class='img comment'>Current experiment</p></a></li>
 
 		<li><a href='galaxies/dancing/index.html'><img alt='Galaxy experiments' title='Galaxy experiments' height=200 src='img/2.jpg'/>
 		<p class='img legend'>Galaxy : disco shader</p><p class='img comment'>Total work : 1 day. Release : 2015.09.02</p></a></li>
@@ -58,15 +76,41 @@
 
 	<hr/>
 	<br/>
+	<p style='padding-bottom:25px;'>coffre.a@gmail.com</p>
 	<a href="https://codepen.io/Astrak" style='background:#111;padding:20px 44px;margin:30px;color:#ccc;font-family:Arial;'>Codepen albums</a>
 	<br/><br/><br/><br/>
 	<a href="http://stackoverflow.com/users/4236091/atrahasis"><img src="http://stackoverflow.com/users/flair/4236091.png?theme=clean" width="208" height="58" alt="profile for Atrahasis at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for Atrahasis at Stack Overflow, Q&amp;A for professional and enthusiast programmers"></a>
 	<br/><br/>
-	<a href="https://twitter.com/GPUaccelerated" class="twitter-follow-button" data-show-count="false" data-size="large">Follow me on Twitter</a><p>v1.0.1</p>
+	<a href="https://twitter.com/GPUaccelerated" class="twitter-follow-button" data-show-count="false" data-size="large">Follow me on Twitter</a><p>v1.0.2</p>
 
+	<!-- Check if  the client can get WebGL contexts, or display why it cannot -->
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/detectizr/2.1.0/detectizr.min.js'></script>
+	<script type='text/javascript'>
+		var log=document.querySelector('#log');
+		var device=Detectizr.device.type==='desktop'?'computer':Detectizr.device.type==='tablet'?'tablet':'mobile';
+		var browser=Detectizr.browser.name;
+		browser=browser==='ie'?'Internet Explorer':browser==='firefox'?'Mozilla Firefox':browser==='chrome'?'Chrome':browser==='safari'?'Safari':browser;
+		if (!window.WebGLRenderingContext) {
+			log.innerHTML='Your are using '+browser+' '+Detectizr.browser.major+' that cannot run WebGL';
+			log.style.background='#b33';
+		} else {
+			var canvas = document.createElement('canvas');
+			canvas.width=canvas.height=10;
+			var ctx = canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+			if (!ctx) {
+				log.style.background='#b33';
+				log.innerHTML='Your are using '+browser+' '+Detectizr.browser.major+' that can run WebGL.<br/>'+
+				'However creating a WebGL context seems to fail. Your '+device+' uses '+Detectizr.os.name+' '+Detectizr.os.version+' '+Detectizr.os.addressRegisterSize+' :<ul>'+
+				'<li>Your '+device+' may be out of memory</li>'+
+				'<li>This operating system may not be able to run WebGL contexts</li>'+
+				'<li>You may lack a graphic card.</li></ul>'+
+				'Your browser will not display the following examples';
+			}
+		}	
+	</script>
 	<!-- WebGL Stats -->
 	<script src="//cdn.webglstats.com/stat.js" defer="defer" async="async"></script>
-
 	<!-- Twitter follow button -->
 	<script>
 		!function(d,s,id){
