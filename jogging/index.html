@@ -267,7 +267,7 @@
 
 				window.addEventListener('resize',function(){
 					//cams
-					camera.aspect=tween.width1*innerWidth/innerHeight;
+					camera.aspect=(1-tween.width)*innerWidth/innerHeight;
 					camera.updateProjectionMatrix();
 					orthoCam1.left=-tween.width*innerWidth/innerHeight;
 					orthoCam1.right=tween.width*innerWidth/innerHeight;
@@ -403,7 +403,7 @@
 					spanVert.style.transform='rotateZ('+(90+tween.width*300).toString()+'deg)';
 					cycle.material.opacity=tween.opacity;
 					controls.target.set(0,tween.target,0);
-					camera.aspect=tween.width1*innerWidth/innerHeight;
+					camera.aspect=tween.(1-tween.width)*innerWidth/innerHeight;
 					camera.updateProjectionMatrix();
 					orthoCam1.left=-tween.width*innerWidth/innerHeight;
 					orthoCam1.right=tween.width*innerWidth/innerHeight;
@@ -414,7 +414,6 @@
 				}
 
 				tl.to(tween,1,{
-					width1:.7,
 					width:.3,
 					target:.85,
 					opacity:.6,
@@ -507,7 +506,7 @@
 				plane.material.emissive.set(0x000000);
 				spot.shadowDarkness=.8;
 				//main view
-				renderer.setViewport(0,0,tween.width1*innerWidth,innerHeight);
+				renderer.setViewport(0,0,(1-tween.width)*innerWidth,innerHeight);
 				renderer.setScissor(0,0,(1-tween.width)*innerWidth,innerHeight);
 				renderer.setClearColor(0x000000);
 				renderer.render(scene,camera);

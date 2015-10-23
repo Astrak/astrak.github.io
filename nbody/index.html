@@ -1,283 +1,351 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>N-BODY</title>
-	</head>
-	<body style=padding:0;margin:0;overflow:hidden;  >
-		<script src='../libs/three.js'></script>
-		<script src='../libs/controls/TrackballControls.js'></script>
+<head>
+	<title>TITLE</title>
+</head>
+<body style='margin:0;overflow:hidden;'>
+<script src='../libs/threer72.js'></script>
+<script src='../libs/controls/TrackballControls.js'></script>
 
-		<!-- Random Shaders -->
-		<script type="x-shader/x-vertex" id="randVert">
-			varying vec2 vUv;
+<!--display shaders -->
+<script id='vs' type='x-shader/x-vertex'>
+	uniform sampler2D posTex;
+	uniform float pointSize;
+	uniform float pixelRatio;
+	varying float blueColor;
+	varying float gas;
+	void main(){
+		vec4 vPosition=texture2D(posTex,position.xy);
+		vec4 mvPosition=modelViewMatrix*vPosition;
+		float l=length(vPosition);
 
-			void main() {
-				vUv = uv;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+		blueColor=max(.32,.0065*l);
+		gas=max(.0,sin(-l/20.));
+
+		gl_PointSize=pixelRatio*pointSize*(1.+gas*2.)/length(mvPosition.xyz);
+		gl_Position=projectionMatrix*mvPosition;
+		//gl_PointSize=2.;
+		//gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+	}
+</script>
+<script id='fs' type='x-shader/x-fragment'>
+	varying float blueColor;
+	varying float gas;
+	void main(){
+		float ratio=distance(gl_PointCoord,vec2(.5));
+		float gaslook=-(ratio-.5)*1.2*gas; 
+		float starlook=(1.-gas)/(ratio*10.);
+		float result=gaslook+starlook;
+		gl_FragColor=vec4(.32,.28,blueColor,result)*result;
+		//gl_FragColor=vec4(1.);
+	}
+</script>
+<!-- end display shaders -->
+
+<!-- init shaders -->
+<script id='initvs' type='x-shader/x-vertex'>
+	uniform float b;
+	attribute vec3 initPos;
+	attribute vec3 initSpeed;
+	varying vec3 vColor;
+	void main(){
+		vColor=b==0.?initSpeed:initPos;
+		gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+	}
+</script>
+<script id='initfs' type='x-shader/x-fragment'>
+	varying vec3 vColor;
+	void main(){
+		gl_FragColor=vec4(vColor,1.);
+	}
+</script>
+<!-- end init shaders -->
+
+
+<!-- generic vertex shader -->
+<script id='gvs' type='x-shader/x-vertex'>
+	varying vec3 vPosition;
+	void main(){
+		vPosition=position;
+		gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+	}
+</script>
+<!-- end generic vertex shader -->
+
+
+<!-- position shader -->
+<script id='ps' type='x-shader/x-vertex'>
+	uniform sampler2D posTex;
+	uniform sampler2D speedTex;
+	varying vec3 vPosition;
+	void main(){
+		vec3 pos=texture2D(posTex,vPosition.xy).xyz;
+		vec3 speed=texture2D(speedTex,vPosition.xy).xyz;
+		pos+=speed;
+		gl_FragColor=vec4(pos,1.);
+	}
+</script>
+<!-- end position shader -->
+
+
+<!-- speed shader -->
+<script id='ss' type='x-shader/x-vertex'>
+	precision highp float;
+	uniform sampler2D posTex;
+	uniform sampler2D speedTex;
+	uniform float size;
+	varying vec3 vPosition;
+	const float pix=1./32.;
+	void main(){
+		vec3 speed=texture2D(speedTex,vPosition.xy).xyz;
+		vec3 pos=texture2D(posTex,vPosition.xy).xyz;
+		for(float i=0.;i<1.;i+=pix){
+			for(float j=1.;j>0.;j-=pix){
+				vec3 v=texture2D(posTex,vec2(i,j)).xyz-pos;
+				float d=length(v);
+				if(d>0.)speed+=.0001*v/(d*d);
 			}
-		</script>
-		<script type="x-shader/x-fragment" id="randFrag">
-			varying vec2 vUv;
+		}
+		gl_FragColor=vec4(speed,1.);
+	}
+</script>
+<!-- end speed shader -->
 
+<script>
+	'use strict';
+	
+	var scene,renderer,camera,controls,points;
+	var texGeometry,texturesScene,orthoCam;
+	var speedTex=[],posTex=[],
+		speedMesh,posMesh,
+		actual=1,before=(actual+1)%2;
+	var rtParams={
+			format:THREE.RGBFormat,
+			generateMipmaps:false,
+			magFilter:THREE.NearestFilter,
+			minFilter:THREE.NearestFilter,
+			type:THREE.FloatType
+		};
+	var size=32;
+	var galaxy=new Galaxy(size*size);
+	
+	setScenes();
 
-			float rand(vec2 co){
-				return fract(sin(dot(co.xy, vec2(12.8273, 67.245))) * 53726.17623);
+	addPoints();
+
+	animate();
+
+	function setScenes(){
+		//main scene & usual stuff
+		renderer=new THREE.WebGLRenderer();
+		renderer.setSize(innerWidth,innerHeight);
+		document.body.appendChild(renderer.domElement);
+		scene=new THREE.Scene();
+		camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,100,100000);
+		camera.position.z=200;
+		controls=new THREE.TrackballControls(camera,renderer.domElement);
+		controls.rotateSpeed=7;
+
+		//texturesScene
+		texturesScene=new THREE.Scene();
+		orthoCam=new THREE.OrthographicCamera(0,1,1,0,.1,1);
+		orthoCam.position.z=1;
+		orthoCam.lookAt(scene.position);
+
+		initRT();
+		initTextures();
+
+		//scene.add(new THREE.AxisHelper(size/2));
+	}
+
+	function addPoints(){
+		var geometry=new THREE.Geometry();
+		for(var i=0;i<size*size;i++)geometry.vertices.push(new THREE.Vector3(i%size/size+.5/size,-Math.floor(i/size)/size+1-.5/size,0));
+
+		var material=new THREE.ShaderMaterial({
+			vertexShader:document.getElementById('vs').textContent,
+			fragmentShader:document.getElementById('fs').textContent,
+			uniforms:{
+				posTex:{type:'t',value:posTex[actual]},
+				pointSize:{type:'f',value:400/size},
+				pixelRatio:{type:"f",value:innerHeight}
+			},
+			transparent:true,
+			depthTest:false,
+			blending:THREE.AdditiveBlending
+		})
+
+		points=new THREE.Points(geometry,material);
+
+		scene.add(points);
+	}
+
+	function initRT(){
+		speedTex[0]=new THREE.WebGLRenderTarget(size,size,rtParams);
+		speedTex[1]=new THREE.WebGLRenderTarget(size,size,rtParams);
+		posTex[0]=new THREE.WebGLRenderTarget(size,size,rtParams);
+		posTex[1]=new THREE.WebGLRenderTarget(size,size,rtParams);
+	}
+
+	function setTexGeometry(){
+		texGeometry=new THREE.BufferGeometry();
+		var vertices=new Float32Array(size*size*3*6);
+		var initPos=new Float32Array(size*size*3*6);
+		var initSpeed=new Float32Array(size*size*3*6);
+		var starsInitPos=galaxy.getPos();
+		var starsInitSpeed=galaxy.getSpeed();
+		for(var i=0;i<size*size;i++){
+			var a=i%size/size,
+				b=-Math.floor(i/size)/size+1;
+			//top triangle
+			//top left				    //bottom left			 	 //top right
+			vertices[18*i]=a;			vertices[18*i+3]=a;		 	 vertices[18*i+6]=a+1/size;
+			vertices[18*i+1]=b;			vertices[18*i+4]=b-1/size;	 vertices[18*i+7]=b;
+			vertices[18*i+2]=0;			vertices[18*i+5]=0;		 	 vertices[18*i+8]=0;
+			
+			//bottom triangle
+			//top right				    //bottom left			 	 //bottom right
+			vertices[18*i+9]=a+1/size;	vertices[18*i+12]=a;	 	 vertices[18*i+15]=a+1/size;
+			vertices[18*i+10]=b;		vertices[18*i+13]=b-1/size;	 vertices[18*i+16]=b-1/size;
+			vertices[18*i+11]=0;		vertices[18*i+14]=0;	 	 vertices[18*i+17]=0;
+
+			initPos[18*i]=initPos[18*i+3]=initPos[18*i+6]=initPos[18*i+9]=initPos[18*i+12]=initPos[18*i+15]=starsInitPos[3*i];
+			initPos[18*i+1]=initPos[18*i+4]=initPos[18*i+7]=initPos[18*i+10]=initPos[18*i+13]=initPos[18*i+16]=starsInitPos[3*i+1];
+			initPos[18*i+2]=initPos[18*i+5]=initPos[18*i+8]=initPos[18*i+11]=initPos[18*i+14]=initPos[18*i+17]=starsInitPos[3*i+2];
+
+			initSpeed[18*i]=initSpeed[18*i+3]=initSpeed[18*i+6]=initSpeed[18*i+9]=initSpeed[18*i+12]=initSpeed[18*i+15]=starsInitSpeed[3*i+0];		
+			initSpeed[18*i+1]=initSpeed[18*i+4]=initSpeed[18*i+7]=initSpeed[18*i+10]=initSpeed[18*i+13]=initSpeed[18*i+16]=starsInitSpeed[3*i+1];
+			initSpeed[18*i+2]=initSpeed[18*i+5]=initSpeed[18*i+8]=initSpeed[18*i+11]=initSpeed[18*i+14]=initSpeed[18*i+17]=starsInitSpeed[3*i+2];
+		}
+		texGeometry.addAttribute('position',new THREE.BufferAttribute(vertices,3));
+		texGeometry.addAttribute('initPos',new THREE.BufferAttribute(initPos,3));
+		texGeometry.addAttribute('initSpeed',new THREE.BufferAttribute(initSpeed,3));
+	}
+
+	function setInitPosSpeed(){
+		var initTexMaterial=new THREE.ShaderMaterial({
+			vertexShader:document.getElementById('initvs').textContent,
+			fragmentShader:document.getElementById('initfs').textContent,
+			uniforms:{
+				b:{type:'f',value:0}
 			}
+		});
 
-			void main() {
-				vec3 col;
-				col.g = rand(vec2(vUv.x, vUv.y + 1.0));
-				col.b = rand(vec2(vUv.x, vUv.y + 2.0));
-				col.r = rand(vec2(vUv.xy));
-				col = col - 0.5;
+		var initTexMesh=new THREE.Mesh(texGeometry,initTexMaterial);
 
-				gl_FragColor = vec4(col, 1.0);
-			}
-		</script>
-		<!-- End Random Shaders -->
+		texturesScene.add(initTexMesh);
 
-		<!-- Velocity Shaders -->
-		<script type="x-shader/x-vertex" id="velVert">
-			varying vec2 vUv;
+		renderer.render(texturesScene,orthoCam,speedTex[actual]);
+		initTexMesh.material.uniforms.b.value=1;
+		renderer.render(texturesScene,orthoCam,posTex[actual]);
 
-			void main() {
-				vUv = uv;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-			}
-		</script>
-		<script type="x-shader/x-fragment" id="velFrag">
-			varying vec2 vUv;
-			uniform sampler2D velTex;
-			uniform sampler2D posTex;
-			uniform float total;
+		texturesScene.remove(initTexMesh);
+		//scene.add(initTexMesh)
+	}
 
-			const float pix=1./64.;
-			void main() {
-				vec3 velocity = texture2D(velTex, vUv).xyz;
-				vec3 pos = texture2D(posTex, vUv).xyz;
-				for(float i=0.;i<1.;i+=pix){
-					for(float j=0.;j<1.;j+=pix){
-						vec3 d=texture2D(posTex,vec2(i,j)).xyz-pos;
-						float a=.00005/(dot(d,d));
-						d=a*d.xyz;///(total*total);
-						velocity+=d;
-					}
+	function initTextures(){
+		setTexGeometry();
+		setInitPosSpeed();
+
+		var posMaterial=new THREE.ShaderMaterial({
+			vertexShader:document.getElementById('gvs').textContent,
+			fragmentShader:document.getElementById('ps').textContent,
+				uniforms:{
+					posTex:{type:'t',value:null},
+					speedTex:{type:'t',value:null}
 				}
-				
-				gl_FragColor = vec4( velocity, 1.0 );
-			}
-		</script>
-		<!-- End Velocity Shaders -->
-
-		<!-- Position Shaders -->
-		<script type="x-shader/x-vertex" id="posVert">
-			varying vec2 vUv;
-
-			void main() {
-				vUv = uv;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-			}
-		</script>
-		<script type="x-shader/x-fragment" id="posFrag">
-			varying vec2 vUv;
-			uniform sampler2D velTex;
-			uniform sampler2D posTex;
-
-			void main() {
-				vec3 velocity = texture2D(velTex, vUv).rgb;
-				vec3 pos = texture2D(posTex, vUv).rgb;
-				pos += velocity;
-				gl_FragColor = vec4( pos, 1.0 );
-			}
-		</script>
-		<!-- End Position Shaders -->
-
-		<!-- Display Shaders -->
-		<script type="x-shader/x-vertex" id="dispVert">
-			uniform sampler2D posTex;
-			uniform float pointSize;
-			vec4 mvPosition;
-
-			void main() {
-				mvPosition = modelViewMatrix*vec4(position,1.0);
-	        	gl_PointSize = pointSize / length( mvPosition.xyz );
-				vec3 pos = texture2D(posTex, position.xy).rgb;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-			}
-		</script>
-		<script type="x-shader/x-fragment" id="dispFrag">
-			uniform sampler2D text;
-			void main() {
-				vec4 color=texture2D(text,gl_PointCoord);
-				gl_FragColor = vec4(color);
-			}
-		</script>
-		<!-- End Display Shaders -->
-
-		<script>
-			var renderer,camera,scene,particles,controls;
-
-			init();
-			function init(){
-				scene=new THREE.Scene();
-				camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.5,1000);
-				renderer=new THREE.WebGLRenderer({alpha:true});
-				renderer.setClearColor(0x000000)
-				renderer.setSize(innerWidth,innerHeight);
-				document.body.appendChild(renderer.domElement);
-				controls=new THREE.TrackballControls(camera,renderer.domElement);
-				controls.rotateSpeed=8;
-
-				var axisHelper=new THREE.AxisHelper(1);
-				scene.add(axisHelper);
-
-				camera.position.set(1,1,200);
-
-				//PARTICLES
-				var size= 64,
-					pointSize= 3000,
-					gravityFactor= 0.5;
-
-			    var renderTargets = {
-			      velocity: [
-			        new THREE.WebGLRenderTarget(size,size,{format:THREE.RGBFormat,generateMipmaps:false,magFilter:THREE.NearestFilter,minFilter:THREE.NearestFilter,type:THREE.FloatType}),
-			        new THREE.WebGLRenderTarget(size,size,{format:THREE.RGBFormat,generateMipmaps:false,magFilter:THREE.NearestFilter,minFilter:THREE.NearestFilter,type:THREE.FloatType})
-			      ],
-			      position: [
-			        new THREE.WebGLRenderTarget(size,size,{format:THREE.RGBFormat,generateMipmaps:false,magFilter:THREE.NearestFilter,minFilter:THREE.NearestFilter,type:THREE.FloatType}),
-			        new THREE.WebGLRenderTarget(size,size,{format:THREE.RGBFormat,generateMipmaps:false,magFilter:THREE.NearestFilter,minFilter:THREE.NearestFilter,type:THREE.FloatType})
-			      ]
-			    };
-
-			    var shaders = {
-			      velocityVertex: window.document.getElementById( 'velVert' ).textContent,
-			      velocityFragment: window.document.getElementById( 'velFrag' ).textContent,
-			      positionVertex: window.document.getElementById( 'posVert' ).textContent,
-			      positionFragment: window.document.getElementById( 'posFrag' ).textContent,
-			      displayVertex: window.document.getElementById( 'dispVert' ).textContent,
-			      displayFragment: window.document.getElementById( 'dispFrag' ).textContent,
-			      randomVertex: window.document.getElementById( 'randVert' ).textContent,
-			      randomFragment: window.document.getElementById( 'randFrag' ).textContent
-			    };
-
-				var uniforms = {
-					velocity: {
-					  velTex: {type: "t", value: renderTargets.velocity[0]},
-					  posTex: {type: "t", value: renderTargets.position[0]}
-					},
-					position: {
-					  velTex: {type: "t", value: renderTargets.velocity[0]},
-					  posTex: {type: "t", value: renderTargets.position[0]}
-					},
-					display: {
-					  pointSize: {type: "f", value: pointSize},
-					  posTex: {type: "t", value: renderTargets.position[0]},
-					  text:{type:"t",value:THREE.ImageUtils.loadTexture('star.png')},
-					  total:{type:"f",value:size}
-					}
+		});
+		var speedMaterial=new THREE.ShaderMaterial({
+			vertexShader:document.getElementById('gvs').textContent,
+			fragmentShader:document.getElementById('ss').textContent,
+				uniforms:{
+					posTex:{type:'t',value:null},
+					speedTex:{type:'t',value:null},
+					size:{type:'f',value:size}
 				}
+		});
 
-			    var shaderMaterials = {
-			      velocity: new THREE.ShaderMaterial({
-			      	vertexShader:shaders.velocityVertex,
-			      	fragmentShader:shaders.velocityFragment,
-			      	uniforms:uniforms.velocity
-			      	}),
-			      position: new THREE.ShaderMaterial({
-			      	uniforms:uniforms.position,
-			      	vertexShader:shaders.positionVertex,
-			      	fragmentShader:shaders.positionFragment
-			      	}),
-			      random: new THREE.ShaderMaterial({
-			      	vertexShader:shaders.randomVertex,
-			      	fragmentShader:shaders.randomFragment
-			      	}),
-			      display: new THREE.ShaderMaterial({
-			      	vertexShader:shaders.displayVertex, 
-			      	fragmentShader:shaders.displayFragment, 
-			      	uniforms:uniforms.display,
-			      	transparent:true,
-			      	depthTest:false
-			      	})
-			    };
+		speedMesh=new THREE.Mesh(texGeometry,speedMaterial);
+		posMesh=new THREE.Mesh(texGeometry,posMaterial);
+		//computePositions();
+		//scene.add(posMesh,speedMesh)
+		//speedMesh.position.x+=1;
+	}
 
-			    var scenes = {
-			      velocity: new THREE.Scene(),
-			      position: new THREE.Scene(),
-			      display: scene,
-			      random: new THREE.Scene()
-			    };
+	function animate(){
+		requestAnimationFrame(animate);
+		renderer.render(scene,camera);
+		points.material.uniforms.posTex.value=computePositions();
+		controls.update();
+	}
 
-			    scenes.velocity.add(
-			    	new THREE.Mesh(
-					    new THREE.PlaneBufferGeometry( size, size ),
-					    shaderMaterials.velocity
-			    	));
-			    scenes.position.add(
-			    	new THREE.Mesh(
-					    new THREE.PlaneBufferGeometry( size, size ),
-					    shaderMaterials.position
-			    	));
-			    scenes.random.add(
-			    	new THREE.Mesh(
-					    new THREE.PlaneBufferGeometry( size, size ),
-					    shaderMaterials.random
-			    	));
+	function computePositions(){
+		before=actual;
+		actual=(actual+1)%2;
 
-			    var points = new THREE.Geometry();
-			    for (var i = 0; i < size * size; i++) {
-			      var pos = new THREE.Vector3((i % size)/size, Math.floor(i/size)/size , 0);
-			      points.vertices.push(pos);
-			    }
+		texturesScene.add(speedMesh);
+		speedMesh.material.uniforms.speedTex.value=speedTex[before];
+		speedMesh.material.uniforms.posTex.value=posTex[before];
+		renderer.render(texturesScene,orthoCam,speedTex[actual])
+		texturesScene.remove(speedMesh);
 
+		texturesScene.add(posMesh);
+		posMesh.material.uniforms.speedTex.value=speedTex[actual];
+		posMesh.material.uniforms.posTex.value=posTex[before];
+		renderer.render(texturesScene,orthoCam,posTex[actual])
+		texturesScene.remove(posMesh);
 
+		return posTex[actual];
+	}
 
-			    scenes.display.add(
-			    	new THREE.PointCloud(points, shaderMaterials.display)
-			    	);
+	function Galaxy(_n, _axis1, _axis2, _armsAngle, _bulbSize, _ellipticity){
+		var n=(typeof _n === 'undefined')?10000:_n;
+		var axis1=(typeof _axis1 === 'undefined')?75:_axis1;
+		var axis2=(typeof _axis2 === 'undefined')?(axis1+30+Math.random()*30):_axis2;
+		var maja,mina;
+		axis1>axis2?(maja=axis1,mina=axis2):axis1==axis2?(maja=axis1+1,mina=axis2):(maja=axis2,mina=axis1);
+		var armsAngle;
+		if(typeof _armsAngle === 'undefined'){
+			var b=(Math.random()*2-1)>0?1:-1;
+			armsAngle=b*(Math.random()*6+3);
+		}else{armsAngle=_armsAngle}
+		var bulbSize=(typeof _bulbSize === 'undefined')?.3:_bulbSize>1?1:_bulbSize<0?0:_bulbSize;
+		var ellipticity=(typeof _ellipticity === 'undefined')?.2+Math.random()*.2:_ellipticity>1?1:_ellipticity<0?0:_ellipticity;
+		
+		var starsPos=[],starsSpeeds=[],dist,angle,a,b,e,phi,theta,radius;
+		for(var i=0;i<n;i++){
+			dist=Math.random();
+			angle=(dist-bulbSize)*armsAngle;
+			a=maja*dist;
+			b=mina*dist;
+			e=Math.sqrt(a*a-b*b)/a;
+			phi=ellipticity*Math.PI/2*(1-dist)*(Math.random()*2-1);
+			theta=Math.random()*Math.PI*2;
+			radius=Math.sqrt(b*b/(1-e*e*Math.pow(Math.cos(theta),2)))*(1+Math.random()*.1);
+			if(dist>bulbSize)theta+=angle;
 
-			    //debug
-			    /*
-			    scenes.display.add(
-			    	new THREE.Mesh(
-					    new THREE.PlaneBufferGeometry( size, size ),
-					    shaderMaterials.velocity
-			    	));
-			    scenes.display.add(
-			    	new THREE.Mesh(
-					    new THREE.PlaneBufferGeometry( size, size ),
-					    shaderMaterials.position
-			    	));
-				*/
+			var pos=new THREE.Vector3(
+				Math.cos(phi)*Math.cos(theta)*radius,
+				Math.cos(phi)*Math.sin(theta)*radius,
+				Math.sin(phi)*radius);
+			starsPos.push(pos.x,pos.y,pos.z);
 
-			    var processCamera = new THREE.OrthographicCamera(-size/2, size/2, size/2, -size/2, -1, 0);
-				var buffer = 0;
-
-			    //start with random values
-			    renderer.render(scenes.random, processCamera, renderTargets.position[buffer]);
-			    //renderer.render(scenes.random, processCamera, renderTargets.velocity[buffer]);
-
-				animate();
-
-				function animate(){
-					requestAnimationFrame(animate);
-					renderer.render(scene,camera);
-					controls.update();
-
-					var newBuffer = (buffer+1)%2;
-					uniforms.velocity.velTex.value = renderTargets.velocity[buffer];
-					uniforms.position.posTex.value = renderTargets.position[buffer];
-					renderer.render(scenes.velocity, processCamera, renderTargets.velocity[newBuffer]);
-
-					uniforms.position.velTex.value = renderTargets.velocity[newBuffer];
-					uniforms.position.posTex.value = renderTargets.position[buffer];
-					renderer.render(scenes.position, processCamera, renderTargets.position[newBuffer]);
-
-					uniforms.display.posTex.value = renderTargets.position[newBuffer];
-
-					buffer = newBuffer;
-				}
-			}
-		</script>
-	</body>
+			var c=Math.sqrt(pos.length()),
+				speedCoeff=.0337,//make it related to the one in the shader
+				arms=armsAngle>0?1:-1;
+			pos.normalize();
+			var speed=new THREE.Vector3().crossVectors(pos,new THREE.Vector3(0,0,1));
+			speed.multiplyScalar(speedCoeff*c*arms);
+			starsSpeeds.push(speed.x,speed.y,speed.z)
+		}
+		console.log(axis1+ ' ' +axis2+ ' ' + armsAngle + ' ' + bulbSize + ' ' + ellipticity )
+		this.getPos=function(){
+			return starsPos;
+		};
+		this.getSpeed=function(){
+			return starsSpeeds;
+		};
+	}
+</script>
+</body>
 </html>
