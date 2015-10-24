@@ -308,7 +308,10 @@
 			generateMipmaps:false,
 			magFilter:THREE.NearestFilter,
 			minFilter:THREE.NearestFilter,
-			type:THREE.FloatType
+			premultiplyAlpha:false,
+			type:THREE.FloatType,
+			stencilBuffer:false,
+			depthBuffer:false
 		};
 	var size=32;
 	var galaxy=new Galaxy(size*size,2);
@@ -324,6 +327,8 @@
 	function setScenes(){
 		//main scene & usual stuff
 		renderer=new THREE.WebGLRenderer();
+		renderer.context.getExtension('OES_texture_float');
+		renderer.context.getExtension('OES_texture_float_linear');
 		renderer.setPixelRatio(.8);
 		renderer.setSize(innerWidth,innerHeight);
 		document.body.appendChild(renderer.domElement);
@@ -419,6 +424,7 @@
 		})
 
 		points=new THREE.Points(geometry,material);
+		points.matrixAutoUpdate=false;
 
 		scene.add(points);
 	}
