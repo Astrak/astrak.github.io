@@ -105,7 +105,7 @@
 
 			/* the real slider is hidden on top of 
 			the visible range and thumb that let 
-			display the value inside the later */
+			display the value inside the latter */
 
 			/** 1. REMOVE AUTOMATIC STYLES **/
 			input[type=range]::-webkit-slider-thumb {
@@ -403,7 +403,7 @@
 					spanVert.style.transform='rotateZ('+(90+tween.width*300).toString()+'deg)';
 					cycle.material.opacity=tween.opacity;
 					controls.target.set(0,tween.target,0);
-					camera.aspect=tween.(1-tween.width)*innerWidth/innerHeight;
+					camera.aspect=(1-tween.width)*innerWidth/innerHeight;
 					camera.updateProjectionMatrix();
 					orthoCam1.left=-tween.width*innerWidth/innerHeight;
 					orthoCam1.right=tween.width*innerWidth/innerHeight;

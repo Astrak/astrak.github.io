@@ -2,6 +2,188 @@
 <html>
 <head>
 	<title>TITLE</title>
+	<style>
+		/*MAIN*/
+		body{
+		    margin:0;
+		    overflow:hidden;
+		}
+		canvas{
+			cursor:grab;
+			cursor:-webkit-grab;
+			cursor:-moz-grab;
+		}
+		canvas:active{
+			cursor:grabbing;
+			cursor:-webkit-grabbing;
+			cursor:-moz-grabbing;
+		}
+		/*BUTTON*/
+		button{
+		    position:absolute;
+		    bottom:0;
+		    cursor:pointer;
+		}
+		button span{
+			position:absolute;
+			width:30px;
+			height:5px;
+			margin-left:-15px;
+			margin-top:-2.5px;
+			background:chocolate;
+			border-radius:2px;
+		}
+		button{
+		    outline:0;
+		    background:darkslategrey;
+			border:none;
+		    box-shadow:0px 0px 10px black;
+			left:100%;
+			margin-left:-70px;
+			margin-bottom:7px;
+			border-radius:50%;
+			width:50px;height:50px;
+		}
+		/*SPEED SLIDER*/
+		div.slider-container{
+			position:absolute;
+			left:50%;
+			margin-left:-100px;
+			width:200px;
+			height:60px;
+			bottom:2px;
+		}
+		span.slider-range{
+			position:absolute;
+			left:50%;top:50%;
+			margin-left:-50%;
+			margin-top:-4px;
+			width:100%;
+			height:8px;
+			border-radius:2px;
+			background:chocolate;
+		}
+		span.slider-thumb{
+			left:200px;
+		    background:darkslategrey;
+		    box-shadow:0px 0px 10px black;
+			margin-bottom:7px;
+			width:50px;height:50px;
+			border-radius:50%;
+			margin-left:-50px;
+			position:absolute;
+			margin-top:-21px;/*25-4 of slider-range margin-top*/
+		}
+		p.slider-thumb-content{
+			position:absolute;
+			color:chocolate;
+			font:bold 25px Arial;
+			top:50%;left:50%;
+			padding:0;
+			margin:-15px 0px 0px -10px;
+		}
+		input{
+		    position:absolute;
+		    bottom:-2px;
+		    opacity:0;
+		    cursor:pointer;
+		 	-webkit-appearance: none; 
+		    width:200px;
+		    height:60px;
+		    left:50%;
+		    margin-left:-100px;
+			background:none;
+			border:none;
+		}
+
+		/**********************************/
+		/** SLIDER STYLE FROM CSS TRICKS **/
+		/**********************************/
+
+		/* the real slider is hidden on top of 
+		the visible range and thumb that let 
+		display the value inside the latter */
+
+		/** 1. REMOVE AUTOMATIC STYLES **/
+		input[type=range]::-webkit-slider-thumb {
+		  -webkit-appearance: none;
+		}
+		input[type=range]:focus {
+		  outline: none;
+		}
+		input[type=range]::-ms-track {
+		  cursor: pointer;
+		  background: transparent; /* Hides the slider so custom styles can be added */
+		  border-color: transparent;
+		  color: transparent;
+		}
+
+		/** 2. THE THUMB **/
+		input[type=range]::-webkit-slider-thumb {
+		  -webkit-appearance: none;
+		  height: 50px;
+		  width: 50px;
+		  border-radius: 50%;
+		  background: darkslategrey;
+		  margin-top: -21px; /* needed in Chrome, not in Firefox and IE */
+		  box-shadow:0px 0px 10px #000;
+		}
+		input[type=range]::-moz-range-thumb {
+		  height: 50px;
+		  width: 50px;
+		  border-radius: 50%;
+		  background: darkslategrey;
+		  box-shadow:0px 0px 10px #000;
+		  border:none;
+		}
+		input[type=range]::-ms-thumb {
+		  height: 50px;
+		  width: 50px;
+		  border-radius: 50%;
+		  background: darkslategrey;
+		  box-shadow:0px 0px 10px #000;
+		  border:none;
+		}
+
+		/* 3. THE TRACK */
+		input[type=range]::-webkit-slider-runnable-track {
+		  width: 100%;
+		  height: 8.4px;
+		  background: chocolate;
+		  border-radius: 1.3px;
+		}
+		input[type=range]:focus::-webkit-slider-runnable-track {
+		  background: chocolate;
+		}
+		input[type=range]::-moz-range-track {
+		  width: 100%;
+		  height: 8.4px;
+		  background: chocolate;
+		  border-radius: 1.3px;
+		}
+		input[type=range]::-ms-track {
+		  width: 100%;
+		  height: 8.4px;
+		  background: transparent;
+		  border-color: transparent;
+		  border-width: 16px 0;
+		  color: transparent;
+		}
+		input[type=range]::-ms-fill-lower {
+		  background: chocolate;
+		  border-radius: 2.6px;
+		}
+		input[type=range]:focus::-ms-fill-lower {
+		  background: chocolate;
+		}
+		input[type=range]::-ms-fill-upper {
+		  background: chocolate;
+		  border-radius: 2.6px;
+		}
+		input[type=range]:focus::-ms-fill-upper {
+		  background: chocolate;
+		}
+	</style>
 </head>
 <body style='margin:0;overflow:hidden;'>
 <script src='../libs/threer72.js'></script>
@@ -17,14 +199,13 @@
 	void main(){
 		vec4 vPosition=texture2D(posTex,position.xy);
 		vec4 mvPosition=modelViewMatrix*vPosition;
-		float l=length(vPosition);
+		float l=length(vPosition.xyz);
+		gas=1.;
+		blueColor=1./gas;
 
-		blueColor=max(.32,.0065*l);
-		gas=max(.0,sin(-l/20.));
-
-		gl_PointSize=pixelRatio*pointSize*(1.+gas*2.)/length(mvPosition.xyz);
+		gl_PointSize=pointSize*pixelRatio*(1.+gas*4.)/length(mvPosition.xyz);
 		gl_Position=projectionMatrix*mvPosition;
-		//gl_PointSize=2.;
+		//gl_PointSize=3.;
 		//gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
 	}
 </script>
@@ -36,7 +217,7 @@
 		float gaslook=-(ratio-.5)*1.2*gas; 
 		float starlook=(1.-gas)/(ratio*10.);
 		float result=gaslook+starlook;
-		gl_FragColor=vec4(.32,.28,blueColor,result)*result;
+		gl_FragColor=vec4(.32*.7,.28*.7,blueColor*.7,result)*result;
 		//gl_FragColor=vec4(1.);
 	}
 </script>
@@ -80,9 +261,9 @@
 	varying vec3 vPosition;
 	void main(){
 		vec3 pos=texture2D(posTex,vPosition.xy).xyz;
-		vec3 speed=texture2D(speedTex,vPosition.xy).xyz;
-		pos+=speed;
-		gl_FragColor=vec4(pos,1.);
+		vec4 speed=texture2D(speedTex,vPosition.xy);
+		pos+=speed.xyz;
+		gl_FragColor=vec4(pos,speed.w);
 	}
 </script>
 <!-- end position shader -->
@@ -93,20 +274,23 @@
 	precision highp float;
 	uniform sampler2D posTex;
 	uniform sampler2D speedTex;
+	uniform float gravity;
 	uniform float size;
 	varying vec3 vPosition;
 	const float pix=1./32.;
 	void main(){
 		vec3 speed=texture2D(speedTex,vPosition.xy).xyz;
 		vec3 pos=texture2D(posTex,vPosition.xy).xyz;
+		float gas=0.;
 		for(float i=0.;i<1.;i+=pix){
 			for(float j=1.;j>0.;j-=pix){
-				vec3 v=texture2D(posTex,vec2(i,j)).xyz-pos;
-				float d=length(v);
-				if(d>0.)speed+=.0001*v/(d*d);
+				vec3 u=texture2D(posTex,vec2(i,j)).xyz-pos;
+				float d=length(u);
+				if(d<5.)gas+=1.;
+				if(d>0.)speed+=gravity*u/(d*d);
 			}
 		}
-		gl_FragColor=vec4(speed,1.);
+		gl_FragColor=vec4(speed,gas);
 	}
 </script>
 <!-- end speed shader -->
@@ -127,24 +311,29 @@
 			type:THREE.FloatType
 		};
 	var size=32;
-	var galaxy=new Galaxy(size*size);
+	var galaxy=new Galaxy(size*size,2);
 	
 	setScenes();
 
 	addPoints();
+
+	setGravitySlider();
 
 	animate();
 
 	function setScenes(){
 		//main scene & usual stuff
 		renderer=new THREE.WebGLRenderer();
+		renderer.setPixelRatio(.8);
 		renderer.setSize(innerWidth,innerHeight);
 		document.body.appendChild(renderer.domElement);
 		scene=new THREE.Scene();
-		camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,100,100000);
-		camera.position.z=200;
+		camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,10,10000);
+		camera.position.z=400;
 		controls=new THREE.TrackballControls(camera,renderer.domElement);
 		controls.rotateSpeed=7;
+		controls.minDistance=300;
+		controls.noPan=true;
 
 		//texturesScene
 		texturesScene=new THREE.Scene();
@@ -152,10 +341,64 @@
 		orthoCam.position.z=1;
 		orthoCam.lookAt(scene.position);
 
+		window.addEventListener('resize',resize);
+
 		initRT();
 		initTextures();
 
 		//scene.add(new THREE.AxisHelper(size/2));
+	}
+
+	function resize(){
+		renderer.setSize(innerWidth,innerHeight);
+		camera.aspect=innerWidth/innerHeight;
+		camera.updateProjectionMatrix();
+		points.material.uniforms.pixelRatio.value=innerHeight;
+	}
+
+	function setGravitySlider(){
+		var sliderContainer, sliderRange, sliderThumb, sliderThumbContent, slider;
+		//1. Appearance
+
+		//container
+		sliderContainer=document.createElement('div');
+		sliderContainer.className='slider-container';
+		document.body.appendChild(sliderContainer);
+
+		//fake slider
+		sliderRange=document.createElement('span');
+		sliderRange.className='slider-range';
+		sliderContainer.appendChild(sliderRange);
+
+		sliderThumb=document.createElement('span');
+		sliderThumb.className='slider-thumb';
+		sliderRange.appendChild(sliderThumb);
+
+		sliderThumbContent=document.createElement('p');
+		sliderThumbContent.className='slider-thumb-content';
+		sliderThumbContent.textContent='G';
+		sliderThumb.appendChild(sliderThumbContent);
+
+		//real invisible slider
+		slider=document.createElement('input');
+	    slider.type='range';
+	    slider.min=0;slider.max=.01;slider.step=0.0001;
+	    slider.value=.001;
+	    sliderContainer.appendChild(slider);
+
+	    //2. Event listener
+
+	    var range=slider.max-slider.min;
+		sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
+
+	    slider.addEventListener('input',function(){
+			speedMesh.material.uniforms.gravity.value=slider.value;
+			sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
+			var content=slider.value;
+			//var fixed=Math.abs(content)===1||(content<0.05&&content>-.05)?0:1;
+			//sliderThumbContent.style.marginLeft=fixed===0?content<0?'-13px':'-7px':content<0?'-23px':'-18px';
+			//sliderThumbContent.textContent=(animation.timeScale/2.2).toFixed(fixed);
+	    },false);
 	}
 
 	function addPoints(){
@@ -167,8 +410,8 @@
 			fragmentShader:document.getElementById('fs').textContent,
 			uniforms:{
 				posTex:{type:'t',value:posTex[actual]},
-				pointSize:{type:'f',value:400/size},
-				pixelRatio:{type:"f",value:innerHeight}
+				pointSize:{type:'f',value:214/size},
+				pixelRatio:{type:'f',value:innerHeight}
 			},
 			transparent:true,
 			depthTest:false,
@@ -261,15 +504,13 @@
 				uniforms:{
 					posTex:{type:'t',value:null},
 					speedTex:{type:'t',value:null},
-					size:{type:'f',value:size}
+					size:{type:'f',value:size},
+					gravity:{type:'f',value:.001}
 				}
 		});
 
 		speedMesh=new THREE.Mesh(texGeometry,speedMaterial);
 		posMesh=new THREE.Mesh(texGeometry,posMaterial);
-		//computePositions();
-		//scene.add(posMesh,speedMesh)
-		//speedMesh.position.x+=1;
 	}
 
 	function animate(){
@@ -298,8 +539,9 @@
 		return posTex[actual];
 	}
 
-	function Galaxy(_n, _axis1, _axis2, _armsAngle, _bulbSize, _ellipticity){
+	function Galaxy(_n, _galnumber, _axis1, _axis2, _armsAngle, _bulbSize, _ellipticity){
 		var n=(typeof _n === 'undefined')?10000:_n;
+		var galnumber=(typeof _galnumber === 'undefined')?1:Math.floor(_galnumber);
 		var axis1=(typeof _axis1 === 'undefined')?75:_axis1;
 		var axis2=(typeof _axis2 === 'undefined')?(axis1+30+Math.random()*30):_axis2;
 		var maja,mina;
@@ -312,33 +554,57 @@
 		var bulbSize=(typeof _bulbSize === 'undefined')?.3:_bulbSize>1?1:_bulbSize<0?0:_bulbSize;
 		var ellipticity=(typeof _ellipticity === 'undefined')?.2+Math.random()*.2:_ellipticity>1?1:_ellipticity<0?0:_ellipticity;
 		
-		var starsPos=[],starsSpeeds=[],dist,angle,a,b,e,phi,theta,radius;
+		var starsPos=[],starsSpeeds=[],dist,angle,a,b,f1,f2,saabb,e,phi,theta,radius;
 		for(var i=0;i<n;i++){
 			dist=Math.random();
 			angle=(dist-bulbSize)*armsAngle;
 			a=maja*dist;
 			b=mina*dist;
-			e=Math.sqrt(a*a-b*b)/a;
+			saabb=Math.sqrt(a*a-b*b);
+			f1=a*a/saabb;
+			f2=-f1;
+			e=saabb/a;
 			phi=ellipticity*Math.PI/2*(1-dist)*(Math.random()*2-1);
 			theta=Math.random()*Math.PI*2;
 			radius=Math.sqrt(b*b/(1-e*e*Math.pow(Math.cos(theta),2)))*(1+Math.random()*.1);
 			if(dist>bulbSize)theta+=angle;
 
+			var m=new THREE.Vector3(Math.cos(theta)*radius,Math.sin(theta)*radius,0),
+				mf1=new THREE.Vector3(f1,0,0).sub(m).normalize(),
+				mf2=new THREE.Vector3(f2,0,0).sub(m).normalize(),
+				bissPoint=new THREE.Vector3().subVectors(mf2,mf1).multiplyScalar(.5),
+				biss=new THREE.Vector3().subVectors(bissPoint,m),
+				tan=new THREE.Vector3().copy(biss).applyAxisAngle(new THREE.Vector3(0,0,1),-Math.PI/2);
+			tan.x*=Math.cos(phi),tan.y*=Math.cos(phi),tan.z*=Math.sin(phi);
+			tan.normalize();
+
 			var pos=new THREE.Vector3(
 				Math.cos(phi)*Math.cos(theta)*radius,
 				Math.cos(phi)*Math.sin(theta)*radius,
-				Math.sin(phi)*radius);
-			starsPos.push(pos.x,pos.y,pos.z);
+				Math.sin(phi)*radius
+				);
 
 			var c=Math.sqrt(pos.length()),
-				speedCoeff=.0337,//make it related to the one in the shader
-				arms=armsAngle>0?1:-1;
-			pos.normalize();
-			var speed=new THREE.Vector3().crossVectors(pos,new THREE.Vector3(0,0,1));
-			speed.multiplyScalar(speedCoeff*c*arms);
-			starsSpeeds.push(speed.x,speed.y,speed.z)
+				speedCoeff=.07,//make it related to the one in the shader
+				arms=armsAngle>0?-1:1;
+			tan.multiplyScalar(speedCoeff*c*arms);
+
+			if(galnumber>1){
+				if(i>n/galnumber){
+					pos.x+=200;
+					tan.y+=.07;
+			starsPos.push(pos.x,pos.y,pos.z);
+			starsSpeeds.push(tan.x,tan.y,tan.z)
+				}else{
+					pos.x-=200;
+					tan.y-=.05;
+			starsPos.push(pos.x,pos.z,pos.y);
+			starsSpeeds.push(tan.x,tan.z,tan.y)
+				}
+			}
+
 		}
-		console.log(axis1+ ' ' +axis2+ ' ' + armsAngle + ' ' + bulbSize + ' ' + ellipticity )
+
 		this.getPos=function(){
 			return starsPos;
 		};
