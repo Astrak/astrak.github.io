@@ -309,7 +309,7 @@
 			magFilter:THREE.NearestFilter,
 			minFilter:THREE.NearestFilter,
 			premultiplyAlpha:false,
-			type:THREE.HalfFloatType,
+			type:THREE.FloatType,
 			stencilBuffer:false,
 			depthBuffer:false
 		};
@@ -327,8 +327,6 @@
 	function setScenes(){
 		//main scene & usual stuff
 		renderer=new THREE.WebGLRenderer();
-		renderer.context.getExtension('OES_texture_half_float');//?
-		renderer.context.getExtension('EXT_color_buffer_half_float');//?
 		renderer.setPixelRatio(.8);
 		renderer.setSize(innerWidth,innerHeight);
 		document.body.appendChild(renderer.domElement);
@@ -415,7 +413,7 @@
 			fragmentShader:document.getElementById('fs').textContent,
 			uniforms:{
 				posTex:{type:'t',value:posTex[actual]},
-				pointSize:{type:'f',value:214/size},
+				pointSize:{type:'f',value:124/size},
 				pixelRatio:{type:'f',value:innerHeight}
 			},
 			transparent:true,
@@ -554,7 +552,7 @@
 		axis1>axis2?(maja=axis1,mina=axis2):axis1==axis2?(maja=axis1+1,mina=axis2):(maja=axis2,mina=axis1);
 		var armsAngle;
 		if(typeof _armsAngle === 'undefined'){
-			var b=(Math.random()*2-1)>0?1:-1;
+			var b=1;
 			armsAngle=b*(Math.random()*6+3);
 		}else{armsAngle=_armsAngle}
 		var bulbSize=(typeof _bulbSize === 'undefined')?.3:_bulbSize>1?1:_bulbSize<0?0:_bulbSize;
@@ -598,12 +596,13 @@
 			if(galnumber>1){
 				if(i>n/galnumber){
 					pos.x+=200;
-					tan.y+=.07;
+					pos.y+=50;
+					tan.z-=.25;
 			starsPos.push(pos.x,pos.y,pos.z);
 			starsSpeeds.push(tan.x,tan.y,tan.z)
 				}else{
 					pos.x-=200;
-					tan.y-=.05;
+					tan.y+=.25;
 			starsPos.push(pos.x,pos.z,pos.y);
 			starsSpeeds.push(tan.x,tan.z,tan.y)
 				}
