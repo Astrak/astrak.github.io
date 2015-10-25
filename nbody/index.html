@@ -309,7 +309,7 @@
 			magFilter:THREE.NearestFilter,
 			minFilter:THREE.NearestFilter,
 			premultiplyAlpha:false,
-			type:THREE.FloatType,
+			type:THREE.HalfFloatType,
 			stencilBuffer:false,
 			depthBuffer:false
 		};
@@ -327,8 +327,7 @@
 	function setScenes(){
 		//main scene & usual stuff
 		renderer=new THREE.WebGLRenderer();
-		renderer.context.getExtension('OES_texture_float');
-		renderer.context.getExtension('OES_texture_float_linear');
+		renderer.context.getExtension('OES_texture_float');//?
 		renderer.setPixelRatio(.8);
 		renderer.setSize(innerWidth,innerHeight);
 		document.body.appendChild(renderer.domElement);
