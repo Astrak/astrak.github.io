@@ -231,7 +231,7 @@
 			stencilBuffer:false,
 			depthBuffer:false
 		};
-	var size=32;
+	var size=64;
 	var galaxy=new Galaxy(size*size,2);
 	
 	setScenes();
@@ -275,51 +275,6 @@
 		camera.aspect=innerWidth/innerHeight;
 		camera.updateProjectionMatrix();
 		points.material.uniforms.pixelRatio.value=innerHeight;
-	}
-
-	function setGravitySlider(){
-		var sliderContainer, sliderRange, sliderThumb, sliderThumbContent, slider;
-		//1. Appearance
-
-		//container
-		sliderContainer=document.createElement('div');
-		sliderContainer.className='slider-container';
-		document.body.appendChild(sliderContainer);
-
-		//fake slider
-		sliderRange=document.createElement('span');
-		sliderRange.className='slider-range';
-		sliderContainer.appendChild(sliderRange);
-
-		sliderThumb=document.createElement('span');
-		sliderThumb.className='slider-thumb';
-		sliderRange.appendChild(sliderThumb);
-
-		sliderThumbContent=document.createElement('p');
-		sliderThumbContent.className='slider-thumb-content';
-		sliderThumbContent.textContent='G';
-		sliderThumb.appendChild(sliderThumbContent);
-
-		//real invisible slider
-		slider=document.createElement('input');
-	    slider.type='range';
-	    slider.min=0;slider.max=.003;slider.step=0.0001;
-	    slider.value=.001;
-	    sliderContainer.appendChild(slider);
-
-	    //2. Event listener
-
-	    var range=slider.max-slider.min;
-		sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
-
-	    slider.addEventListener('input',function(){
-			speedMesh.material.uniforms.gravity.value=slider.value;
-			sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
-			var content=slider.value;
-			//var fixed=Math.abs(content)===1||(content<0.05&&content>-.05)?0:1;
-			//sliderThumbContent.style.marginLeft=fixed===0?content<0?'-13px':'-7px':content<0?'-23px':'-18px';
-			//sliderThumbContent.textContent=(animation.timeScale/2.2).toFixed(fixed);
-	    },false);
 	}
 
 	function addPoints(){
@@ -467,9 +422,8 @@
 				'	for(float i=0.;i<1.;i+=pix){',
 				'		for(float j=1.;j>0.;j-=pix){',
 				'			vec3 u=texture2D(posTex,vec2(i,j)).xyz-pos;',
-				'			float d=length(u);',
-				'			if(d<5.)gas+=1.;',
-				'			if(d>0.)speed+=gravity*u/(d*d);',
+				'			float d=length(u)+.000001;',
+				'			speed+=gravity*u/(d*d);',
 				'		}',
 				'	}',
 				'	gl_FragColor=vec4(speed,gas);',
@@ -477,7 +431,7 @@
 				uniforms:{
 					posTex:{type:'t',value:null},
 					speedTex:{type:'t',value:null},
-					gravity:{type:'f',value:.001}
+					gravity:{type:'f',value:.824/(size*size)}
 				}
 		});
 
@@ -585,6 +539,51 @@
 		this.getSpeed=function(){
 			return starsSpeeds;
 		};
+	}
+
+	function setGravitySlider(){
+		var sliderContainer, sliderRange, sliderThumb, sliderThumbContent, slider;
+		//1. Appearance
+
+		//container
+		sliderContainer=document.createElement('div');
+		sliderContainer.className='slider-container';
+		document.body.appendChild(sliderContainer);
+
+		//fake slider
+		sliderRange=document.createElement('span');
+		sliderRange.className='slider-range';
+		sliderContainer.appendChild(sliderRange);
+
+		sliderThumb=document.createElement('span');
+		sliderThumb.className='slider-thumb';
+		sliderRange.appendChild(sliderThumb);
+
+		sliderThumbContent=document.createElement('p');
+		sliderThumbContent.className='slider-thumb-content';
+		sliderThumbContent.textContent='G';
+		sliderThumb.appendChild(sliderThumbContent);
+
+		//real invisible slider
+		slider=document.createElement('input');
+	    slider.type='range';
+	    slider.min=0;slider.max=.003;slider.step=0.0001;
+	    slider.value=.001;
+	    sliderContainer.appendChild(slider);
+
+	    //2. Event listener
+
+	    var range=slider.max-slider.min;
+		sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
+
+	    slider.addEventListener('input',function(){
+			speedMesh.material.uniforms.gravity.value=slider.value;
+			sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
+			var content=slider.value;
+			//var fixed=Math.abs(content)===1||(content<0.05&&content>-.05)?0:1;
+			//sliderThumbContent.style.marginLeft=fixed===0?content<0?'-13px':'-7px':content<0?'-23px':'-18px';
+			//sliderThumbContent.textContent=(animation.timeScale/2.2).toFixed(fixed);
+	    },false);
 	}
 </script>
 </body>
