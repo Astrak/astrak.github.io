@@ -189,111 +189,29 @@
 <script src='../libs/threer72.js'></script>
 <script src='../libs/controls/TrackballControls.js'></script>
 
-<!--display shaders -->
 <script id='vs' type='x-shader/x-vertex'>
 	uniform sampler2D posTex;
 	uniform float pointSize;
 	uniform float pixelRatio;
-	varying float blueColor;
-	varying float gas;
 	void main(){
 		vec4 vPosition=texture2D(posTex,position.xy);
 		vec4 mvPosition=modelViewMatrix*vPosition;
 		float l=length(vPosition.xyz);
-		gas=1.;
-		blueColor=1./gas;
 
-		gl_PointSize=pointSize*pixelRatio*(1.+gas*4.)/length(mvPosition.xyz);
+		gl_PointSize=pointSize*pixelRatio*(5.)/length(mvPosition.xyz);
 		gl_Position=projectionMatrix*mvPosition;
 		//gl_PointSize=3.;
 		//gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
 	}
 </script>
 <script id='fs' type='x-shader/x-fragment'>
-	varying float blueColor;
-	varying float gas;
 	void main(){
 		float ratio=distance(gl_PointCoord,vec2(.5));
-		float gaslook=-(ratio-.5)*1.2*gas; 
-		float starlook=(1.-gas)/(ratio*10.);
-		float result=gaslook+starlook;
-		gl_FragColor=vec4(.32*.7,.28*.7,blueColor*.7,result)*result;
+		float result=-(ratio-.5)*1.2;
+		gl_FragColor=vec4(.32*.7,.28*.7,1.*.7,result)*result;
 		//gl_FragColor=vec4(1.);
 	}
 </script>
-<!-- end display shaders -->
-
-<!-- init shaders -->
-<script id='initvs' type='x-shader/x-vertex'>
-	uniform float b;
-	attribute vec3 initPos;
-	attribute vec3 initSpeed;
-	varying vec3 vColor;
-	void main(){
-		vColor=b==0.?initSpeed:initPos;
-		gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
-	}
-</script>
-<script id='initfs' type='x-shader/x-fragment'>
-	varying vec3 vColor;
-	void main(){
-		gl_FragColor=vec4(vColor,1.);
-	}
-</script>
-<!-- end init shaders -->
-
-
-<!-- generic vertex shader -->
-<script id='gvs' type='x-shader/x-vertex'>
-	varying vec3 vPosition;
-	void main(){
-		vPosition=position;
-		gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
-	}
-</script>
-<!-- end generic vertex shader -->
-
-
-<!-- position shader -->
-<script id='ps' type='x-shader/x-vertex'>
-	uniform sampler2D posTex;
-	uniform sampler2D speedTex;
-	varying vec3 vPosition;
-	void main(){
-		vec3 pos=texture2D(posTex,vPosition.xy).xyz;
-		vec4 speed=texture2D(speedTex,vPosition.xy);
-		pos+=speed.xyz;
-		gl_FragColor=vec4(pos,speed.w);
-	}
-</script>
-<!-- end position shader -->
-
-
-<!-- speed shader -->
-<script id='ss' type='x-shader/x-vertex'>
-	precision highp float;
-	uniform sampler2D posTex;
-	uniform sampler2D speedTex;
-	uniform float gravity;
-	uniform float size;
-	varying vec3 vPosition;
-	const float pix=1./32.;
-	void main(){
-		vec3 speed=texture2D(speedTex,vPosition.xy).xyz;
-		vec3 pos=texture2D(posTex,vPosition.xy).xyz;
-		float gas=0.;
-		for(float i=0.;i<1.;i+=pix){
-			for(float j=1.;j>0.;j-=pix){
-				vec3 u=texture2D(posTex,vec2(i,j)).xyz-pos;
-				float d=length(u);
-				if(d<5.)gas+=1.;
-				if(d>0.)speed+=gravity*u/(d*d);
-			}
-		}
-		gl_FragColor=vec4(speed,gas);
-	}
-</script>
-<!-- end speed shader -->
 
 <script>
 	'use strict';
@@ -309,7 +227,7 @@
 			magFilter:THREE.NearestFilter,
 			minFilter:THREE.NearestFilter,
 			premultiplyAlpha:false,
-			type:THREE.FloatType,
+			type:THREE.HalfFloatType,
 			stencilBuffer:false,
 			depthBuffer:false
 		};
@@ -413,7 +331,7 @@
 			fragmentShader:document.getElementById('fs').textContent,
 			uniforms:{
 				posTex:{type:'t',value:posTex[actual]},
-				pointSize:{type:'f',value:124/size},
+				pointSize:{type:'f',value:164/size},
 				pixelRatio:{type:'f',value:innerHeight}
 			},
 			transparent:true,
@@ -471,8 +389,20 @@
 
 	function setInitPosSpeed(){
 		var initTexMaterial=new THREE.ShaderMaterial({
-			vertexShader:document.getElementById('initvs').textContent,
-			fragmentShader:document.getElementById('initfs').textContent,
+			vertexShader:['',
+				'uniform float b;',
+				'attribute vec3 initPos;',
+				'attribute vec3 initSpeed;',
+				'varying vec3 vColor;',
+				'void main(){',
+				'	vColor=b==0.?initSpeed:initPos;',
+				'	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+				'}'].join('\n'),
+			fragmentShader:[''+
+				'varying vec3 vColor;',
+				'void main(){',
+				'	gl_FragColor=vec4(vColor,1.);',
+				'}'].join('\n'),
 			uniforms:{
 				b:{type:'f',value:0}
 			}
@@ -495,20 +425,58 @@
 		setInitPosSpeed();
 
 		var posMaterial=new THREE.ShaderMaterial({
-			vertexShader:document.getElementById('gvs').textContent,
-			fragmentShader:document.getElementById('ps').textContent,
+			vertexShader:['',
+				'varying vec3 vPosition;',
+				'void main(){',
+				'	vPosition=position;',
+				'	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+				'}'].join('\n'),
+			fragmentShader:['',
+				'uniform sampler2D posTex;',
+				'uniform sampler2D speedTex;',
+				'varying vec3 vPosition;',
+				'void main(){',
+				'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
+				'	vec4 speed=texture2D(speedTex,vPosition.xy);',
+				'	pos+=speed.xyz;',
+				'	gl_FragColor=vec4(pos,speed.w);',
+				'}'].join('\n'),
 				uniforms:{
 					posTex:{type:'t',value:null},
 					speedTex:{type:'t',value:null}
 				}
 		});
 		var speedMaterial=new THREE.ShaderMaterial({
-			vertexShader:document.getElementById('gvs').textContent,
-			fragmentShader:document.getElementById('ss').textContent,
+			vertexShader:['',
+				'varying vec3 vPosition;',
+				'void main(){',
+				'	vPosition=position;',
+				'	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+				'}'].join('\n'),
+			fragmentShader:['',
+				'precision highp float;',
+				'uniform sampler2D posTex;',
+				'uniform sampler2D speedTex;',
+				'uniform float gravity;',
+				'varying vec3 vPosition;',
+				'const float pix=1./'+size+'.;',
+				'void main(){',
+				'	vec3 speed=texture2D(speedTex,vPosition.xy).xyz;',
+				'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
+				'	float gas=1.;',
+				'	for(float i=0.;i<1.;i+=pix){',
+				'		for(float j=1.;j>0.;j-=pix){',
+				'			vec3 u=texture2D(posTex,vec2(i,j)).xyz-pos;',
+				'			float d=length(u);',
+				'			if(d<5.)gas+=1.;',
+				'			if(d>0.)speed+=gravity*u/(d*d);',
+				'		}',
+				'	}',
+				'	gl_FragColor=vec4(speed,gas);',
+				'}'].join('\n'),
 				uniforms:{
 					posTex:{type:'t',value:null},
 					speedTex:{type:'t',value:null},
-					size:{type:'f',value:size},
 					gravity:{type:'f',value:.001}
 				}
 		});
@@ -602,6 +570,7 @@
 			starsSpeeds.push(tan.x,tan.y,tan.z)
 				}else{
 					pos.x-=200;
+					pos.z-=50;
 					tan.y+=.25;
 			starsPos.push(pos.x,pos.z,pos.y);
 			starsSpeeds.push(tan.x,tan.z,tan.y)
