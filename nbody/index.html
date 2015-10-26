@@ -227,9 +227,11 @@
 			magFilter:THREE.NearestFilter,
 			minFilter:THREE.NearestFilter,
 			premultiplyAlpha:false,
-			type:THREE.HalfFloatType
+			type:THREE.HalfFloatType,
+			stencilBuffer:false,
+			depthBuffer:false
 		};
-	var size=32;
+	var size=16;
 	var galaxy=new Galaxy(size*size,2);
 	
 	setScenes();
