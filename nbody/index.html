@@ -215,25 +215,25 @@
 
 <script>
 	'use strict';
-	
+
 	var scene,renderer,camera,controls,points;
 	var texGeometry,texturesScene,orthoCam;
 	var speedTex=[],posTex=[],
 		speedMesh,posMesh,
 		actual=1,before=(actual+1)%2;
 	var rtParams={
-			format:THREE.RGBFormat,
-			generateMipmaps:false,
-			magFilter:THREE.NearestFilter,
-			minFilter:THREE.NearestFilter,
-			premultiplyAlpha:false,
-			type:THREE.HalfFloatType,
-			stencilBuffer:false,
-			depthBuffer:false
-		};
-	var size=16;
+		format:THREE.RGBFormat,
+		generateMipmaps:false,
+		magFilter:THREE.NearestFilter,
+		minFilter:THREE.NearestFilter,
+		premultiplyAlpha:false,
+		type:THREE.HalfFloatType,
+		stencilBuffer:false,
+		depthBuffer:false
+	};
+	var size=32;
 	var galaxy=new Galaxy(size*size,2);
-	
+
 	setScenes();
 
 	addPoints();
@@ -242,9 +242,12 @@
 
 	animate();
 
+	/** FUNCTIONS **/
+
 	function setScenes(){
 		//main scene & usual stuff
 		renderer=new THREE.WebGLRenderer();
+		renderer.context.getExtension('OES_texture_float');
 		renderer.setPixelRatio(.8);
 		renderer.setSize(innerWidth,innerHeight);
 		document.body.appendChild(renderer.domElement);
@@ -258,7 +261,7 @@
 
 		//texturesScene
 		texturesScene=new THREE.Scene();
-		orthoCam=new THREE.OrthographicCamera(0,1,1,0,.1,1);
+		orthoCam=new THREE.OrthographicCamera(0,1,1,0,-.1,2);
 		orthoCam.position.z=1;
 		orthoCam.lookAt(scene.position);
 
@@ -322,7 +325,7 @@
 			vertices[18*i]=a;			vertices[18*i+3]=a;		 	 vertices[18*i+6]=a+1/size;
 			vertices[18*i+1]=b;			vertices[18*i+4]=b-1/size;	 vertices[18*i+7]=b;
 			vertices[18*i+2]=0;			vertices[18*i+5]=0;		 	 vertices[18*i+8]=0;
-			
+
 			//bottom triangle
 			//top right				    //bottom left			 	 //bottom right
 			vertices[18*i+9]=a+1/size;	vertices[18*i+12]=a;	 	 vertices[18*i+15]=a+1/size;
@@ -345,19 +348,19 @@
 	function setInitPosSpeed(){
 		var initTexMaterial=new THREE.ShaderMaterial({
 			vertexShader:['',
-				'uniform float b;',
-				'attribute vec3 initPos;',
-				'attribute vec3 initSpeed;',
-				'varying vec3 vColor;',
-				'void main(){',
-				'	vColor=b==0.?initSpeed:initPos;',
-				'	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
-				'}'].join('\n'),
+						  'uniform float b;',
+						  'attribute vec3 initPos;',
+						  'attribute vec3 initSpeed;',
+						  'varying vec3 vColor;',
+						  'void main(){',
+						  '	vColor=b==0.?initSpeed:initPos;',
+						  '	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+						  '}'].join('\n'),
 			fragmentShader:[''+
-				'varying vec3 vColor;',
-				'void main(){',
-				'	gl_FragColor=vec4(vColor,1.);',
-				'}'].join('\n'),
+							'varying vec3 vColor;',
+							'void main(){',
+							'	gl_FragColor=vec4(vColor,1.);',
+							'}'].join('\n'),
 			uniforms:{
 				b:{type:'f',value:0}
 			}
@@ -372,7 +375,7 @@
 		renderer.render(texturesScene,orthoCam,posTex[actual]);
 
 		texturesScene.remove(initTexMesh);
-		//scene.add(initTexMesh)
+		
 	}
 
 	function initTextures(){
@@ -381,58 +384,58 @@
 
 		var posMaterial=new THREE.ShaderMaterial({
 			vertexShader:['',
-				'varying vec3 vPosition;',
-				'void main(){',
-				'	vPosition=position;',
-				'	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
-				'}'].join('\n'),
+						  'varying vec3 vPosition;',
+						  'void main(){',
+						  '	vPosition=position;',
+						  '	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+						  '}'].join('\n'),
 			fragmentShader:['',
-				'uniform sampler2D posTex;',
-				'uniform sampler2D speedTex;',
-				'varying vec3 vPosition;',
-				'void main(){',
-				'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
-				'	vec4 speed=texture2D(speedTex,vPosition.xy);',
-				'	pos+=speed.xyz;',
-				'	gl_FragColor=vec4(pos,speed.w);',
-				'}'].join('\n'),
-				uniforms:{
-					posTex:{type:'t',value:null},
-					speedTex:{type:'t',value:null}
-				}
+							'uniform sampler2D posTex;',
+							'uniform sampler2D speedTex;',
+							'varying vec3 vPosition;',
+							'void main(){',
+							'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
+							'	vec4 speed=texture2D(speedTex,vPosition.xy);',
+							'	pos+=speed.xyz;',
+							'	gl_FragColor=vec4(pos,speed.w);',
+							'}'].join('\n'),
+			uniforms:{
+				posTex:{type:'t',value:null},
+				speedTex:{type:'t',value:null}
+			}
 		});
 		var speedMaterial=new THREE.ShaderMaterial({
 			vertexShader:['',
-				'varying vec3 vPosition;',
-				'void main(){',
-				'	vPosition=position;',
-				'	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
-				'}'].join('\n'),
+						  'varying vec3 vPosition;',
+						  'void main(){',
+						  '	vPosition=position;',
+						  '	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+						  '}'].join('\n'),
 			fragmentShader:['',
-				'precision highp float;',
-				'uniform sampler2D posTex;',
-				'uniform sampler2D speedTex;',
-				'uniform float gravity;',
-				'varying vec3 vPosition;',
-				'const float pix=1./'+size+'.;',
-				'void main(){',
-				'	vec3 speed=texture2D(speedTex,vPosition.xy).xyz;',
-				'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
-				'	float gas=1.;',
-				'	for(float i=0.;i<1.;i+=pix){',
-				'		for(float j=1.;j>0.;j-=pix){',
-				'			vec3 u=texture2D(posTex,vec2(i,j)).xyz-pos;',
-				'			float d=length(u)+.000001;',
-				'			speed+=gravity*u/(d*d);',
-				'		}',
-				'	}',
-				'	gl_FragColor=vec4(speed,gas);',
-				'}'].join('\n'),
-				uniforms:{
-					posTex:{type:'t',value:null},
-					speedTex:{type:'t',value:null},
-					gravity:{type:'f',value:.824/(size*size)}
-				}
+							'precision highp float;',
+							'uniform sampler2D posTex;',
+							'uniform sampler2D speedTex;',
+							'uniform float gravity;',
+							'varying vec3 vPosition;',
+							'const float pix=1./'+size+'.;',
+							'void main(){',
+							'	vec3 speed=texture2D(speedTex,vPosition.xy).xyz;',
+							'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
+							'	float gas=1.;',
+							'	for(float i=0.;i<1.;i+=pix){',
+							'		for(float j=1.;j>0.;j-=pix){',
+							'			vec3 u=texture2D(posTex,vec2(i,j)).xyz-pos;',
+							'			float d=length(u)+.000001;',
+							'			speed+=gravity*u/(d*d);',
+							'		}',
+							'	}',
+							'	gl_FragColor=vec4(speed,gas);',
+							'}'].join('\n'),
+			uniforms:{
+				posTex:{type:'t',value:null},
+				speedTex:{type:'t',value:null},
+				gravity:{type:'f',value:.824/(size*size)}
+			}
 		});
 
 		speedMesh=new THREE.Mesh(texGeometry,speedMaterial);
@@ -479,7 +482,7 @@
 		}else{armsAngle=_armsAngle}
 		var bulbSize=(typeof _bulbSize === 'undefined')?.3:_bulbSize>1?1:_bulbSize<0?0:_bulbSize;
 		var ellipticity=(typeof _ellipticity === 'undefined')?.2+Math.random()*.2:_ellipticity>1?1:_ellipticity<0?0:_ellipticity;
-		
+
 		var starsPos=[],starsSpeeds=[],dist,angle,a,b,f1,f2,saabb,e,phi,theta,radius;
 		for(var i=0;i<n;i++){
 			dist=Math.random();
@@ -508,7 +511,7 @@
 				Math.cos(phi)*Math.cos(theta)*radius,
 				Math.cos(phi)*Math.sin(theta)*radius,
 				Math.sin(phi)*radius
-				);
+			);
 
 			var c=Math.sqrt(pos.length()),
 				speedCoeff=.07,//make it related to the one in the shader
@@ -520,14 +523,14 @@
 					pos.x+=200;
 					pos.y+=50;
 					tan.z-=.25;
-			starsPos.push(pos.x,pos.y,pos.z);
-			starsSpeeds.push(tan.x,tan.y,tan.z)
+					starsPos.push(pos.x,pos.y,pos.z);
+					starsSpeeds.push(tan.x,tan.y,tan.z)
 				}else{
 					pos.x-=200;
 					pos.z-=50;
 					tan.y+=.25;
-			starsPos.push(pos.x,pos.z,pos.y);
-			starsSpeeds.push(tan.x,tan.z,tan.y)
+					starsPos.push(pos.x,pos.z,pos.y);
+					starsSpeeds.push(tan.x,tan.z,tan.y)
 				}
 			}
 
@@ -566,25 +569,26 @@
 
 		//real invisible slider
 		slider=document.createElement('input');
-	    slider.type='range';
-	    slider.min=0;slider.max=.003;slider.step=0.0001;
-	    slider.value=.001;
-	    sliderContainer.appendChild(slider);
+		slider.type='range';
+		slider.min=0;slider.max=.003;slider.step=0.0001;
+		slider.value=.001;
+		sliderContainer.appendChild(slider);
 
-	    //2. Event listener
+		//2. Event listener
 
-	    var range=slider.max-slider.min;
+		var range=slider.max-slider.min;
 		sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
 
-	    slider.addEventListener('input',function(){
+		slider.addEventListener('input',function(){
 			speedMesh.material.uniforms.gravity.value=slider.value;
 			sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
 			var content=slider.value;
 			//var fixed=Math.abs(content)===1||(content<0.05&&content>-.05)?0:1;
 			//sliderThumbContent.style.marginLeft=fixed===0?content<0?'-13px':'-7px':content<0?'-23px':'-18px';
 			//sliderThumbContent.textContent=(animation.timeScale/2.2).toFixed(fixed);
-	    },false);
+		},false);
 	}
+
 </script>
 </body>
 </html>
