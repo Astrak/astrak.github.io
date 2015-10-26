@@ -51,7 +51,7 @@
 			margin-left:-100px;
 			width:200px;
 			height:60px;
-			bottom:2px;
+			bottom:60px;
 		}
 		span.slider-range{
 			position:absolute;
@@ -245,6 +245,9 @@
 	/** FUNCTIONS **/
 
 	function setScenes(){
+
+		window.devicePixelRatio=1;
+		
 		//main scene & usual stuff
 		renderer=new THREE.WebGLRenderer();
 		renderer.context.getExtension('OES_texture_float');
@@ -270,6 +273,13 @@
 		initRT();
 		initTextures();
 
+		window.addEventListener('click',function(){
+			clearSimulation();
+			initRT();
+			initTextures();
+			addPoints();
+		})
+
 		//scene.add(new THREE.AxisHelper(size/2));
 	}
 
@@ -278,6 +288,12 @@
 		camera.aspect=innerWidth/innerHeight;
 		camera.updateProjectionMatrix();
 		points.material.uniforms.pixelRatio.value=innerHeight;
+	}
+
+	function clearSimulation(){
+		scene.remove(points)
+		speedTex=[],posTex=[],points=undefined,actual=1,before=(actual+1)%2,speedMesh=undefined,posMesh=undefined;
+		galaxy=new Galaxy(size*size,2);
 	}
 
 	function addPoints(){
@@ -375,7 +391,6 @@
 		renderer.render(texturesScene,orthoCam,posTex[actual]);
 
 		texturesScene.remove(initTexMesh);
-		
 	}
 
 	function initTextures(){
