@@ -39,6 +39,7 @@ var SCENE={
         
         controls=new THREE.TrackballControls(camera,renderer.domElement);
     	controls.noPan=true;
+        controls.noZoom=true;
     	controls.rotateSpeed=.7;
     	controls.maxDistance=25;
 		

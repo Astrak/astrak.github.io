@@ -48,11 +48,13 @@ var initLoadScreen = function(){
     var loadContained=document.getElementById('load-contained');
     var geometriesInfo=document.createElement('p'),
     	texturesInfo=document.createElement('p'),
-    	meshesInfo=document.createElement('p');
-    geometriesInfo.className=texturesInfo.className=meshesInfo.className='info';
+    	meshesInfo=document.createElement('p'),
+        go=document.createElement('p');
+    geometriesInfo.className=texturesInfo.className=meshesInfo.className=go.className='info';
     geometriesInfo.innerHTML='<br/>&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;analyse des géometries, 0/'+geometriesLength;
     texturesInfo.innerHTML='&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chargement des textures, 0/'+texturesLength;
     meshesInfo.innerHTML='&#9744;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;création des objets, 0/'+meshesLength;
+    go.innerHTML='cliquez pour lancer l\'application';
 
     var loadGeometries = function(){
         loadContained.appendChild(geometriesInfo);
@@ -78,7 +80,7 @@ var initLoadScreen = function(){
 	            loadTextures();
 	        }
         }
-    }
+    };
 
     var loadTextures = function(){
         loadContained.appendChild(texturesInfo);
@@ -104,7 +106,7 @@ var initLoadScreen = function(){
 	            createMeshes();
 	        }
 	    }
-    }
+    };
 
     var createMeshes = function(){
         loadContained.appendChild(meshesInfo);
@@ -153,12 +155,34 @@ var initLoadScreen = function(){
 	            endLoadScreen(resources);
 	        }
 	    }
-    }
+    };
+
+    var launchIntoFullscreen = function(element) {
+        if(element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if(element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if(element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if(element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        }
+    };
     
     var endLoadScreen = function(data){
-        window.removeEventListener('resize',handleResize,false);
-        setTimeout(function(){initScene(data)},500);
-    }
+        loadContained.appendChild(go);
+        window.addEventListener('click',launch,false);
+        document.body.style.cursor='pointer';
+        document.querySelector('.spinner-loading').style.strokeDasharray='200';
+        document.querySelector('.spinner-loading').style.animation='none';
+        function launch(){
+            window.removeEventListener('click',launch,false);
+            launchIntoFullscreen(document.documentElement);
+            initScene(data)
+            document.body.style.cursor='auto';
+            window.removeEventListener('resize',handleResize,false);
+        }
+    };
 
     loadGeometries();
 }

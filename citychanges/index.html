@@ -3,6 +3,10 @@
 <head>
 	<title>CASTRES</title>
 	<link href='style.css' rel=stylesheet>
+	<!-- hide adress bar and prevent scaling on ios -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+	<!-- enable fullscreen if added to home screen -->
+	<meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
 	<!-- libs -->
@@ -17,7 +21,6 @@
 	<script src='scripts/cars.js'></script>
 	<script src='scripts/scene.js'></script>
 	<script src='scripts/UI.js'></script>
-	<script src='scripts/smoother.js'></script>
 	<script>
 
 		'use strict';
@@ -26,8 +29,6 @@
 
 		var scene, renderer, canvasContainer;
 		var camera, controls;
-
-		var smoother=new SMOOTHER();
 
 	    var steps=[
 	            {
@@ -81,7 +82,6 @@
 		        UI.compass.compassCamera.lookAt(UI.compass.compassScene.position);
 		        UI.compass.compassRenderer.render(UI.compass.compassScene,UI.compass.compassCamera);
 		    }
-		    //smoother.check();
 			controls.update();
 		    renderer.render(scene,camera);
 		}
