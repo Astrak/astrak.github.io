@@ -4,97 +4,97 @@
 	<title>TITLE</title>
 	<style>
 		/*MAIN*/
-		body{
-		    margin:0;
-		    overflow:hidden;
-		}
-		canvas{
-			cursor:grab;
-			cursor:-webkit-grab;
-			cursor:-moz-grab;
-		}
-		canvas:active{
-			cursor:grabbing;
-			cursor:-webkit-grabbing;
-			cursor:-moz-grabbing;
-		}
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
 		/*BUTTON*/
-		button{
-		    position:absolute;
-		    bottom:0;
-		    cursor:pointer;
-		}
-		button span{
-			position:absolute;
-			width:30px;
-			height:5px;
-			margin-left:-15px;
-			margin-top:-2.5px;
-			background:chocolate;
-			border-radius:2px;
-		}
-		button{
-		    outline:0;
-		    background:darkslategrey;
-			border:none;
-		    box-shadow:0px 0px 10px black;
-			left:100%;
-			margin-left:-70px;
-			margin-bottom:7px;
-			border-radius:50%;
-			width:50px;height:50px;
-		}
+			button{
+			    position:absolute;
+			    bottom:0;
+			    cursor:pointer;
+			}
+			button span{
+				position:absolute;
+				width:30px;
+				height:5px;
+				margin-left:-15px;
+				margin-top:-2.5px;
+				background:chocolate;
+				border-radius:2px;
+			}
+			button{
+			    outline:0;
+			    background:darkslategrey;
+				border:none;
+			    box-shadow:0px 0px 10px black;
+				left:100%;
+				margin-left:-70px;
+				margin-bottom:7px;
+				border-radius:50%;
+				width:50px;height:50px;
+			}
 		/*SPEED SLIDER*/
-		div.slider-container{
-			position:absolute;
-			left:50%;
-			margin-left:-100px;
-			width:200px;
-			height:60px;
-			bottom:60px;
-		}
-		span.slider-range{
-			position:absolute;
-			left:50%;top:50%;
-			margin-left:-50%;
-			margin-top:-4px;
-			width:100%;
-			height:8px;
-			border-radius:2px;
-			background:chocolate;
-		}
-		span.slider-thumb{
-			left:200px;
-		    background:darkslategrey;
-		    box-shadow:0px 0px 10px black;
-			margin-bottom:7px;
-			width:50px;height:50px;
-			border-radius:50%;
-			margin-left:-50px;
-			position:absolute;
-			margin-top:-21px;/*25-4 of slider-range margin-top*/
-		}
-		p.slider-thumb-content{
-			position:absolute;
-			color:chocolate;
-			font:bold 25px Arial;
-			top:50%;left:50%;
-			padding:0;
-			margin:-15px 0px 0px -10px;
-		}
-		input{
-		    position:absolute;
-		    bottom:-2px;
-		    opacity:0;
-		    cursor:pointer;
-		 	-webkit-appearance: none; 
-		    width:200px;
-		    height:60px;
-		    left:50%;
-		    margin-left:-100px;
-			background:none;
-			border:none;
-		}
+			div.slider-container{
+				position:absolute;
+				left:50%;
+				margin-left:-100px;
+				width:200px;
+				height:60px;
+				bottom:20px;
+			}
+			span.slider-range{
+				position:absolute;
+				left:50%;top:50%;
+				margin-left:-50%;
+				margin-top:-4px;
+				width:100%;
+				height:8px;
+				border-radius:2px;
+				background:chocolate;
+			}
+			span.slider-thumb{
+				left:200px;
+			    background:darkslategrey;
+			    box-shadow:0px 0px 10px black;
+				margin-bottom:7px;
+				width:50px;height:50px;
+				border-radius:50%;
+				margin-left:-50px;
+				position:absolute;
+				margin-top:-21px;/*25-4 of slider-range margin-top*/
+			}
+			p.slider-thumb-content{
+				position:absolute;
+				color:chocolate;
+				font:bold 25px Arial;
+				top:50%;left:50%;
+				padding:0;
+				margin:-15px 0px 0px -10px;
+			}
+			input{
+			    position:absolute;
+			    bottom:-2px;
+			    opacity:0;
+			    cursor:pointer;
+			 	-webkit-appearance: none; 
+			    width:200px;
+			    height:60px;
+			    left:50%;
+			    margin-left:-100px;
+				background:none;
+				border:none;
+			}
 
 		/**********************************/
 		/** SLIDER STYLE FROM CSS TRICKS **/
@@ -105,84 +105,84 @@
 		display the value inside the latter */
 
 		/** 1. REMOVE AUTOMATIC STYLES **/
-		input[type=range]::-webkit-slider-thumb {
-		  -webkit-appearance: none;
-		}
-		input[type=range]:focus {
-		  outline: none;
-		}
-		input[type=range]::-ms-track {
-		  cursor: pointer;
-		  background: transparent; /* Hides the slider so custom styles can be added */
-		  border-color: transparent;
-		  color: transparent;
-		}
+			input[type=range]::-webkit-slider-thumb {
+			  -webkit-appearance: none;
+			}
+			input[type=range]:focus {
+			  outline: none;
+			}
+			input[type=range]::-ms-track {
+			  cursor: pointer;
+			  background: transparent; /* Hides the slider so custom styles can be added */
+			  border-color: transparent;
+			  color: transparent;
+			}
 
 		/** 2. THE THUMB **/
-		input[type=range]::-webkit-slider-thumb {
-		  -webkit-appearance: none;
-		  height: 50px;
-		  width: 50px;
-		  border-radius: 50%;
-		  background: darkslategrey;
-		  margin-top: -21px; /* needed in Chrome, not in Firefox and IE */
-		  box-shadow:0px 0px 10px #000;
-		}
-		input[type=range]::-moz-range-thumb {
-		  height: 50px;
-		  width: 50px;
-		  border-radius: 50%;
-		  background: darkslategrey;
-		  box-shadow:0px 0px 10px #000;
-		  border:none;
-		}
-		input[type=range]::-ms-thumb {
-		  height: 50px;
-		  width: 50px;
-		  border-radius: 50%;
-		  background: darkslategrey;
-		  box-shadow:0px 0px 10px #000;
-		  border:none;
-		}
+			input[type=range]::-webkit-slider-thumb {
+			  -webkit-appearance: none;
+			  height: 50px;
+			  width: 50px;
+			  border-radius: 50%;
+			  background: darkslategrey;
+			  margin-top: -21px; /* needed in Chrome, not in Firefox and IE */
+			  box-shadow:0px 0px 10px #000;
+			}
+			input[type=range]::-moz-range-thumb {
+			  height: 50px;
+			  width: 50px;
+			  border-radius: 50%;
+			  background: darkslategrey;
+			  box-shadow:0px 0px 10px #000;
+			  border:none;
+			}
+			input[type=range]::-ms-thumb {
+			  height: 50px;
+			  width: 50px;
+			  border-radius: 50%;
+			  background: darkslategrey;
+			  box-shadow:0px 0px 10px #000;
+			  border:none;
+			}
 
-		/* 3. THE TRACK */
-		input[type=range]::-webkit-slider-runnable-track {
-		  width: 100%;
-		  height: 8.4px;
-		  background: chocolate;
-		  border-radius: 1.3px;
-		}
-		input[type=range]:focus::-webkit-slider-runnable-track {
-		  background: chocolate;
-		}
-		input[type=range]::-moz-range-track {
-		  width: 100%;
-		  height: 8.4px;
-		  background: chocolate;
-		  border-radius: 1.3px;
-		}
-		input[type=range]::-ms-track {
-		  width: 100%;
-		  height: 8.4px;
-		  background: transparent;
-		  border-color: transparent;
-		  border-width: 16px 0;
-		  color: transparent;
-		}
-		input[type=range]::-ms-fill-lower {
-		  background: chocolate;
-		  border-radius: 2.6px;
-		}
-		input[type=range]:focus::-ms-fill-lower {
-		  background: chocolate;
-		}
-		input[type=range]::-ms-fill-upper {
-		  background: chocolate;
-		  border-radius: 2.6px;
-		}
-		input[type=range]:focus::-ms-fill-upper {
-		  background: chocolate;
-		}
+		/** 3. THE TRACK **/
+			input[type=range]::-webkit-slider-runnable-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: chocolate;
+			  border-radius: 1.3px;
+			}
+			input[type=range]:focus::-webkit-slider-runnable-track {
+			  background: chocolate;
+			}
+			input[type=range]::-moz-range-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: chocolate;
+			  border-radius: 1.3px;
+			}
+			input[type=range]::-ms-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: transparent;
+			  border-color: transparent;
+			  border-width: 16px 0;
+			  color: transparent;
+			}
+			input[type=range]::-ms-fill-lower {
+			  background: chocolate;
+			  border-radius: 2.6px;
+			}
+			input[type=range]:focus::-ms-fill-lower {
+			  background: chocolate;
+			}
+			input[type=range]::-ms-fill-upper {
+			  background: chocolate;
+			  border-radius: 2.6px;
+			}
+			input[type=range]:focus::-ms-fill-upper {
+			  background: chocolate;
+			}
 	</style>
 </head>
 <body>
@@ -193,9 +193,11 @@
 	uniform sampler2D posTex;
 	uniform float pointSize;
 	uniform float pixelRatio;
+	varying float speed;
 	void main(){
 		vec4 vPosition=texture2D(posTex,position.xy);
-		vec4 mvPosition=modelViewMatrix*vPosition;
+		speed=vPosition.w*3.;
+		vec4 mvPosition=modelViewMatrix*vec4(vPosition.xyz,1.);
 		float l=length(vPosition.xyz);
 
 		gl_PointSize=pointSize*pixelRatio*(5.)/length(mvPosition.xyz);
@@ -205,10 +207,11 @@
 	}
 </script>
 <script id='fs' type='x-shader/x-fragment'>
+	varying float speed;
 	void main(){
-		float ratio=distance(gl_PointCoord,vec2(.5));
-		float result=-(ratio-.5)*1.2;
-		gl_FragColor=vec4(.32*.7,.28*.7,1.*.7,result)*result;
+		float d=distance(gl_PointCoord,vec2(.5));
+		float result=-(d-.5)*1.2;
+		gl_FragColor=vec4(.32*.7*speed,.28*.7,1.*.7,result)*result;
 		//gl_FragColor=vec4(1.);
 	}
 </script>
@@ -216,29 +219,22 @@
 <script>
 	'use strict';
 
-	var scene,renderer,camera,controls,points;
+	var scene,renderer,camera,controls,points,galaxy;
 	var texGeometry,texturesScene,orthoCam;
 	var speedTex=[],posTex=[],
 		speedMesh,posMesh,
 		actual=1,before=(actual+1)%2;
-	var rtParams={
-		format:THREE.RGBFormat,
-		generateMipmaps:false,
-		magFilter:THREE.NearestFilter,
-		minFilter:THREE.NearestFilter,
-		premultiplyAlpha:false,
-		type:THREE.HalfFloatType,
-		stencilBuffer:false,
-		depthBuffer:false
-	};
+
 	var size=32;
-	var galaxy=new Galaxy(size*size,2);
+	var rttype=THREE.HalfFloatType;
+	var gNumber=2;
+	var gravity;
 
 	setScenes();
 
 	addPoints();
 
-	setGravitySlider();
+	setUI();
 
 	animate();
 
@@ -273,12 +269,12 @@
 		initRT();
 		initTextures();
 
-		window.addEventListener('click',function(){
-			clearSimulation();
-			initRT();
-			initTextures();
-			addPoints();
-		})
+		//window.addEventListener('click',function(){
+		//	clearSimulation();
+		//	initRT();
+		//	initTextures();
+		//	addPoints();
+		//})
 
 		//scene.add(new THREE.AxisHelper(size/2));
 	}
@@ -293,7 +289,7 @@
 	function clearSimulation(){
 		scene.remove(points)
 		speedTex=[],posTex=[],points=undefined,actual=1,before=(actual+1)%2,speedMesh=undefined,posMesh=undefined;
-		galaxy=new Galaxy(size*size,2);
+		galaxy=new Galaxy(size*size,gNumber);
 	}
 
 	function addPoints(){
@@ -305,7 +301,7 @@
 			fragmentShader:document.getElementById('fs').textContent,
 			uniforms:{
 				posTex:{type:'t',value:posTex[actual]},
-				pointSize:{type:'f',value:164/size},
+				pointSize:{type:'f',value:130/(size)},
 				pixelRatio:{type:'f',value:innerHeight}
 			},
 			transparent:true,
@@ -319,7 +315,17 @@
 		scene.add(points);
 	}
 
-	function initRT(){
+	function initRT(){	
+		var rtParams={
+			format:THREE.RGBAFormat,
+			generateMipmaps:false,
+			magFilter:THREE.NearestFilter,
+			minFilter:THREE.NearestFilter,
+			premultiplyAlpha:false,
+			type:rttype,
+			stencilBuffer:false,
+			depthBuffer:false
+		};
 		speedTex[0]=new THREE.WebGLRenderTarget(size,size,rtParams);
 		speedTex[1]=new THREE.WebGLRenderTarget(size,size,rtParams);
 		posTex[0]=new THREE.WebGLRenderTarget(size,size,rtParams);
@@ -327,6 +333,7 @@
 	}
 
 	function setTexGeometry(){
+		galaxy=new Galaxy(size*size,gNumber);
 		texGeometry=new THREE.BufferGeometry();
 		var vertices=new Float32Array(size*size*3*6);
 		var initPos=new Float32Array(size*size*3*6);
@@ -397,6 +404,8 @@
 		setTexGeometry();
 		setInitPosSpeed();
 
+		gravity=.824/(size*size);
+
 		var posMaterial=new THREE.ShaderMaterial({
 			vertexShader:['',
 						  'varying vec3 vPosition;',
@@ -436,7 +445,6 @@
 							'void main(){',
 							'	vec3 speed=texture2D(speedTex,vPosition.xy).xyz;',
 							'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
-							'	float gas=1.;',
 							'	for(float i=0.;i<1.;i+=pix){',
 							'		for(float j=1.;j>0.;j-=pix){',
 							'			vec3 u=texture2D(posTex,vec2(i,j)).xyz-pos;',
@@ -444,12 +452,13 @@
 							'			speed+=gravity*u/(d*d);',
 							'		}',
 							'	}',
-							'	gl_FragColor=vec4(speed,gas);',
+							'	float s=length(speed);',
+							'	gl_FragColor=vec4(speed,s);',
 							'}'].join('\n'),
 			uniforms:{
 				posTex:{type:'t',value:null},
 				speedTex:{type:'t',value:null},
-				gravity:{type:'f',value:.824/(size*size)}
+				gravity:{type:'f',value:gravity}
 			}
 		});
 
@@ -547,6 +556,9 @@
 					starsPos.push(pos.x,pos.z,pos.y);
 					starsSpeeds.push(tan.x,tan.z,tan.y)
 				}
+			}else{
+				starsPos.push(pos.x,pos.y,pos.z);
+				starsSpeeds.push(tan.x*Math.sqrt(2),tan.y*Math.sqrt(2),tan.z*Math.sqrt(2))
 			}
 
 		}
@@ -559,7 +571,7 @@
 		};
 	}
 
-	function setGravitySlider(){
+	function setUI(){
 		var sliderContainer, sliderRange, sliderThumb, sliderThumbContent, slider;
 		//1. Appearance
 
@@ -585,8 +597,8 @@
 		//real invisible slider
 		slider=document.createElement('input');
 		slider.type='range';
-		slider.min=0;slider.max=.003;slider.step=0.0001;
-		slider.value=.001;
+		slider.min=0;slider.max=gravity*2;slider.step=gravity/1000;
+		slider.value=gravity;
 		sliderContainer.appendChild(slider);
 
 		//2. Event listener
@@ -598,9 +610,6 @@
 			speedMesh.material.uniforms.gravity.value=slider.value;
 			sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
 			var content=slider.value;
-			//var fixed=Math.abs(content)===1||(content<0.05&&content>-.05)?0:1;
-			//sliderThumbContent.style.marginLeft=fixed===0?content<0?'-13px':'-7px':content<0?'-23px':'-18px';
-			//sliderThumbContent.textContent=(animation.timeScale/2.2).toFixed(fixed);
 		},false);
 	}
 </script>

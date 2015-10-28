@@ -13,7 +13,7 @@ var TREES={
         g.merge(plane2.geometry,plane2.matrixWorld);
         
         //mat
-        data.textures[8].minFilter=THREE.LinearFilter;
+       // data.textures[8].minFilter=THREE.LinearFilter;
         var m=new THREE.MeshBasicMaterial({
                 map:data.textures[8],
                 transparent:true,

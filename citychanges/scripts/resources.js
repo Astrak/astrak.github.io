@@ -11,16 +11,16 @@ var resources = {
         'chantiertest043',      // 5  minfilter : linearfilter
         'commercestest019',     // 6  minfilter : 
         'nouveauxbat048',       // 7  minfilter : 
-        'platane10',            // 8  minfilter : linearfilter
-        'gridtest047',          // 9  minfilter : linearfilter
-        'lensflare1_uncache',   //10  minfilter : 
-        'lensflare2',           //11  minfilter : 
-        'lensflare3',           //12  minfilter : 
-        'routestest090',        //13  minfilter : linearfilter
-        'trottoirstest042',     //14  minfilter : linearfilter
-        'carstest041',          //15  minfilter : 
-        'gardenstest033',       //16  minfilter : linearfilter
-        'gambettacitytest299'   //17  minfilter : 
+        //'platane10',            // 8  minfilter : linearfilter
+        //'gridtest047',          // 9  minfilter : linearfilter
+        //'lensflare1_uncache',   //10  minfilter : 
+        //'lensflare2',           //11  minfilter : 
+        //'lensflare3',           //12  minfilter : 
+        //'routestest090',        //13  minfilter : linearfilter
+        //'trottoirstest042',     //14  minfilter : linearfilter
+        //'carstest041',          //15  minfilter : 
+        //'gardenstest033',       //16  minfilter : linearfilter
+       // 'gambettacitytest299'   //17  minfilter : 
         ],
     geometries:[
         'hospital',

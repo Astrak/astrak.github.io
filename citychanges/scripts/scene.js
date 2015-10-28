@@ -25,7 +25,7 @@ var SCENE={
             if(i>7)data.meshes.matrixAutoUpdate=false;
     	}
     
-	    CARS.addCars(data);
+	    CARS.addParkedCars(data);
 	    TREES.addTrees(data);
         
 		this.createSky(32,data);
@@ -71,7 +71,7 @@ var SCENE={
         light.shadowDarkness=1;
         scene.add(light,ambient);
 
-    	renderer.shadowMapEnabled=true;
+    	//renderer.shadowMapEnabled=true;
     	light.castShadow=true;
     	light.shadowCameraFar=60;
     	light.shadowCameraTop=25;
