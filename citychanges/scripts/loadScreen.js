@@ -170,17 +170,18 @@ var initLoadScreen = function(){
     };
     
     var endLoadScreen = function(data){
+        loadContained.innerHTML='';
         loadContained.appendChild(go);
         window.addEventListener('click',launch,false);
+        window.addEventListener('touchstart',launch,false);
         document.body.style.cursor='pointer';
-        document.querySelector('.spinner-loading').style.strokeDasharray='200';
-        document.querySelector('.spinner-loading').style.animation='none';
         function launch(){
-            window.removeEventListener('click',launch,false);
             launchIntoFullscreen(document.documentElement);
             initScene(data)
             document.body.style.cursor='auto';
             window.removeEventListener('resize',handleResize,false);
+            window.removeEventListener('click',launch,false);
+            window.removeEventListener('touchstart',launch,false);
         }
     };
 
