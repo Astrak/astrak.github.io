@@ -164,13 +164,15 @@ var initLoadScreen = function(){
         window.addEventListener('touchstart',launch,false);
         document.body.style.cursor='pointer';
         function launch(){
-            go.innerHTML='initialisation...'
-            if(Detectizr.device.type!=='desktop')UI.launchIntoFullscreen(document.documentElement);
-            initScene(data)
-            document.body.style.cursor='auto';
-            window.removeEventListener('resize',handleResize,false);
-            window.removeEventListener('click',launch,false);
-            window.removeEventListener('touchstart',launch,false);
+            go.innerHTML='initialisation...';
+            setTimeout(function(){
+                if(Detectizr.device.type!=='desktop')UI.launchIntoFullscreen(document.documentElement);
+                initScene(data)
+                document.body.style.cursor='auto';
+                window.removeEventListener('resize',handleResize,false);
+                window.removeEventListener('click',launch,false);
+                window.removeEventListener('touchstart',launch,false);
+            },100);
         }
     };
 
