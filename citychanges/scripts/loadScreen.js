@@ -164,6 +164,7 @@ var initLoadScreen = function(){
         window.addEventListener('touchstart',launch,false);
         document.body.style.cursor='pointer';
         function launch(){
+            go.innerHTML='initialisation...'
             if(Detectizr.device.type!=='desktop')UI.launchIntoFullscreen(document.documentElement);
             initScene(data)
             document.body.style.cursor='auto';
