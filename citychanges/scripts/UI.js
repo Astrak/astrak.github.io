@@ -652,14 +652,12 @@ var UI={
 		            setTimeout(function(){
 		                window.addEventListener('mousemove',PLU_raycast,false);
                         window.addEventListener('click',PLU_displayInfos,false);
-                        window.addEventListener('touchstart',PLU_displayInfos,false);
 		                window.addEventListener('mousedown',checkMouseMove,true);
 		            },200)//so PLU animation finishes before
 		        }else{
 		            UI.PLU.PLUAreas.UA.OFF();UI.PLU.PLUAreas.UAa.OFF();UI.PLU.PLUAreas.UB.OFF();
 		            window.removeEventListener('mousemove',PLU_raycast,false);
                     window.removeEventListener('click',PLU_displayInfos,false);
-                    window.removeEventListener('touchstart',PLU_displayInfos,false);
 		            window.removeEventListener('mousedown',checkMouseMove,true);
 		            if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x555588);
 		            PLU_INTERSECTED=null;
@@ -755,7 +753,6 @@ var UI={
                 }
                 window.removeEventListener('mousemove',PLU_raycast,false);
                 window.removeEventListener('click',PLU_displayInfos,false);
-                window.removeEventListener('touchstart',PLU_displayInfos,false);
                 window.removeEventListener('mousedown',checkMouseMove,true);
                 span.style.cssText='font:normal 12px Arial;color:#fff';
                 if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x333366);
