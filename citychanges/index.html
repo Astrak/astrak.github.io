@@ -4,7 +4,6 @@
 	<title>CASTRES</title>
 	<link href='style.css' rel=stylesheet>
 	<!-- hide adress bar and prevent scaling on ios -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
 	<!-- enable fullscreen if added to home screen -->
 	<meta name="apple-mobile-web-app-capable" content="yes">
 </head>
@@ -61,11 +60,8 @@
 
 		    animate();
 
-            if(Detectizr.device.type!=='desktop'){
-            	UI.setLow(true);
-            }else{
-                for(var i=0;i<CARS.streetMesh.length;i++)scene.add(CARS.streetMesh[i])
-            }
+            if(Detectizr.device.type!=='desktop')UI.setLow(true);
+            else for(var i=0;i<CARS.streetMesh.length;i++)scene.add(CARS.streetMesh[i]);
 
 		    //test to output an image
 		    //renderer.setPixelRatio(3);
