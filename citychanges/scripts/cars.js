@@ -25,6 +25,8 @@ var CARS={
 		var cars=this.cars(data);
         var l=this.streetCars.length;
 
+        CARS.streetMesh=[];
+
 		for(var i=0;i<l;i++)createCar(i);
 
         function createCar(i){
@@ -43,6 +45,8 @@ var CARS={
 
 			var position={l:CARS.streetCars[i].begin};
 		    var car=cars[CARS.randomCarIndex(cars)].car.clone();
+		    car.castShadow=car.receiveShadow=true;
+		    CARS.streetMesh.push(car);
 
 		    var tl=new TimelineLite();
 
@@ -111,7 +115,8 @@ var CARS={
 			car.position.set(beginPos.x,beginPos.y,beginPos.z);
 			car.lookAt(CARS.streetCars[i].curve.spline.getPoint(CARS.streetCars[i].begin+.001));
 			scene.add(car);
-        };
+        }
+        for(var i=0;i<CARS.streetMesh.length;i++)scene.remove(CARS.streetMesh[i])
 	},
     randomCarIndex:function(array){
         var divider=0;

@@ -1,19 +1,30 @@
 var TREES={
     addTrees:function addTrees(data){
-        //create foliage geometry
+        //textured model : create foliage geometry
         var plane=new THREE.PlaneGeometry(1.7,2.5,1,1);
         
         var plane1=new THREE.Mesh(plane,new THREE.MeshBasicMaterial());
         var plane2=new THREE.Mesh(plane,new THREE.MeshBasicMaterial());
         plane2.rotation.y=Math.PI/2;
         plane2.updateMatrixWorld();
-    
+        
         var g=new THREE.Geometry();
         g.merge(plane1.geometry,plane1.matrixWorld);
         g.merge(plane2.geometry,plane2.matrixWorld);
+
+        //low poly model, to use for shadows too
+        var sphere=new THREE.Mesh(new THREE.SphereGeometry(.6,10,10),new THREE.MeshBasicMaterial());
+        var cyl=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,1,4),new THREE.MeshBasicMaterial());
+        //sphere.position.y=1.2;
+        sphere.updateMatrixWorld();
+        cyl.position.y=-1;
+        cyl.updateMatrixWorld();
+        var fg=new THREE.Geometry();
+        fg.merge(sphere.geometry,sphere.matrixWorld);
+        fg.merge(cyl.geometry,cyl.matrixWorld);
+
         
         //mat
-       // data.textures[8].minFilter=THREE.LinearFilter;
         var m=new THREE.MeshBasicMaterial({
                 map:data.textures[8],
                 transparent:true,
@@ -23,21 +34,37 @@ var TREES={
             });
         
         var tree=new THREE.Mesh(g,m);
+        var ftree=new THREE.Mesh(fg,new THREE.MeshLambertMaterial({color:0x00aa00,shading:THREE.FlatShading}))
         
         //clone to each coordinates and scale
         var geometry=new THREE.Geometry();
+        var fgeometry=new THREE.Geometry();
         var l=this.coordinates.length;
         for(var i=0;i<l;i++){
             var treeY=this.coordinates[i].y+(this.coordinates[i].scaleY-1)*2.5/2;
+
             tree.position.set(this.coordinates[i].x,treeY+.5,this.coordinates[i].z);
+            ftree.position.set(this.coordinates[i].x,treeY+.5,this.coordinates[i].z);
+
             tree.scale.set(this.coordinates[i].scaleX,this.coordinates[i].scaleY,this.coordinates[i].scaleZ);
+            ftree.scale.set(this.coordinates[i].scaleX,this.coordinates[i].scaleY,this.coordinates[i].scaleZ);
+
             tree.rotation.y+=Math.random()*Math.PI*2;
+            ftree.rotation.y+=Math.random()*Math.PI*2;
+            
             tree.updateMatrixWorld();
+            ftree.updateMatrixWorld();
+
             geometry.merge(tree.geometry.clone(),tree.matrixWorld);
+            fgeometry.merge(ftree.geometry.clone(),ftree.matrixWorld);
         }
         var mesh=new THREE.Mesh(geometry,m);
-        mesh.castShadow=mesh.receiveShadow=true;
-        scene.add(mesh);
+        var fmesh=new THREE.Mesh(fgeometry,ftree.material);
+        fmesh.castShadow=fmesh.receiveShadow=true;
+        TREES.mesh=mesh;
+        TREES.fmesh=fmesh;
+        scene.add(fmesh,mesh)
+        fmesh.material.visible=false;
     },
     coordinates:[
         {x:6.5,y:.76,z:24.42,scaleX:1,scaleY:.8,scaleZ:1},

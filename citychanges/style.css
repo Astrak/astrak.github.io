@@ -109,6 +109,18 @@ p{
 .extendOFF{
 	top:-5px;
 }
+button.params{
+	position:absolute;
+	top:-50px;
+	left:0;
+	background:red;
+}
+button.fullscreen{
+	position:absolute;
+	top:-50px;
+	right:0;
+	background:red;
+}
 #stepsContainer{
 	width:calc(100% - 10px);
 	height:84px;margin:5px 0px 5px 0px;

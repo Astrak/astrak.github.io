@@ -156,18 +156,6 @@ var initLoadScreen = function(){
 	        }
 	    }
     };
-
-    var launchIntoFullscreen = function(element) {
-        if(element.requestFullscreen) {
-            element.requestFullscreen();
-        } else if(element.mozRequestFullScreen) {
-            element.mozRequestFullScreen();
-        } else if(element.webkitRequestFullscreen) {
-            element.webkitRequestFullscreen();
-        } else if(element.msRequestFullscreen) {
-            element.msRequestFullscreen();
-        }
-    };
     
     var endLoadScreen = function(data){
         loadContained.innerHTML='';
@@ -176,7 +164,7 @@ var initLoadScreen = function(){
         window.addEventListener('touchstart',launch,false);
         document.body.style.cursor='pointer';
         function launch(){
-            launchIntoFullscreen(document.documentElement);
+            if(Detectizr.device.type!=='desktop')UI.launchIntoFullscreen(document.documentElement);
             initScene(data)
             document.body.style.cursor='auto';
             window.removeEventListener('resize',handleResize,false);

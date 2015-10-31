@@ -14,6 +14,8 @@
 	<script src='../libs/controls/TrackballControls_modified.js'></script>
 	<!--<script src='../../three/examples/js/controls/FlyControls.js'></script>-->
 	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TweenMax.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/detectizr/2.1.0/detectizr.min.js'></script>
 	<!-- resources -->
 	<script src='scripts/resources.js'></script>
 	<script src='scripts/loadScreen.js'></script>
@@ -53,8 +55,18 @@
 
 		function initScene(data){		    
 		    SCENE.set(data);
+		    camera.lastPosition=new THREE.Vector3().copy(camera.position);
+
 		    UI.set(data);
+
 		    animate();
+
+            if(Detectizr.device.type!=='desktop'){
+            	UI.setLow(true);
+            }else{
+                for(var i=0;i<CARS.streetMesh.length;i++)scene.add(CARS.streetMesh[i])
+            }
+
 		    //test to output an image
 		    //renderer.setPixelRatio(3);
 		    //renderer.setSize(3*innerWidth,3*innerHeight);
@@ -73,17 +85,23 @@
 
 		function animate(){
 		    window.requestAnimationFrame(animate);
-		        
-		    //COMPASS
-		    if(UI.compass.updateCompass){
-		        UI.compass.compassCamera.position.copy(camera.position);
-		        UI.compass.compassCamera.position.normalize().multiplyScalar(2);
-		        UI.compass.compassCamera.up.copy(camera.up);
-		        UI.compass.compassCamera.lookAt(UI.compass.compassScene.position);
-		        UI.compass.compassRenderer.render(UI.compass.compassScene,UI.compass.compassCamera);
-		    }
+
 			controls.update();
-		    renderer.render(scene,camera);
+
+			if(!camera.position.equals(camera.lastPosition)||camera.update){
+			    //COMPASS
+			    if(UI.compass.updateCompass){
+			        UI.compass.compassCamera.position.copy(camera.position);
+			        UI.compass.compassCamera.position.normalize().multiplyScalar(2);
+			        UI.compass.compassCamera.up.copy(camera.up);
+			        UI.compass.compassCamera.lookAt(UI.compass.compassScene.position);
+			        UI.compass.compassRenderer.render(UI.compass.compassScene,UI.compass.compassCamera);
+			    }
+			    renderer.render(scene,camera);
+				camera.lastPosition.copy(camera.position)
+				camera.update=false;
+			}
+		        
 		}
 	</script>
 </body>

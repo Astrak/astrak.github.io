@@ -12,7 +12,8 @@ var SCENE={
         canvasContainer.style.cssText='height:'+innerHeight+'px;width:'+innerWidth+'px;cursor:move;';
         canvasContainer.appendChild(renderer.domElement);
         renderer.domElement.style.position='relative';
-        renderer.setClearColor(0x2E2EC1);
+        //renderer.setClearColor(0x2E2EC1);
+        renderer.setClearColor(0x000000);
 
         this.setView();
 
@@ -25,9 +26,9 @@ var SCENE={
             if(i>7)data.meshes.matrixAutoUpdate=false;
     	}
     
-	    CARS.addParkedCars(data);
+	    CARS.addCars(data);
 	    TREES.addTrees(data);
-        
+
 		this.createSky(32,data);
 			
 		//this.addLensFlares(light,camera);
@@ -35,6 +36,7 @@ var SCENE={
     setView:function(){
         camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.4,150);
         camera.position.set(10,12,20);
+        camera.update=false;
         scene.add(camera);
         
         controls=new THREE.TrackballControls(camera,renderer.domElement);
@@ -63,6 +65,7 @@ var SCENE={
         camera.aspect=width/height;
         camera.updateProjectionMatrix();
         controls.handleResize();
+        camera.update=true;
         var UIContainer=document.querySelector('#UIContainer');
     },
     setLighting:function(){
@@ -72,7 +75,7 @@ var SCENE={
         light.shadowDarkness=1;
         scene.add(light,ambient);
 
-    	//renderer.shadowMapEnabled=true;
+    	renderer.shadowMapEnabled=true;
     	light.castShadow=true;
     	light.shadowCameraFar=60;
     	light.shadowCameraTop=25;
@@ -90,6 +93,7 @@ var SCENE={
         sky.position.y=9;
         sky.scale.x=-1;
         scene.add(sky);
+        SCENE.sky=sky;
     },
     addLensFlares:function(source,camera){
 		var textureFlare0 = data.textures[10],

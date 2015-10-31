@@ -55,7 +55,81 @@ var UI={
 	    
 	    //Steps
 	    this.stepsUI.set(stepsContainer,data);
+
+        //Params button
+        this.params(UIContainer,data);
+
+        //Fullscreen button
+        this.setFullScreenButton(UIContainer);
 	},
+    params:function(w,data){
+        var button=document.createElement('button');
+        button.innerHTML='params';
+        button.className='params';
+        w.appendChild(button);
+
+        var low=true;
+
+        var m8mh=data.meshes[8].material;
+        var m9mh=data.meshes[9].material;
+        var m10mh=data.meshes[10].material;
+        var m23mh=data.meshes[23].material;
+        var m8ml=new THREE.MeshBasicMaterial({color:0x00ff00})
+        var m9ml=new THREE.MeshBasicMaterial({color:0x555555})
+        var m10ml=new THREE.MeshBasicMaterial({color:0x666666})
+        var m23ml=new THREE.MeshLambertMaterial({color:0xaa5511,shading:THREE.FlatShading})
+
+        this.setLow=function(b){
+            low=!b
+            if(low){
+                data.meshes[8].material=m8mh;
+                data.meshes[9].material=m9mh;
+                data.meshes[10].material=m10mh;
+                data.meshes[23].material=m23mh;
+                scene.add(SCENE.sky)
+                TREES.fmesh.material.visible=false;
+                for(var i=0;i<CARS.streetMesh.length;i++)scene.add(CARS.streetMesh[i])
+                scene.add(TREES.mesh)
+                renderer.shadowMapEnabled=true;
+                camera.update=true;
+            }else{
+                data.meshes[8].material=m8ml;
+                data.meshes[9].material=m9ml;
+                data.meshes[10].material=m10ml;
+                data.meshes[23].material=m23ml;
+                scene.remove(SCENE.sky)
+                TREES.fmesh.material.visible=true;
+                for(var i=0;i<CARS.streetMesh.length;i++)scene.remove(CARS.streetMesh[i])
+                scene.remove(TREES.mesh)
+                renderer.shadowMapEnabled=false;
+                camera.update=true;
+            }
+        };
+
+        button.addEventListener('click',function(){
+            UI.setLow(low)
+        },false);
+    },
+    setFullScreenButton:function(w){
+        var button=document.createElement('button');
+        button.innerHTML='fullscreen';
+        button.className='fullscreen';
+        w.appendChild(button);
+        button.addEventListener('click',function(){
+            UI.launchIntoFullscreen(document.documentElement);
+        },false);
+    },
+    launchIntoFullscreen:function(element) {
+        if(element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if(element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if(element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if(element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        }
+    },
     stepsUI:{
         actualStep:0,
     	set:function(stepsContainer,data){
@@ -138,6 +212,7 @@ var UI={
             mesh.material.color.set(0x00ff00)
             TweenLite.to(mesh.material,.7,{
             	opacity:1,
+                onUpdate:function(){camera.update=true;},
             	onComplete:function(){
         			mesh.material.transparent=false;
         			mesh.material.color.set(0xffffff)
@@ -149,6 +224,7 @@ var UI={
             mesh.material.color.set(0xff0000)
             TweenLite.to(mesh.material,.7,{
             	opacity:0,
+                onUpdate:function(){camera.update=true;},
             	onComplete:function(){scene.remove(mesh)}
             });
         },
@@ -361,7 +437,7 @@ var UI={
                     initialPos={x:camera.position.x,y:camera.position.y,z:camera.position.z};
                     TweenLite.to(camera.position,2,{x:0,y:100,z:0,ease:Power2.easeOut});
                     TweenLite.to(camera.up,2,{x:0,y:0,z:-1,ease:Power2.easeOut});
-                    TweenLite.to(camera,2,{fov:13,ease:Power3.easeOut,onUpdate:function(){camera.updateProjectionMatrix()}});
+                    TweenLite.to(camera,2,{fov:13,ease:Power3.easeOut,onUpdate:function(){camera.updateProjectionMatrix();camera.update=true}});
                 }else{
                     //button style
                     span.style.cssText="background-image:url('img/planmasse40.png')";
@@ -371,7 +447,7 @@ var UI={
                         controls.enabled=true;controls.maxDistance=25;
                     }});
                     TweenLite.to(camera.up,2,{x:0,y:1,z:0,ease:Power2.easeInOut});
-                    TweenLite.to(camera,2,{fov:40,ease:Power3.easeInOut,onUpdate:function(){camera.updateProjectionMatrix()}});
+                    TweenLite.to(camera,2,{fov:40,ease:Power3.easeInOut,onUpdate:function(){camera.updateProjectionMatrix();camera.update=true}});
                 }
                 UI.viewMassPlan=!UI.viewMassPlan;
             }
@@ -408,7 +484,10 @@ var UI={
                     window.removeEventListener('mousemove',raycast,false);
                     window.removeEventListener('click',displayInfos,false);
                     window.removeEventListener('mousedown',checkMouseMove,true);
-                    if(INTERSECTED)INTERSECTED.material.color.set(0xffffff);
+                    if(INTERSECTED){
+                        INTERSECTED.material.color.set(0xffffff);
+                        camera.update=true
+                    }
                     INTERSECTED=null;
                     this.style.cssText='font:italic 33px Times New Roman;color:#fff;';
                     canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
@@ -436,9 +515,13 @@ var UI={
                         }
                         INTERSECTED=intersects[interest].object;
                         INTERSECTED.material.color.set(0xaaaaff);
+                        camera.update=true
                         canvasContainer.style.cursor='pointer';
                     }else{
-                        if(INTERSECTED)INTERSECTED.material.color.set(0xffffff);
+                        if(INTERSECTED){
+                            INTERSECTED.material.color.set(0xffffff);
+                            camera.update=true
+                        }
                         INTERSECTED=null;
                         canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
                     }
@@ -568,13 +651,15 @@ var UI={
 		            span.style.cssText+='background:blue;';
 		            setTimeout(function(){
 		                window.addEventListener('mousemove',PLU_raycast,false);
-		                window.addEventListener('click',PLU_displayInfos,false);
+                        window.addEventListener('click',PLU_displayInfos,false);
+                        window.addEventListener('touchstart',PLU_displayInfos,false);
 		                window.addEventListener('mousedown',checkMouseMove,true);
 		            },200)//so PLU animation finishes before
 		        }else{
 		            UI.PLU.PLUAreas.UA.OFF();UI.PLU.PLUAreas.UAa.OFF();UI.PLU.PLUAreas.UB.OFF();
 		            window.removeEventListener('mousemove',PLU_raycast,false);
-		            window.removeEventListener('click',PLU_displayInfos,false);
+                    window.removeEventListener('click',PLU_displayInfos,false);
+                    window.removeEventListener('touchstart',PLU_displayInfos,false);
 		            window.removeEventListener('mousedown',checkMouseMove,true);
 		            if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x555588);
 		            PLU_INTERSECTED=null;
@@ -605,8 +690,10 @@ var UI={
                         PLU_INTERSECTED=intersects[interest].object;
                         PLU_INTERSECTED.material.color.set(0x555588);
                         canvasContainer.style.cursor='pointer';
+                        camera.update=true
                     }else{
                         if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x333366);
+                        camera.update=true
                         PLU_INTERSECTED=null;
                         canvasContainer.style.cursor=camera instanceof THREE.PerspectiveCamera?'move':'auto';
                     }
@@ -668,6 +755,7 @@ var UI={
                 }
                 window.removeEventListener('mousemove',PLU_raycast,false);
                 window.removeEventListener('click',PLU_displayInfos,false);
+                window.removeEventListener('touchstart',PLU_displayInfos,false);
                 window.removeEventListener('mousedown',checkMouseMove,true);
                 span.style.cssText='font:normal 12px Arial;color:#fff';
                 if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x333366);
@@ -718,12 +806,12 @@ var UI={
                 mesh:UAMesh,
                 ON:function(){
                     scene.add(UAMesh);
-                    TweenLite.to(UAMesh.scale,.7,{y:1});
-                    TweenLite.to(UAMesh.material,.7,{opacity:.6});
+                    TweenLite.to(UAMesh.scale,.7,{y:1,onUpdate:function(){camera.update=true}});
+                    TweenLite.to(UAMesh.material,.7,{opacity:.6,onUpdate:function(){camera.update=true}});
                 },
                 OFF:function(){
-                    TweenLite.to(UAMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UAMesh)}});
-                    TweenLite.to(UAMesh.material,.7,{opacity:0});
+                    TweenLite.to(UAMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UAMesh)},onUpdate:function(){camera.update=true}});
+                    TweenLite.to(UAMesh.material,.7,{opacity:0,onUpdate:function(){camera.update=true}});
                 }
             };
             
@@ -756,12 +844,12 @@ var UI={
                 mesh:UAaMesh,
                 ON:function(){
                     scene.add(UAaMesh);
-                    TweenLite.to(UAaMesh.scale,.7,{y:1});
-                    TweenLite.to(UAaMesh.material,.7,{opacity:.6});
+                    TweenLite.to(UAaMesh.scale,.7,{y:1,onUpdate:function(){camera.update=true}});
+                    TweenLite.to(UAaMesh.material,.7,{opacity:.6,onUpdate:function(){camera.update=true}});
                 },
                 OFF:function(){
-                    TweenLite.to(UAaMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UAaMesh)}});
-                    TweenLite.to(UAaMesh.material,.7,{opacity:0});
+                    TweenLite.to(UAaMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UAaMesh)},onUpdate:function(){camera.update=true}});
+                    TweenLite.to(UAaMesh.material,.7,{opacity:0,onUpdate:function(){camera.update=true}});
                 }
             };
             
@@ -798,12 +886,12 @@ var UI={
                 mesh:UBMesh,
                 ON:function(){
                     scene.add(UBMesh);
-                    TweenLite.to(UBMesh.scale,.7,{y:1});
-                    TweenLite.to(UBMesh.material,.7,{opacity:.6});
+                    TweenLite.to(UBMesh.scale,.7,{y:1,onUpdate:function(){camera.update=true}});
+                    TweenLite.to(UBMesh.material,.7,{opacity:.6,onUpdate:function(){camera.update=true}});
                 },
                 OFF:function(){
-                    TweenLite.to(UBMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UBMesh)}});
-                    TweenLite.to(UBMesh.material,.7,{opacity:0});
+                    TweenLite.to(UBMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UBMesh)},onUpdate:function(){camera.update=true}});
+                    TweenLite.to(UBMesh.material,.7,{opacity:0,onUpdate:function(){camera.update=true}});
                 }
             };
             
