@@ -141,9 +141,9 @@ var UI={
 	        stepsContainer.appendChild(sliderContainer);
 	        sliderContainer.appendChild(slider);
 	        for(var i=0;i<stepsLength;i++){
-	            var dateFrom=document.createElement('p');dateFrom.innerHTML=steps[i].dateFrom;
-	            var dateTo=document.createElement('p');dateTo.innerHTML=steps[i].dateTo;
-	            dateFrom.className=dateTo.className='slider-stepDate';
+	            var from=document.createElement('p');from.innerHTML=steps[i].from;
+	            var to=document.createElement('p');to.innerHTML=steps[i].to;
+	            from.className=to.className='slider-stepDate';
 	            var title=document.createElement('p');title.innerHTML=steps[i].title;
 	            title.className='slider-stepTitle';
 	            var description=document.createElement('p');description.innerHTML=steps[i].description;
@@ -153,7 +153,7 @@ var UI={
 	            var infos=document.createElement('div');
 	            infos.className='slider-stepMain';
 	            infos.appendChild(title);infos.appendChild(description);
-	            step.appendChild(dateFrom);step.appendChild(infos);step.appendChild(dateTo);
+	            step.appendChild(from);step.appendChild(infos);step.appendChild(to);
 	            slider.appendChild(step);
 	        }
 	        var valign=document.createElement('span');
@@ -178,12 +178,12 @@ var UI={
                     UI.stepsUI.actualStep+=1;
                     var stepsContainerWidth=parseInt(getComputedStyle(stepsContainer,null).width)+10;
                     slider.style.left=-(stepsContainerWidth-10)*UI.stepsUI.actualStep+'px';
-                    buttonAfter.style.borderLeftColor=UI.stepsUI.actualStep==(steps.length-1)?'#555':'wheat';
-                    buttonBefore.style.borderRightColor=UI.stepsUI.actualStep==0?'#555':'wheat';
+                    buttonAfter.style.borderLeftColor=UI.stepsUI.actualStep===(steps.length-1)?'#555':'wheat';
+                    buttonBefore.style.borderRightColor=UI.stepsUI.actualStep===0?'#555':'wheat';
                     for(var i=0;i<data.meshes.length;i++){
                         var mesh=data.meshes[i];
-                        if(mesh.userData.steps[UI.stepsUI.actualStep]==true&&mesh.userData.steps[UI.stepsUI.actualStep-1]==false)UI.stepsUI.addMesh(mesh);
-                        if(mesh.userData.steps[UI.stepsUI.actualStep]==false&&mesh.userData.steps[UI.stepsUI.actualStep-1]==true)UI.stepsUI.removeMesh(mesh);
+                        if(mesh.userData.steps[UI.stepsUI.actualStep]===true&&mesh.userData.steps[UI.stepsUI.actualStep-1]===false)UI.stepsUI.addMesh(mesh);
+                        if(mesh.userData.steps[UI.stepsUI.actualStep]===false&&mesh.userData.steps[UI.stepsUI.actualStep-1]===true)UI.stepsUI.removeMesh(mesh,data);
                     }
                 }
             }
@@ -194,12 +194,12 @@ var UI={
                     UI.stepsUI.actualStep-=1;
                     var stepsContainerWidth=parseInt(getComputedStyle(stepsContainer,null).width)+10;
                     slider.style.left=-(stepsContainerWidth-10)*UI.stepsUI.actualStep+'px';
-                    buttonBefore.style.borderRightColor=UI.stepsUI.actualStep==0?'#555':'wheat';
-                    buttonAfter.style.borderLeftColor=UI.stepsUI.actualStep==(steps.length-1)?'#555':'wheat';
+                    buttonBefore.style.borderRightColor=UI.stepsUI.actualStep===0?'#555':'wheat';
+                    buttonAfter.style.borderLeftColor=UI.stepsUI.actualStep===(steps.length-1)?'#555':'wheat';
                     for(var i=0;i<data.meshes.length;i++){
                         var mesh=data.meshes[i];
-                        if(mesh.userData.steps[UI.stepsUI.actualStep]==true&&mesh.userData.steps[UI.stepsUI.actualStep+1]==false)UI.stepsUI.addMesh(mesh);
-                        if(mesh.userData.steps[UI.stepsUI.actualStep]==false&&mesh.userData.steps[UI.stepsUI.actualStep+1]==true)UI.stepsUI.removeMesh(mesh);
+                        if(mesh.userData.steps[UI.stepsUI.actualStep]===true&&mesh.userData.steps[UI.stepsUI.actualStep+1]===false)UI.stepsUI.addMesh(mesh);
+                        if(mesh.userData.steps[UI.stepsUI.actualStep]===false&&mesh.userData.steps[UI.stepsUI.actualStep+1]===true)UI.stepsUI.removeMesh(mesh,data);
                     }
                 }
             }
@@ -219,13 +219,16 @@ var UI={
             	}
             });
 	    },
-	    removeMesh:function(mesh){
+	    removeMesh:function(mesh,d){
             mesh.material.transparent=true;
             mesh.material.color.set(0xff0000)
             TweenLite.to(mesh.material,.7,{
             	opacity:0,
                 onUpdate:function(){camera.update=true;},
-            	onComplete:function(){scene.remove(mesh)}
+            	onComplete:function(){
+                    scene.remove(mesh);
+                    if(mesh.name==='commerces')scene.remove(d.meshes[11],d.meshes[12],d.meshes[13])
+                }
             });
         },
         resizeStepContainer:function(stepsContainer,slider){

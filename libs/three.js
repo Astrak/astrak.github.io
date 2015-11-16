@@ -31976,8 +31976,6 @@ THREE.LatheGeometry.prototype.constructor = THREE.LatheGeometry;
 
 THREE.PlaneGeometry = function ( width, height, widthSegments, heightSegments ) {
 
-	console.info( 'THREE.PlaneGeometry: Consider using THREE.PlaneBufferGeometry for lower memory footprint.' );
-
 	THREE.Geometry.call( this );
 
 	this.type = 'PlaneGeometry';
@@ -35132,4 +35130,37 @@ THREE.MorphBlendMesh.prototype.update = function ( delta ) {
 	}
 
 };
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
+THREE.SpriteCanvasMaterial = function ( parameters ) {
+
+	THREE.Material.call( this );
+
+	this.type = 'SpriteCanvasMaterial';
+
+	this.color = new THREE.Color( 0xffffff );
+	this.program = function ( context, color ) {};
+
+	this.setValues( parameters );
+
+};
+
+THREE.SpriteCanvasMaterial.prototype = Object.create( THREE.Material.prototype );
+THREE.SpriteCanvasMaterial.prototype.constructor = THREE.SpriteCanvasMaterial;
+
+THREE.SpriteCanvasMaterial.prototype.clone = function () {
+
+	var material = new THREE.SpriteCanvasMaterial();
+
+	material.copy( this );
+	material.color.copy( this.color );
+	material.program = this.program;
+
+	return material;
+
+};
+
+//
 

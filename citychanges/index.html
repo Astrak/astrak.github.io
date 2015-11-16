@@ -4,65 +4,90 @@
 	<title>CASTRES</title>
 	<link href='style.css' rel=stylesheet>
 	<!-- hide adress bar and prevent scaling on ios -->
-	<!--<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">-->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
 	<!-- enable fullscreen if added to home screen -->
 	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel='manifest' href='manifest.webapp'>
 </head>
-<body>
+<body onload='main()' style='position:relative;background:#666'>
+	<div id='canvas-container'></div>
 	<!-- libs -->
 	<script src='../libs/three.js'></script>
+	<script src='../libs/CanvasRenderer.js'></script>
+	<script src='../libs/Projector.js'></script>
+	<script src='../libs/controls/OrbitControls.js'></script>
 	<script src='../libs/controls/TrackballControls_modified.js'></script>
 	<!--<script src='../../three/examples/js/controls/FlyControls.js'></script>-->
 	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TweenMax.min.js'></script>
-	<script src='https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
-	<script src='https://cdnjs.cloudflare.com/ajax/libs/detectizr/2.1.0/detectizr.min.js'></script>
 	<!-- resources -->
 	<script src='scripts/resources.js'></script>
-	<script src='scripts/loadScreen.js'></script>
 	<script src='scripts/trees.js'></script>
 	<script src='scripts/cars.js'></script>
-	<script src='scripts/scene.js'></script>
-	<script src='scripts/UI.js'></script>
+	<script src='scripts/UI3.js'></script>
 	<script>
 
-		'use strict';
+		function main(){
 
-		initLoadScreen();
+			'use strict';
 
-		var scene, renderer, canvasContainer;
-		var camera, controls;
+			var canvasContainer=document.getElementById('canvas-container');
 
-	    var steps=[
-	            {
-	                dateFrom:'2011',
-	                dateTo:'JUN 2014',
-	                title:"Vente du terrain",
-	                description:"Déménagement de l'hôpital au Causse, vente du terrain puis désamiantage"
-	            },
-	            {
-	                dateFrom:'JUN 2014',
-	                dateTo:'JAN 2015',
-	                title:'Déconstruction et terrassement',
-	                description:'Déconstruction, terrassement et reliage de la voirie et des réseaux divers'
-	            },
-	            {
-	                dateFrom:'JAN 2015',
-	                dateTo:'JAN 2016',
-	                title:'Gros oeuvre',
-	                description:'Construction du parking, des résidences et commerces et aménagements du bâtiment Gambetta'
-	            },
-	        ];
+			//for experiment
+			canvasContainer.style.cssText=''+
+				'width:700px;height:300px;'+
+				'margin-left:'+(innerWidth-700)/2+'px;'+
+				'margin-top:'+(innerHeight-300)/2+'px;'+
+				'border-radius:10px;'+
+				'box-shadow:0px 10px 10px #444';
 
-		function initScene(data){		    
-		    SCENE.set(data);
-		    camera.lastPosition=new THREE.Vector3().copy(camera.position);
+		    var steps=[
+		            {
+		                from:'2011',
+		                to:'JUN 2014',
+		                title:"Vente du terrain",
+		                description:"Déménagement de l'hôpital au Causse, vente du terrain puis désamiantage"
+		            },
+		            {
+		                from:'JUN 2014',
+		                to:'JAN 2015',
+		                title:'Déconstruction et terrassement',
+		                description:'Déconstruction, terrassement et reliage de la voirie et des réseaux divers'
+		            },
+		            {
+		                from:'JAN 2015',
+		                to:'JAN 2016',
+		                title:'Gros oeuvre',
+		                description:'Construction du parking, des résidences et commerces et aménagements du bâtiment Gambetta'
+		            }
+		        ];
 
-		    UI.set(data);
+			window.landscape = new Landscape(resources,{
 
-		    animate();
+				//fTLL : allows textures above this number to be considered unnecessary if connexion is low
+				firstTexturesLoadLimit:7,//included
+				
+				//envmeshes : will merge those meshes for a lower view option (single draw call for them)
+				//  if ftll : the merged mesh will be visible first and the switch (will) occurs on texturescomplete
+				//	else : the merged mesh is available to speed up rendering
+				envMeshes:['gardens','routes','trottoirs','gambettacity'],//name or meshRef of env meshes to remove/ merge at untextured level.
+				
+				//will create sky with this texture
+				skyTexture:9,
 
-            if(Detectizr.device.type!=='desktop')UI.setLow(true);
-            else for(var i=0;i<CARS.streetMesh.length;i++)scene.add(CARS.streetMesh[i]);
+				container:canvasContainer,
+
+				//steps:steps,
+
+				//views:['massPlan','compass'],//+default aerial view
+
+				//informations:['infos','PLU'],
+
+				cars:cars,
+
+				trees:trees,
+
+				//developper:true >> to enable car paths, lights, trees and PLU modifications ?!
+			});
 
 		    //test to output an image
 		    //renderer.setPixelRatio(3);
@@ -78,27 +103,6 @@
 		    //a.innerHTML='click HERE !!!'
 		    //a.style.cssText='position:absolute;top:10px;left:100px;'
 		    //document.body.appendChild(a);
-		}
-
-		function animate(){
-		    window.requestAnimationFrame(animate);
-
-			controls.update();
-
-			if(!camera.position.equals(camera.lastPosition)||camera.update){
-			    //COMPASS
-			    if(UI.compass.updateCompass){
-			        UI.compass.compassCamera.position.copy(camera.position);
-			        UI.compass.compassCamera.position.normalize().multiplyScalar(2);
-			        UI.compass.compassCamera.up.copy(camera.up);
-			        UI.compass.compassCamera.lookAt(UI.compass.compassScene.position);
-			        UI.compass.compassRenderer.render(UI.compass.compassScene,UI.compass.compassCamera);
-			    }
-			    renderer.render(scene,camera);
-				camera.lastPosition.copy(camera.position)
-				camera.update=false;
-			}
-		        
 		}
 	</script>
 </body>

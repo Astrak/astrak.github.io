@@ -23,139 +23,128 @@ var resources = {
         'gambettacitytest299'   //17  minfilter : 
         ],
     geometries:[
-        'hospital',
+        'hospital',//0
         'hugo',
         'gambettacity19',
         'gambetta',
         'gambetta2',
-        'chantier',
+        'chantier',//5
         'chantier1',
         'commerces',
         'commercesdepth',
         'escalier',
-        'nouveau_sol',
+        'nouveau_sol',//10
         'residences',
         'RPA',
         'gardens2',
         'routes5',
-        'trottoirs4',
+        'trottoirs4',//15
         '4x4_shadow',
         'citadine_shadow',
         'break_shadow',
         'berline_shadow',
-        'kangoo_shadow',
+        'kangoo_shadow',//20
         'sportive_shadow',
         'camionette_shadow',
         'familiale_shadow'
         ],
     meshes:[//! dont change cars indices
         /*CARS*/
-        {
+        {//0
             geometry:16,
             map:15,
             material:linearFilteredSmoothLambertMaterial,
-            name:'4x4',
-            steps:[true,true,true]
+            name:'4x4'
         },
-        {
+        {//1
             geometry:17,
             map:15,
             material:linearFilteredSmoothLambertMaterial,
-            name:'citadine',
-            steps:[true,true,true]
+            name:'citadine'
         },
-        {
+        {//2
             geometry:18,
             map:15,
             material:linearFilteredSmoothLambertMaterial,
-            name:'break',
-            steps:[true,true,true]
+            name:'break'
         },
-        {
+        {//3
             geometry:19,
             map:15,
             material:linearFilteredSmoothLambertMaterial,
-            name:'berline',
-            steps:[true,true,true]
+            name:'berline'
         },
-        {
+        {//4
             geometry:20,
             map:15,
             material:linearFilteredSmoothLambertMaterial,
-            name:'kangoo',
-            steps:[true,true,true]
+            name:'kangoo'
         },
-        {
+        {//5
             geometry:21,
             map:15,
             material:linearFilteredSmoothLambertMaterial,
-            name:'sportive',
-            steps:[true,true,true]
+            name:'sportive'
         },
-        {
+        {//6
             geometry:22,
             map:15,
             material:linearFilteredSmoothLambertMaterial,
-            name:'camionette',
-            steps:[true,true,true]
+            name:'camionette'
         },
-        {
+        {//7
             geometry:23,
             map:15,
             material:linearFilteredSmoothLambertMaterial,
-            name:'familiale',
-            steps:[true,true,true]
+            name:'familiale'
         },//cars
-        {
+        {//8
             geometry:13,
             map:16,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
-            name:'gardens',
-            steps:[true,true,true]
+            name:'gardens'
         },
-        {
+        {//9
             geometry:14,
             map:13,//minFilter set to Linear in loadTextures
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
-            name:'routes',
-            steps:[true,true,true]
+            name:'routes'
         },
-        {
+        {//10
             geometry:15,
             map:14,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
-            name:'trottoirs',
-            steps:[true,true,true]
+            name:'trottoirs'
         },
-        {
+        {//11
             geometry:12,
             map:7,
             material:nearestFilteredFlatLambertMaterial,
             name:'RPA',
             steps:[false,false,true]
         },
-        {
+        {//12
             geometry:11,
             map:7,
             material:nearestFilteredFlatLambertMaterial,
             name:'residences',
             steps:[false,false,true]
         },
-        {
+        {//13
             geometry:10,
             map:7,
             material:nearestFilteredFlatLambertMaterial,
             name:'nouveau_sol',
             steps:[false,false,true]
         },
-        {
+        {//14
             geometry:9,
             map:7,
             material:nearestFilteredFlatLambertMaterial,
             name:'escalier',
             steps:[false,false,true]
         },
-        {
+        {//15
             geometry:8,
             map:undefined,
             material:new THREE.MeshLambertMaterial({
@@ -169,28 +158,28 @@ var resources = {
             name:'commercesdepth',
             steps:[false,false,true]
         },
-        {
+        {//16
             geometry:7,
             map:6,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'commerces',
             steps:[false,false,true]
         },
-        {
+        {//17
             geometry:5,
             map:5,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading}),
             name:'chantier',
-            steps:[true,true,true]
+            steps:[false,true,false]
         },
-        {
+        {//18
             geometry:6,
             map:4,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'chantier1',
             steps:[false,true,false]
         },
-        {
+        {//19
             geometry:0,
             map:0,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading,side:THREE.DoubleSide}),
@@ -198,33 +187,29 @@ var resources = {
             infos:{title:"Informations sur le bâtiment principal de l'hôpital",description:"Il a été bâti en 1982"},
             steps:[true,false,false]
         },
-        {
+        {//20
             geometry:3,
             map:2,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
-            name:'gambetta',
-            steps:[true,true,true]
+            name:'gambetta'
         },
-        {
+        {//21
             geometry:4,
             map:1,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
-            name:'gambetta2',
-            steps:[true,true,true]
+            name:'gambetta2'
         },
-        {
+        {//22
             geometry:1,
             map:3,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
-            name:'hugo',
-            steps:[true,true,true]
+            name:'hugo'
         },
-        {
+        {//23
             geometry:2,
             map:17,
             material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
-            name:'gambettacity',
-            steps:[true,true,true]
+            name:'gambettacity'
         }
         ]
 };

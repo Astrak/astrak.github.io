@@ -45,7 +45,7 @@
 
 		var scope = this;
 
-		var EPS = 0.000001;
+		var EPS = .1;
 
 		// Current position in spherical coordinate system.
 		var theta;

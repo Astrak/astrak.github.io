@@ -1,0 +1,7 @@
+{
+	"short_name": "Visitron",
+	"name": "The Visitron",
+	"start_url": "/index.html",
+	"display": "standalone",
+	"orientation": "landscape"
+}

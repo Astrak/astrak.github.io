@@ -1,26 +1,43 @@
-body {
-	margin:0;
-	overflow:hidden;
-	position:relative;
+button{
+  cursor:pointer;
+  outline:none;
 }
-p{
-	margin:0;
-	padding:0;
-	color:wheat;
+button:active{
+  outline:none;
 }
-.background{
+.container{
+  position:relative;
+  height:100%;width:100%;
+}
+canvas{
+	cursor:move;/*For IE ... & edge...*/
+	cursor:grab;
+	cursor:-webkit-grab;
+	cursor:-moz-grab;
+}
+canvas:active{
+	cursor:move;/*For IE ... & edge...*/
+	cursor:grabbing;
+	cursor:-webkit-grabbing;
+	cursor:-moz-grabbing;
+}
+
+/***LOADSCREEN***/
+.loader-wrapper{
   background:#355 url('img/leaves1400.png') no-repeat;
   background-size:100% 100%;
-  height:100%;
-  position:relative;width:100%;
+  position:absolute;
+  top:0;
   text-align:center;
 }
-#load-container{
+.loader-infos-wrapper{
   display:inline-block;
   vertical-align:middle;
   border-radius:2px;
   background:linear-gradient(-3deg ,#2b4d4D 49.9%, #2f5050 50%);
   height:340px;width:500px;
+  max-width:90%;
+  max-height:90%;
   position:relative;
   box-shadow:3px 3px 1px #344;
   text-align:center;
@@ -30,25 +47,38 @@ p{
   background: url('img/ill.png') no-repeat;
   background-position:center;
   background-size:100% 100%;
-  height:100%;width:100%;
+  height:100%;width:100%;top:0;
   position:absolute;
 }
-#load-contained{
+#loader-infos{
   display:inline-block;
   vertical-align:middle;
   color:#c70;
+  position:relative;
 }
 .valign{
   height:50%;display:inline-block;
 }
-.valign-panel{
-  height:calc(100% - 16px);display:inline-block;
+.loader-prompt-mobile{
+  width:50%;
+  margin-top:20px;
+  padding:20px;
+  background:chocolate;
 }
-.valign-sliderStep{
-  height:100%;display:inline-block;
-  vertical-align:middle;
+p{
+	margin:0;
+	padding:0;
+	color:wheat;
 }
-.svg{
+.info{
+  opacity:1;
+  font:normal 20px arial;
+  animation:append 500ms ease-out;
+  -webkit-animation:append 500ms ease-out;
+  padding:8px;margin:0px;
+  color:wheat;
+}
+.loader-svg{
   position:relative;
   border-radius:24px;
 }
@@ -59,14 +89,56 @@ p{
   -webkit-animation:spin-load 1.9s linear infinite;
   animation:spin-load 1.9s linear infinite;
 }
-.info{
+
+/*** UI ***/
+.UI-button{
+  background:darkslategrey;
+  border:none;
+  position:absolute;
+  top:0;left:0;
+  padding:5px;
+}
+
+.UI-container{
+  position:absolute;
+  top:0;
+  height:100%;width:100%;
+  text-align:center;
+}
+
+.UI-greyScreen{
+  position:absolute;
+  top:0;
+  opacity:.3;
+  background:#000;
+  height:100%; width:100%;
+  z-index:1;
+}
+
+.UI-displayDiv{
+  display:inline-block;
+  vertical-align:middle;
+  background:darkslategrey;
+  max-width:90%;
+  max-height:80%;
   opacity:1;
-  font:normal 20px arial;
-  animation:append 500ms ease-out;
-  -webkit-animation:append 500ms ease-out;
-  padding:8px;margin:0px;
+  position:relative;
+  z-index:2;
+}
+
+.UI-params-buttons{
+  padding:10px;
+  text-align:center;
+  width:150px;
+  display:block;
+  background:none;
+  border:none;
   color:wheat;
 }
+.UI-params-buttons:active{
+  background:chocolate;
+}
+
 @-webkit-keyframes append{
   0%{font-size:0px;opacity:0;}
   50%{font-size:20px;opacity:.2}
@@ -85,7 +157,21 @@ p{
   0% {stroke-dashoffset:250.8}
   100% {stroke-dashoffset:0}
 }
+
+
+/*
+
+.valign-panel{
+  height:calc(100% - 16px);display:inline-block;
+}
+.valign-sliderStep{
+  height:100%;display:inline-block;
+  vertical-align:middle;
+}*/
+
+
 /*UI*/
+/*
 .panel-title{
 	font:normal 12px Arial;
 	display:block;
@@ -212,8 +298,11 @@ button.fullscreen{
 	border-top:solid 10px white;
 	border-right:solid 10px transparent;
 	border-left:solid 10px transparent;
-}
+}*/
+
+
 /*slider*/
+/*
 #gambetta-sliderContainer{
 	height:100%;width:100%;
 	display:inline-block;
@@ -274,24 +363,11 @@ button.fullscreen{
 }
 .slider-stepDescription{
 	font:normal 13px Arial;
-}
-/*CPUSAVER*/
-.greyScreen{
-	width:100%;height:100%;
-	background:rgba(0,0,0,.2);
-	position:absolute;top:0;left:0;
-	text-align:center;
-}
-.greyScreen div{
-	width:200px;height:60px;
-	font:normal 12px Arial;
-	padding:20px 10px 0 10px;
-	background:#233;border-radius:2px;
-	position:absolute;
-	top:calc(50% - 30px);
-	left:calc(50% - 100px);
-}
+}*/
+
+
 /*INFO DISPLAYER*/
+/*
 .greyScreen div.display-infos{
 	width:500px;height:340px;
 	opacity:1;
@@ -330,6 +406,9 @@ button.fullscreen{
 	0%{opacity:0;}
 	100%{opacity:1;}
 }
+*/
+
+/*
 @media(min-width:1140px){
 	#UIContainer{
 		height:96px;
@@ -350,5 +429,5 @@ button.fullscreen{
 		height:81px;
 		width:calc(25% - 10px);
 	}
-}
+}*/
 

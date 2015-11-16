@@ -1,7 +1,20 @@
-'use strict';
+function Scene(container){
 
-var SCENE={
-    set:function(data){
+    'use strict';
+
+    var that=this;
+
+    this.width=container?container.style.width:window.innerWidth;
+    this.height=container?container.style.height:window.innerHeight;
+    this.container=container?container:undefined;
+
+
+
+    var _this=this;
+
+    var scene=new THREE.Scene();
+
+    this.set=function(data){
     	this.removeLoadScreen();
 
         scene=new THREE.Scene();
@@ -34,8 +47,8 @@ var SCENE={
 		this.createSky(32,data);
 			
 		//this.addLensFlares(light,camera);
-    },
-    setView:function(){
+    };
+    this.setView=function(){
         camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.4,150);
         camera.position.set(10,12,20);
         camera.update=false;
@@ -49,8 +62,8 @@ var SCENE={
 		
         window.addEventListener('resize',this.updateWH,false);
         this.updateWH();
-    },
-    updateWH:function(){
+    };
+    this.updateWH=function(){
         var height=window.innerHeight;
         var width=window.innerWidth;
         canvasContainer.style.height=height+'px';
@@ -69,8 +82,8 @@ var SCENE={
         controls.handleResize();
         camera.update=true;
         var UIContainer=document.querySelector('#UIContainer');
-    },
-    setLighting:function(){
+    };
+    this.setLighting=function(){
         var ambient=new THREE.AmbientLight(0x888888);
         var light=new THREE.DirectionalLight(0xffffff,1.3);
         light.position.set(0,35,20);
@@ -85,8 +98,8 @@ var SCENE={
     	light.shadowCameraBottom=light.shadowCameraLeft=-25;
     	light.shadowMapWidth=light.shadowMapHeight=2048;
     	light.shadowDarkness=.5;
-    },
-    createSky:function(skyWidth,data){
+    };
+    this.createSky=function(skyWidth,data){
         var _skyWidth=skyWidth!==undefined?skyWidth:47;
         var sky=new THREE.Mesh(
             new THREE.CylinderGeometry(_skyWidth,_skyWidth,25,60,1,true),
@@ -96,8 +109,8 @@ var SCENE={
         sky.scale.x=-1;
         scene.add(sky);
         SCENE.sky=sky;
-    },
-    addLensFlares:function(source,camera){
+    };
+    this.addLensFlares=function(source,camera){
 		var textureFlare0 = data.textures[10],
 			textureFlare2 = data.textures[11],
 			textureFlare3 = data.textures[12],
@@ -125,11 +138,11 @@ var SCENE={
     			flare.rotation=0;
     		}
     	}
-	},
-	removeLoadScreen:function(){
+	};
+	this.removeLoadScreen=function(){
 	    document.body.style.overflowY='hidden';
 	    var loadScreen=document.querySelector('.background');
 	    document.body.removeChild(loadScreen);
 	    canvasContainer=document.querySelector('.canvas-container');
     }
-};
+}
