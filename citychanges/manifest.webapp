@@ -1,7 +1,24 @@
 {
 	"short_name": "Visitron",
+
 	"name": "The Visitron",
-	"start_url": "http://astrak.github.io/citychanges/index.html",
-	"display": "standalone",
-	"orientation": "landscape"
+
+	"start_url": "index.html",
+
+	"display": "fullscreen",
+
+	"orientation": "landscape",
+
+	"theme_color":"darkslategrey",
+
+	"background_color":"chocolate",
+
+	//FF
+	"launch_path": "/index.html",
+	"developper":{
+		"name":"Atrahasis",
+		"url":"http://astrak.github.io"
+	},
+	"chrome":{"navigation":false},
+	"fullscreen":true
 }
