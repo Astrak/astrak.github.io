@@ -1,7 +1,7 @@
 {
 	"short_name": "Visitron",
 	"name": "The Visitron",
-	"start_url": "/citychanges/index.html",
+	"start_url": "http://astrak.github.io/citychanges/index.html",
 	"display": "standalone",
 	"orientation": "landscape"
 }
