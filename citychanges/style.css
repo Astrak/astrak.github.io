@@ -8,6 +8,7 @@ button:active{
 .container{
   position:relative;
   height:100%;width:100%;
+  overflow:hidden;
 }
 canvas{
 	cursor:move;/*For IE ... & edge...*/
@@ -99,43 +100,28 @@ p{
   padding:5px;
 }
 
-.UI-container{
-  position:absolute;
-  top:0;
-  height:100%;width:100%;
-  text-align:center;
-}
-
-.UI-greyScreen{
-  position:absolute;
-  top:0;
-  opacity:.3;
-  background:#000;
-  height:100%; width:100%;
-  z-index:1;
-}
-
-.UI-displayDiv{
-  display:inline-block;
-  vertical-align:middle;
+.UI-menu{
   background:darkslategrey;
-  max-width:90%;
-  max-height:80%;
-  opacity:1;
-  position:relative;
-  z-index:2;
+  max-width:40%;
+  height:100%;
+  display:inline-block;
+  position:absolute;
+  left:0;
+  margin-left:-200px;
+  transition:all 200ms ease;
 }
 
-.UI-params-buttons{
-  padding:10px;
-  text-align:center;
-  width:150px;
+.UI-menu-buttons{
+  padding:15px 30px;
+  width:100%;
+  font-size:20px;
+  text-align:left;
   display:block;
   background:none;
   border:none;
   color:wheat;
 }
-.UI-params-buttons:active{
+.UI-menu-buttons:active{
   background:chocolate;
 }
 

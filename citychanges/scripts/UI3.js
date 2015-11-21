@@ -100,7 +100,7 @@ function Landscape ( data, params ) {
 
     		1. loads all geometries
     		2. creates all meshes listed
-    		3. if fTLL defined && fTLL load time > 5 seconds
+    		3. if fTLL defined && fTLL load time > 5 seconds or isMobile
 
 	    			prompts to 
 	    			- view now & continue loading in background
@@ -272,7 +272,7 @@ function Landscape ( data, params ) {
 
 			if ( options.hasOwnProperty( 'firstTexturesLoadLimit' ) && timer ) delay = Date.now() - timer;
 
-			if ( delay > 5000 ) {
+			if ( delay > 5000 || isMobile ) {
 				//go.className = '';
 				go.style.paddingRight=go.style.paddingLeft='50px';
 				go.innerHTML = fTLL + " textures sur " + tL + " ont pu être chargées.<br>"+
@@ -682,29 +682,14 @@ function Landscape ( data, params ) {
 
     	var bGCN = 'UI-button';//button generic classname
 
-    	var UIContainer = document.createElement( 'div' );
-    	UIContainer.className = 'UI-container';
-
-    	var greyScreen = document.createElement( 'div' );
-    	greyScreen.className = 'UI-greyScreen';
-    	UIContainer.appendChild( greyScreen );
-
-    	var valign = document.createElement( 'span' );
-    	valign.className = 'valign';
-    	UIContainer.appendChild( valign );
-
-    	var displayDiv = document.createElement( 'div' );
-    	displayDiv.className = 'UI-displayDiv';
-    	UIContainer.appendChild( displayDiv );
-
     	this.set = function () {
 
-    		setParameters();
+    		setParametersMenu();
     		setFullscreen();
 
     	};
 
-    	function setParameters () {
+    	function setParametersMenu () {
 
     		//bottom left button
     		var b = document.createElement( 'button' );
@@ -746,34 +731,40 @@ function Landscape ( data, params ) {
   					"</path>"+
     			"</svg>";
 
-    		b.addEventListener( 'click', displayParams, false );
+    		b.addEventListener( 'click', displayMenu, false );
 
-    		/**params window**/
+    		/**menu tab**/
 
-    		var back = document.createElement( 'button' ),
-    			display = document.createElement( 'button' ),
+    		//1. create div
+	    	var menuDiv = document.createElement( 'div' );
+	    	menuDiv.className = 'UI-menu';
+	    	container.appendChild( menuDiv );
+
+	    	//2. add buttons
+    		var display = document.createElement( 'button' ),
     			edit = document.createElement( 'button' ),
     			about = document.createElement( 'button' );
-    		back.className = display.className = edit.className = about.className = 'UI-params-buttons';
-    		back.innerHTML = '&#8678';
+    		display.className = edit.className = about.className = 'UI-menu-buttons';
     		display.innerHTML = 'AFFICHAGE';
     		edit.innerHTML = 'EDITION';
     		about.innerHTML = 'À PROPOS';
-    		back.addEventListener( 'click', removeParams, false );
+			menuDiv.appendChild( display );
+			menuDiv.appendChild( edit );
+			menuDiv.appendChild( about );  
 
-    		function displayParams () {
-    			displayDiv.appendChild( back );
-    			displayDiv.appendChild( display );
-    			displayDiv.appendChild( edit );
-    			displayDiv.appendChild( about );    			
+			//3. events
 
-    			container.appendChild( UIContainer );
-    			greyScreen.addEventListener( 'click', removeParams, false );
+    		function displayMenu () {			
+    			//compute every buttons'width and get the max value
+    			menuDiv.style.marginLeft = '0px';
+    			renderer.domElement.addEventListener( 'mousedown', hideMenu, false );
+    			renderer.domElement.addEventListener( 'touchstart', hideMenu, false );
     		}
 
-    		function removeParams () {
-    			container.removeChild( UIContainer );
-    			greyScreen.removeEventListener( 'click', removeParams, false );
+    		function hideMenu () {
+    			menuDiv.style.marginLeft = '-200px'; // = owns width
+    			renderer.domElement.removeEventListener( 'mousedown', removeParams, false );
+    			renderer.domElement.removeEventListener( 'touchstart', removeParams, false );
     		}
     	}
 

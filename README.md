@@ -1,5 +1,4 @@
-# astrak.github.io
-Showcase
+# Atrahasis' portfolio
 
 This repository gathers my WebGL projects and serves them on a github page. 
 
