@@ -762,30 +762,33 @@ function Landscape ( data, params ) {
     			renderer.domElement.addEventListener( 'mousedown', hideMenu, false );
     			renderer.domElement.addEventListener( 'touchstart', hideMenu, false );
     			menuDiv.addEventListener( 'touchmove', onTouchMove, false );
-    			menuDiv.addEventListener( 'touchstart', onTouchMove, false );
-    			menuDiv.addEventListener( 'touchend', onTouchMove, false );
+    			menuDiv.addEventListener( 'touchstart', onTouchStart, false );
+    			menuDiv.addEventListener( 'touchend', onTouchEnd, false );
     		}
 
     		function hideMenu () {
     			menuDiv.style.marginLeft = '-200px'; // = owns width
     			renderer.domElement.removeEventListener( 'mousedown', hideMenu, false );
     			renderer.domElement.removeEventListener( 'touchstart', hideMenu, false );
-    			menuDiv.removeEventListener( 'touchmove', onTouchMove, false );
-    			menuDiv.removeEventListener( 'touchstart', onTouchMove, false );
-    			menuDiv.removeEventListener( 'touchend', onTouchMove, false );
+    			menuDiv.removeEventListener( 'touchmove',  onTouchMove, false );
+    			menuDiv.removeEventListener( 'touchstart', onTouchStart, false );
+    			menuDiv.removeEventListener( 'touchend', onTouchEnd, false );
     		}
 
     		function onTouchStart ( e ) {
-    			startX = e.changedTouches[ 0 ].pageX;
+    			startX = e.pageX;
+    			e.preventDefault();
     		}
 
     		function onTouchEnd ( e ) {
     			dist <= -100 ? hideMenu() : menuDiv.style.marginLeft = '0px';
+    			e.preventDefault();
     		}
 
     		function onTouchMove ( e ) {
-    			dist = e.changedTouches[ 0 ].pageX - startX;
+    			dist = e.pageX - startX;
     			menuDiv.style.marginLeft = dist < 0 ? ( - dist ) + 'px' : '0px';
+    			e.preventDefault();//
     		}
 		}
 
