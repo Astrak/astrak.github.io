@@ -776,19 +776,16 @@ function Landscape ( data, params ) {
     		}
 
     		function onTouchStart ( e ) {
-    			startX = e.pageX;
-    			e.preventDefault();
+    			startX = e.changedTouches[0].pageX;
     		}
 
-    		function onTouchEnd ( e ) {
+    		function onTouchEnd () {
     			dist <= -100 ? hideMenu() : menuDiv.style.marginLeft = '0px';
-    			e.preventDefault();
     		}
 
     		function onTouchMove ( e ) {
-    			dist = e.pageX - startX;
+    			dist = e.changedTouches[0].pageX - startX;
     			menuDiv.style.marginLeft = dist < 0 ? ( - dist ) + 'px' : '0px';
-    			e.preventDefault();//
     		}
 		}
 
