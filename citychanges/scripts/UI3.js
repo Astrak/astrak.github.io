@@ -785,7 +785,7 @@ function Landscape ( data, params ) {
 
     		function onTouchMove ( e ) {
     			dist = e.changedTouches[0].pageX - startX;
-    			menuDiv.style.marginLeft = dist < 0 ? ( - dist ) + 'px' : '0px';
+    			menuDiv.style.marginLeft = dist < 0 ? dist + 'px' : '0px';
     		}
 		}
 
