@@ -754,71 +754,39 @@ function Landscape ( data, params ) {
 
 			//3. events
 
-			swipedetect( menuDiv, function ( dir ) {
-				if ( dir === 'left' ) hideMenu();
-			});
+			var startX, dist;
 
     		function displayMenu () {			
     			//compute every buttons'width and get the max value
     			menuDiv.style.marginLeft = '0px';
     			renderer.domElement.addEventListener( 'mousedown', hideMenu, false );
     			renderer.domElement.addEventListener( 'touchstart', hideMenu, false );
+    			menuDiv.addEventListener( 'touchmove', onTouchMove, false );
+    			menuDiv.addEventListener( 'touchstart', onTouchMove, false );
+    			menuDiv.addEventListener( 'touchend', onTouchMove, false );
     		}
 
     		function hideMenu () {
     			menuDiv.style.marginLeft = '-200px'; // = owns width
     			renderer.domElement.removeEventListener( 'mousedown', hideMenu, false );
     			renderer.domElement.removeEventListener( 'touchstart', hideMenu, false );
+    			menuDiv.removeEventListener( 'touchmove', onTouchMove, false );
+    			menuDiv.removeEventListener( 'touchstart', onTouchMove, false );
+    			menuDiv.removeEventListener( 'touchend', onTouchMove, false );
     		}
 
-    		// handles swipe on mobile
+    		function onTouchStart ( e ) {
+    			startX = e.changedTouches[ 0 ].pageX;
+    		}
 
-			function swipedetect(el, callback){
-			  	//from javascriptkit.com
-			    var touchsurface = el,
-				    swipedir,
-				    startX,
-				    startY,
-				    distX,
-				    distY,
-				    threshold = 150, //required min distance traveled to be considered swipe
-				    restraint = 100, // maximum distance allowed at the same time in perpendicular direction
-				    allowedTime = 300, // maximum time allowed to travel that distance
-				    elapsedTime,
-				    startTime,
-				    handleswipe = callback || function(swipedir){};
-			  
-			    touchsurface.addEventListener('touchstart', function(e){
-			        var touchobj = e.changedTouches[0]
-			        swipedir = 'none'
-			        dist = 0
-			        startX = touchobj.pageX
-			        startY = touchobj.pageY
-			        startTime = new Date().getTime() // record time when finger first makes contact with surface
-			        e.preventDefault()
-			    }, false)
-			  
-			    touchsurface.addEventListener('touchmove', function(e){
-			        e.preventDefault() // prevent scrolling when inside DIV
-			    }, false)
-			  
-			    touchsurface.addEventListener('touchend', function(e){
-			        var touchobj = e.changedTouches[0]
-			        distX = touchobj.pageX - startX // get horizontal dist traveled by finger while in contact with surface
-			        distY = touchobj.pageY - startY // get vertical dist traveled by finger while in contact with surface
-			        elapsedTime = new Date().getTime() - startTime // get time elapsed
-			        if (elapsedTime <= allowedTime){ // first condition for awipe met
-			            if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint){ // 2nd condition for horizontal swipe met
-			                swipedir = (distX < 0)? 'left' : 'right' // if dist traveled is negative, it indicates left swipe
-			            }
-			            else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint){ // 2nd condition for vertical swipe met
-			                swipedir = (distY < 0)? 'up' : 'down' // if dist traveled is negative, it indicates up swipe
-			            }
-			        }
-			        handleswipe(swipedir)
-			        e.preventDefault()
-			    }, false)
-			}
+    		function onTouchEnd ( e ) {
+    			dist <= -100 ? hideMenu() : menuDiv.style.marginLeft = '0px';
+    		}
+
+    		function onTouchMove ( e ) {
+    			dist = e.changedTouches[ 0 ].pageX - startX;
+    			menuDiv.style.marginLeft = dist < 0 ? ( - dist ) + 'px' : '0px';
+    		}
 		}
 
     	function setFullscreen () {
