@@ -768,6 +768,7 @@ function Landscape ( data, params ) {
     		function displayMenu () {			
     			//compute every buttons'width and get the max value
     			menuDiv.style.marginLeft = '0px';
+    			menuDiv.focus();
     			renderer.domElement.addEventListener( 'mousedown', hideMenu, false );
     			renderer.domElement.addEventListener( 'touchstart', hideMenu, false );
     			menuDiv.addEventListener( 'touchmove', onTouchMove, false );
