@@ -746,16 +746,24 @@ function Landscape ( data, params ) {
 	    	//2. add buttons
     		var display = document.createElement( 'button' ),
     			edit = document.createElement( 'button' ),
+    			install = document.createElement( 'button' ),
     			about = document.createElement( 'button' );
-    		display.className = edit.className = about.className = 'UI-menu-buttons';
+    		display.className = edit.className = install.className = about.className = 'UI-menu-buttons';
     		display.innerHTML = 'AFFICHAGE';
     		edit.innerHTML = 'EDITION';
+    		install.innerHTML = 'APPLI MOBILE';
     		about.innerHTML = 'À PROPOS';
 			menuDiv.appendChild( display );
 			menuDiv.appendChild( edit );
+    		menuDiv.appendChild( install );
 			menuDiv.appendChild( about );  
 
-			//3. events
+			//3. deduce style
+			var l = parseInt( getComputedStyle( menuDiv, null).width );
+			menuDiv.style.marginLeft = - l + 'px';
+  			setTimeout( function () { menuDiv.style.transition = 'margin-left 200ms ease' }, 0 );
+
+			//4. events
 
     		function displayMenu () {			
     			//compute every buttons'width and get the max value
@@ -768,7 +776,7 @@ function Landscape ( data, params ) {
     		}
 
     		function hideMenu () {
-    			menuDiv.style.marginLeft = '-200px'; // = owns width
+    			menuDiv.style.marginLeft = - l + 'px'; // = owns width
     			renderer.domElement.removeEventListener( 'mousedown', hideMenu, false );
     			renderer.domElement.removeEventListener( 'touchstart', hideMenu, false );
     			menuDiv.removeEventListener( 'touchmove',  onTouchMove, false );
@@ -780,7 +788,7 @@ function Landscape ( data, params ) {
 			var startX, dist;
 
     		function onTouchStart ( e ) {
-    			startX = e.changedTouches[0].pageX;
+    			startX = e.changedTouches[ 0 ].pageX;
     		}
 
     		function onTouchEnd () {
@@ -788,7 +796,7 @@ function Landscape ( data, params ) {
     		}
 
     		function onTouchMove ( e ) {
-    			dist = e.changedTouches[0].pageX - startX;
+    			dist = e.changedTouches[ 0 ].pageX - startX;
     			menuDiv.style.marginLeft = Math.min( dist, 0 ) + 'px';
     		}
 		}

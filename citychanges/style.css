@@ -107,8 +107,6 @@ p{
   position:absolute;
   left:0;
   z-index:1;
-  margin-left:-200px;
-  transition:all 200ms ease;
 }
 
 .UI-menu-buttons{
