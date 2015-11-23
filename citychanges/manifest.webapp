@@ -1,9 +1,9 @@
 //background_color and theme_color useless ?
 //how to do it on FF ? checking ios..
 {
-	"short_name": "Visitron",
+	"short_name": "Castres",
 
-	"name": "The Visitron",
+	"name": "Castres",
 
 	"start_url": "index.html",
 

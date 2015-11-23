@@ -684,9 +684,12 @@ function Landscape ( data, params ) {
 
     	this.set = function () {
 
+    		//buttons
     		setParametersMenu();
-    		setFullscreen();
+    		if ( options.hasOwnProperty( 'fullscreen' ) && options.fullscreen ) setFullscreen();
 
+    		//steps UI
+    		if ( options.hasOwnProperty( 'steps' ) && options.steps.hasOwnProperty( 'length' ) ) setSteps();
     	};
 
     	function setParametersMenu () {
@@ -754,8 +757,6 @@ function Landscape ( data, params ) {
 
 			//3. events
 
-			var startX, dist;
-
     		function displayMenu () {			
     			//compute every buttons'width and get the max value
     			menuDiv.style.marginLeft = '0px';
@@ -775,17 +776,20 @@ function Landscape ( data, params ) {
     			menuDiv.removeEventListener( 'touchend', onTouchEnd, false );
     		}
 
+    		//swipe detection on menuDiv
+			var startX, dist;
+
     		function onTouchStart ( e ) {
     			startX = e.changedTouches[0].pageX;
     		}
 
     		function onTouchEnd () {
-    			dist <= -100 ? hideMenu() : menuDiv.style.marginLeft = '0px';
+    			dist <= -50 ? hideMenu() : menuDiv.style.marginLeft = '0px';
     		}
 
     		function onTouchMove ( e ) {
     			dist = e.changedTouches[0].pageX - startX;
-    			menuDiv.style.marginLeft = dist < 0 ? dist + 'px' : '0px';
+    			menuDiv.style.marginLeft = Math.min( dist, 0 ) + 'px';
     		}
 		}
 
@@ -863,6 +867,142 @@ function Landscape ( data, params ) {
 		    function fullscreenChange () {
 		    	if ( ! ( document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement ) ) exitFullscreen();
 		    }
+    	}
+
+    	function setSteps () {
+
+    		var currentStep = 0,
+    			s = options.steps,
+    			sL = s.length;
+
+    		var valign = document.createElement( 'span' ),
+    			slC = document.createElement( 'div' ),
+    			sl = document.createElement( 'div' ),
+    			bB = document.createElement( 'button' ),
+    			bA = document.createElement( 'button' );
+
+    		slC.id = 'UI-slider-container';
+    		sl.id = 'UI-slider';
+    		valign.className = 'UI-slider-valign';
+    		bB.className = bA.className = 'UI-slider-buttons';
+    		bB.id = 'UI-button-before';
+    		bA.id = 'UI-button-after';
+
+    		sl.appendChild( valign ); 
+    		slC.appendChild( sl );
+    		container.appendChild( slC );
+    		container.appendChild( bA );
+    		container.appendChild( bB );
+
+
+    		bB.addEventListener( 'click', oneStepBefore, false );
+    		bA.addEventListener( 'click', oneStepBeyond, false );
+
+    		bB.style.display = 'none';
+
+			/*for(var i=0;i<stepsLength;i++){
+	            var from=document.createElement('p');from.innerHTML=steps[i].from;
+	            var to=document.createElement('p');to.innerHTML=steps[i].to;
+	            from.className=to.className='slider-stepDate';
+	            var title=document.createElement('p');title.innerHTML=steps[i].title;
+	            title.className='slider-stepTitle';
+	            var description=document.createElement('p');description.innerHTML=steps[i].description;
+	            description.className='slider-stepDescription';
+	            var step=document.createElement('div');
+	            step.className='slider-step';
+	            var infos=document.createElement('div');
+	            infos.className='slider-stepMain';
+	            infos.appendChild(title);infos.appendChild(description);
+	            step.appendChild(from);step.appendChild(infos);step.appendChild(to);
+	            slider.appendChild(step);
+	        }*/
+		        
+
+            function oneStepBeyond ( e ) {
+                e.stopPropagation();
+
+                if ( currentStep < ( sL - 1 ) ) {
+                    currentStep++;
+                    //var stepsContainerWidth=parseInt(getComputedStyle(stepsContainer,null).width)+10;
+                    //slider.style.left=-(stepsContainerWidth-10)*UI.stepsUI.currentStep+'px';
+                    bA.style.display = currentStep === ( sL - 1 ) ? 'none' : 'block';
+                    bB.style.display = currentStep === 0 ? 'none' : 'block';
+                    for ( var i = 0 ; i < ctx.meshes.main.length ; i++ ) {
+                        var m = ctx.meshes.main[ i ];
+                        if ( m.userData.hasOwnProperty( 'steps' ) && m.userData.steps[ currentStep ] === true && m.userData.steps[ currentStep - 1 ] === false ) addMesh( m );
+                        if ( m.userData.hasOwnProperty( 'steps' ) && m.userData.steps[ currentStep ] === false && m.userData.steps[ currentStep - 1 ] === true ) removeMesh( m, data );
+                    }
+                    if ( ! webgl ) renderer.render( scene, camera );
+                }
+            }
+
+            function oneStepBefore ( e ) {
+                e.stopPropagation();
+
+                if ( currentStep > 0){
+                    currentStep--;
+                    //ar stepsContainerWidth=parseInt(getComputedStyle(stepsContainer,null).width)+10;
+                    //lider.style.left=-(stepsContainerWidth-10)*UI.stepsUI.currentStep+'px';
+                    bB.style.display = currentStep === 0 ? 'none' : 'block';
+                    bA.style.display = currentStep === ( sL - 1 ) ? 'none' : 'block';
+                    for ( var i = 0 ; i < ctx.meshes.main.length ; i++ ) {
+                        var m = ctx.meshes.main[ i ];
+                        if ( m.userData.hasOwnProperty( 'steps' ) && m.userData.steps[ currentStep ] === true && m.userData.steps[ currentStep + 1 ] === false ) addMesh( m );
+                        if ( m.userData.hasOwnProperty( 'steps' ) && m.userData.steps[ currentStep ] === false && m.userData.steps[ currentStep + 1 ] === true ) removeMesh( m );
+                    }
+                    if ( ! webgl ) renderer.render( scene, camera );
+                }
+            }
+
+		    function addMesh ( mesh ) {
+	            if ( mesh.material.depthTest == false ) return;//dont add commercesdepth now
+	            if ( webgl ) {
+		            scene.add( mesh );
+		            if ( mesh.name !== 'chantier' ) {
+			            mesh.material.transparent = true;
+			            mesh.material.opacity = 0;
+			            mesh.material.color.set( 0x00ff00 );
+			            TweenLite.to( mesh.material, .7, {
+			            	opacity : 1,
+			                onUpdate : function () { camera.update = true;},
+			            	onComplete : function () {
+			        			mesh.material.transparent = false;
+			        			mesh.material.color.set( 0xffffff );
+			            	}
+			            });
+		            }
+	            } else {
+	            	scene.add( mesh );
+	            }
+		    }
+
+		    function removeMesh ( mesh ) {
+		    	if ( webgl ) {
+			    	if ( mesh.name !== 'chantier' ){
+			            mesh.material.transparent = true;
+			            mesh.material.color.set( 0xff0000 )
+			            TweenLite.to( mesh.material, .7, {
+			            	opacity : 0,
+			                onUpdate : function () { camera.update = true;},
+			            	onComplete : function () {
+			                    scene.remove( mesh );
+			                    if ( mesh.name === 'commerces' ) {
+			                    	var m = ctx.meshes.main;
+			                    	for ( var  i = 0 ; i < m.length ; i++ ) {
+			                    		if ( m[ i ].name === 'RPA' || m[ i ].name === 'residences' || m[ i ].name === 'nouveau_sol' ) scene.remove( m[ i ] );
+			                    	}
+			                    }
+			                }
+			            });
+			    	} else {
+			    		setTimeout( function () {
+			    			scene.remove( mesh );
+			    		}, 700 );
+			    	}
+		    	} else {
+		    		scene.remove( mesh );
+		    	}
+	        }
     	}
     }
 

@@ -106,12 +106,13 @@ p{
   display:inline-block;
   position:absolute;
   left:0;
+  z-index:1;
   margin-left:-200px;
   transition:all 200ms ease;
 }
 
 .UI-menu-buttons{
-  padding:15px 30px;
+  padding:15px 40px;
   width:100%;
   font-size:20px;
   text-align:left;
@@ -122,6 +123,60 @@ p{
 }
 .UI-menu-buttons:active{
   background:chocolate;
+}
+
+/*slider*/
+#UI-sliderContainer{
+	overflow:hidden;
+	position:absolute;
+	bottom:0;
+	background:#000;
+	opacity:.8;
+	width:70%;
+}
+#UI-slider{
+	height:100%;
+	vertical-align:middle;
+	width:300%;
+	display:inline-block;
+	position:absolute;
+	left:0px;
+	transition:left 800ms ease;
+}
+.UI-slider-valign{
+	height:100%;display:inline-block;
+	vertical-align:middle;
+}
+.UI-slider-buttons{
+	position:absolute;
+	background:darkslategrey;
+	top:50%;
+	height:100px;
+	width:43px;
+	margin-top:-50px;
+	border:none;
+}
+#UI-button-before{
+	left:0;
+}
+#UI-button-after{
+	right:0;
+}
+#UI-button-before::after,#UI-button-after::after{
+	content:' ';
+	border-top:solid 16px transparent;
+	border-bottom:solid 16px transparent;
+	border-right:solid 32px chocolate;
+	position:absolute;
+	margin-left:-16px;
+	margin-top:-16px;
+}
+#UI-button-after::after{
+	border-right:none;
+	border-left:solid 33px chocolate;
+}
+#UI-button-after.UI-button-inactive::after{
+	border-left:solid 33px wheat;
 }
 
 @-webkit-keyframes append{
@@ -150,8 +205,6 @@ p{
   height:calc(100% - 16px);display:inline-block;
 }
 .valign-sliderStep{
-  height:100%;display:inline-block;
-  vertical-align:middle;
 }*/
 
 
@@ -288,14 +341,14 @@ button.fullscreen{
 
 /*slider*/
 /*
-#gambetta-sliderContainer{
+#UI-sliderContainer{
 	height:100%;width:100%;
 	display:inline-block;
 	overflow:hidden;
 	margin-top:-16px;
 	position:relative;
 }
-#gambetta-slider{
+#UI-slider{
 	height:100%;
 	vertical-align:middle;
 	width:300%;
