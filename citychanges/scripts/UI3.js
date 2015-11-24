@@ -970,13 +970,11 @@ function Landscape ( data, params ) {
 		            if ( mesh.name !== 'chantier' ) {
 			            mesh.material.transparent = true;
 			            mesh.material.opacity = 0;
-			            mesh.material.color.set( 0x00ff00 );
 			            TweenLite.to( mesh.material, .7, {
 			            	opacity : 1,
 			                onUpdate : function () { camera.update = true;},
 			            	onComplete : function () {
 			        			mesh.material.transparent = false;
-			        			mesh.material.color.set( 0xffffff );
 			            	}
 			            });
 		            }
@@ -989,7 +987,6 @@ function Landscape ( data, params ) {
 		    	if ( webgl ) {
 			    	if ( mesh.name !== 'chantier' ){
 			            mesh.material.transparent = true;
-			            mesh.material.color.set( 0xff0000 )
 			            TweenLite.to( mesh.material, .7, {
 			            	opacity : 0,
 			                onUpdate : function () { camera.update = true;},
