@@ -8,7 +8,7 @@ function Landscape ( data, params ) {
 
 	//TODO : 
 	//- use localstorage to store display parameters and resources
-	//- implement 'container in view' when animations are on, so they are not updated when out of view
+	//- implement 'container in view' when animations are on, so they are not updated when out of view and mutliple views can be added on one page
 	//- implement container resize
 	//- use threejs event dispatcher (understand classes, prototypes & inheritance...)
 	//- blender / gimp : merge roads/trottoirs/gardens/cars on same texture
@@ -60,6 +60,7 @@ function Landscape ( data, params ) {
 		container = div;
     } else {
     	container = document.body; 
+    	container.style.margin = '0';
     	container.style.margin = '0';
     	width = window.innerWidth;
     	height = window.innerHeight;
@@ -899,7 +900,7 @@ function Landscape ( data, params ) {
 
     		sl.appendChild( valign ); 
     		slC.appendChild( sl );
-    		container.appendChild( slC );
+    		//container.appendChild( slC );
     		container.appendChild( bA );
     		container.appendChild( bB );
 

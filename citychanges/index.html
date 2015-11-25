@@ -10,7 +10,6 @@
 	<!--<link rel='manifest' href='manifest.webapp'>-->
 </head>
 <body onload='main()' style='position:relative;background:#666'>
-	<div id='canvas-container'></div>
 	<!-- libs -->
 	<script src='../libs/three.js'></script>
 	<script src='../libs/CanvasRenderer.js'></script>
@@ -29,16 +28,6 @@
 		function main(){
 
 			'use strict';
-
-			var canvasContainer=document.getElementById('canvas-container');
-
-			//for experiment
-			canvasContainer.style.cssText=''+
-				'width:1000px;height:300px;'+
-				'margin-left:'+(innerWidth-1000)/2+'px;'+
-				'margin-top:'+(innerHeight-300)/2+'px;'+
-				'border-radius:10px;'+
-				'box-shadow:0px 10px 10px #444';
 
 		    var steps=[
 		            {
@@ -73,8 +62,6 @@
 				
 				//will create sky with this texture
 				skyTexture:9,
-
-				container:canvasContainer,
 
 				steps:steps,
 
