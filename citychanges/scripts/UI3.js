@@ -61,7 +61,7 @@ function Landscape ( data, params ) {
     } else {
     	container = document.body; 
     	container.style.margin = '0';
-    	container.style.margin = '0';
+    	container.style.overflow = 'hidden';
     	width = window.innerWidth;
     	height = window.innerHeight;
     }
