@@ -1041,8 +1041,8 @@
 								target.x = ( absX * 2 - 1 ) * soilData.planeSide / 2; 
 								target.z = - ( 1 - absY * 2 ) * soilData.planeSide / 2; 
 							//2. find vertical 
-								var newI = Math.round( ( ( ( i * 2 - 128 ) / ( 2 + ( 1 - j / 128 ) ) ) + 128 ) / 2 );
-								var dataCoord = newI + 128 * j,
+								//var newI = Math.round( ( ( ( i * 2 - 128 ) / ( 2 + ( 1 - j / 128 ) ) ) + 128 ) / 2 );
+								var dataCoord = i + 128 * j,
 									luminosity = 0.21 * soilData.imgData[ dataCoord * 4 ] / 255 + 0.72 * soilData.imgData[ dataCoord * 4 + 1 ] / 255 + 0.07 * soilData.imgData[ dataCoord * 4 + 2 ] / 255 - .5,
 									elevation = 0;
 
