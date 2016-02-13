@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TITLE</title>
+</head>
+<body style='margin:0;overflow:hidden;'>
+<script src='../libs/three.js'></script>
+<script src='../libs/shaders/SkyShader.js'></script>
+<script>
+	'use strict';
+
+	var scene;
+	var rendererA, rendererB, renderer, antialias = true;
+	var controls;
+	var camera,soil,sun;
+	var mouse = {x:0,y:0};
+
+	var soil,
+		soilData = {
+			planeSide : 35,
+			sideVertices : 80,
+			imgData : null,
+			displacementScale : 1,
+			source : 'img/RockGrassy0030_1_S.jpg',
+			POT : null,
+			hills : [
+				{ x : .5, y : .1, factor : 3 },
+				{ x : -.5, y : -.3, factor : 3 },
+				{ x : .5, y : .6, factor : 6 }
+				]
+		};
+
+	var grassGeo, grassMat, grass, 
+		grassData = {
+			seeds:25000,
+			strands:{
+				height : .6,
+				heightVariation : .1,
+				baseWidth : .4,
+				bend : .3,
+				counter:0
+			},
+			daisies:{
+				baseWidth : .15,
+				bend : .3,
+				centerWidth:.15,
+				height : .9,
+				heightVariation : 0,
+				flowerAngle:1,
+				petals:{
+					number:3,
+					width:.8,//rad
+					length:.3,//+-
+					height:.1//variation to apex , +-
+				},
+				proba:.01,
+				counter:0
+			},
+			geometry:{
+				vertices:[
+					[],[],[]
+				],
+				colors:[],
+				weights:[],
+				timestamps:[],
+				indices:[]
+			},
+			texture:{
+				source : 'img/Grass_01_tiled.jpg1b62bdfc-ca95-4713-9e22-d22ad8727293Original.jpg',
+				POT : null,
+				imgData : null,
+			}
+		};
+
+	var water, waterNormals, mirrorMesh,
+		waterData = {
+			geometry : {
+				width:800
+			},
+			mirrorTexture : {
+				POT : 1024,
+				waterColor:0x000507,
+				distortionScale:.1,
+			},
+			normalTexture : {
+				source:'../three/examples/textures/waternormals.jpg'
+			}
+		};
+
+	var sky, sunSphere;
+	
+	setScene();
+	animate();
+
+	function setScene(){
+
+		scene=new THREE.Scene();
+
+		setRenderer();
+
+		setView();		
+
+		createSoil();
+
+		createSky();
+
+		//setLighting();
+
+		//addLake();
+
+		addInteraction();
+	}
+
+	function addInteraction () {
+		var text1 = document.createElement('input');
+		text1.type = 'text';
+		text1.innerHTML = 'fuck';
+		text1.style.cssText = ''+
+			'position:absolute;'+
+			'top:30px;left:0;width:120px;';
+		document.body.appendChild(text1);
+
+		var size1 = document.createElement('input');
+		size1.type='number';
+		size1.value = 27;
+		size1.style.cssText = ''+
+			'position:absolute;'+
+			'top:30px;left:130px;width:30px;';
+		document.body.appendChild(size1);
+
+		var text2 = document.createElement('input');
+		text2.type = 'text';
+		text2.innerHTML = 'fuck';
+		text2.style.cssText = ''+
+			'position:absolute;'+
+			'top:60px;left:0;width:120px;';
+		document.body.appendChild(text2);
+
+		var size2 = document.createElement('input');
+		size2.type='number';
+		size2.value = 27;
+		size2.style.cssText = ''+
+			'position:absolute;'+
+			'top:60px;left:130px;width:30px;';	
+		document.body.appendChild(size2);
+
+        var canvas=document.createElement('canvas');
+        var context=canvas.getContext('2d');
+		canvas.width = canvas.height = 128;
+
+		document.body.appendChild(canvas);
+		canvas.style.cssText = '' +
+			'position:absolute;'+
+			'top:120px;left:0;';
+
+		var edit = document.createElement('button');
+		edit.innerHTML='write my message !';
+		edit.style.cssText=''+
+			'position:absolute;top:0px;left:0px;';
+		document.body.appendChild(edit);
+		edit.addEventListener('click', function () {
+			text1.style.visibility=text2.style.visibility = size1.style.visibility = size2.style.visibility = canvas.style.visibility = b.style.visibility = 'visible';		
+			edit.style.visibility='hidden';
+		}, false);
+
+		var b = document.createElement('button');
+		b.innerHTML = 'go';
+		b.style.cssText = ''+
+			'position:absolute;'+
+			'top:90px;left:0;';
+		document.body.appendChild(b);
+		b.addEventListener( 'click', go, false );
+
+		if ( window.location.hash ) {
+			text1.style.visibility=text2.style.visibility = size1.style.visibility = size2.style.visibility = canvas.style.visibility = b.style.visibility = 'hidden';
+			var hash = window.location.hash.split('_');hash[0]=hash[0].split('#')[1];
+			text1.value = hash[0];size1.value = hash[2];text2.value=hash[1];size2.value=hash[3];
+			go();
+		} else {
+			text1.style.visibility=text2.style.visibility = size1.style.visibility = size2.style.visibility = canvas.style.visibility = b.style.visibility = 'visible';		
+			text1.value = 'CODEPEN';text2.value='i love you';
+			size1.value = size2.value=27;	
+		}
+
+		function go () {
+
+			context.clearRect(0,0,128,128);
+	        context.fillStyle="rgba(255,255,255,255)";
+	        context.fillRect(0,0,128,128);
+	        context.fillStyle="rgba(0,0,0,255)";
+	        context.lineWidth=2;
+	        context.rotate(-Math.PI*.05)
+	        context.translate(-20,65)
+	        context.font="Bold " + size1.value + "px Arial";
+	        context.fillText(text1.value,5,30);
+	        context.font="Bold " + size2.value + "px Arial";
+	        context.fillText(text2.value,2,55);
+	        context.translate(20,-65)
+	        context.rotate(Math.PI*.05)
+
+	        if ( typeof grass !== 'undefined' ) {
+	        	scene.remove(grass);
+	        	grass.geometry.dispose();
+	        	grass.material.dispose();
+	        	grass = null;
+				grassData.geometry.vertices[ 0 ] = [];
+				grassData.geometry.vertices[ 1 ] = [];
+				grassData.geometry.vertices[ 2 ] = [];
+				grassData.geometry.colors = [];
+				grassData.geometry.weights = [];
+				grassData.geometry.timestamps = [];
+				grassData.geometry.indices = [];
+				grassData.strands.counter = grassData.daisies.counter = 0;
+	        }
+
+	        window.location.hash = text1.value + '_' + text2.value + '_' + size1.value + '_' + size2.value;
+
+	        prepareGrassMesh( context.getImageData( 0, 0, 128, 128 ).data );
+			text1.style.visibility=text2.style.visibility = size1.style.visibility = size2.style.visibility = canvas.style.visibility = b.style.visibility = 'hidden';
+			edit.style.visibility='visible';
+		}
+	}
+
+	function grow ( crd, growDaisy ) {
+		/* SETTINGS */
+
+		var seed = ( typeof growDaisy === 'undefined' ) ? Math.random() : growDaisy ? -1 : 1;
+
+			//texture spread
+				var x = Math.floor( ( crd.x + soilData.planeSide / 2 ) * soilData.POT / soilData.planeSide),
+					y = Math.floor( ( soilData.planeSide / 2 - crd.z ) * soilData.POT / soilData.planeSide),
+					I = y * soilData.POT + x,
+					R = soilData.imgData[ I * 4 ] / 255,
+					G = soilData.imgData[ I * 4 + 1 ] / 255,
+					B = soilData.imgData[ I * 4 + 2 ] / 255;
+
+				//if ( R < .7 && Math.sqrt( crd.x * crd.x + crd.z * crd.z ) > ( soilData.planeSide / 2 ) ) return false;
+
+			//shape settings
+				var angle = Math.random() * 2 * Math.PI,//randomize angle for better result (the base is actually a equilateral triangle so 2PI/3 should be enough)
+					angle90 = angle + Math.PI / 2,
+					cos = Math.cos(angle), sin = Math.sin(angle),
+					hcos90 = Math.cos(angle90)/2, hsin90 = Math.sin(angle90)/2;
+
+				var seedBend = Math.random() * 2 - 1, 
+					seedHeight = .5 + Math.random() * .5;
+
+			//colors settings
+				var cL = grassData.geometry.colors.length;
+
+				var px = Math.floor( ( crd.x + soilData.planeSide / 2 ) * grassData.texture.POT / soilData.planeSide),
+					py = Math.floor( ( soilData.planeSide / 2 - crd.z ) * grassData.texture.POT / soilData.planeSide),
+					pI = py * grassData.texture.POT + px,
+					cR = grassData.texture.imgData[ pI * 4 ] / 255,
+					cG = grassData.texture.imgData[ pI * 4 + 1 ] / 255,
+					cB = grassData.texture.imgData[ pI * 4 + 2 ] / 255;
+
+			//wind settings
+				var wL = grassData.geometry.weights.length;
+
+			//indices settings
+				var fL = grassData.geometry.indices.length,
+					r = grassData.strands.counter * 7 + ( 15 + grassData.daisies.petals.number * 5 ) * grassData.daisies.counter ;
+		
+		/*STRAND*/
+
+			if ( seed >= grassData.daisies.proba ) {
+
+				grassData.strands.counter++;
+
+				//vertices0
+					var vL = grassData.geometry.vertices[0].length;
+					grassData.strands.heightVariation *= Math.random() * 2 - 1;
+					//Base
+						//vertices
+						grassData.geometry.vertices[0][ vL ] = crd.x + hcos90 * grassData.strands.baseWidth;
+						grassData.geometry.vertices[0][ vL + 1 ] = crd.y;
+						grassData.geometry.vertices[0][ vL + 2 ] = crd.z - hsin90 * grassData.strands.baseWidth;
+
+						grassData.geometry.vertices[0][ vL + 3 ] = crd.x - hcos90 * grassData.strands.baseWidth;
+						grassData.geometry.vertices[0][ vL + 4 ] = crd.y;
+						grassData.geometry.vertices[0][ vL + 5 ] = crd.z + hsin90 * grassData.strands.baseWidth;
+
+						grassData.geometry.vertices[0][ vL + 6 ] = crd.x + cos * grassData.strands.baseWidth;
+						grassData.geometry.vertices[0][ vL + 7 ] = crd.y;
+						grassData.geometry.vertices[0][ vL + 8 ] = crd.z - sin * grassData.strands.baseWidth;
+
+					//Middle
+						//vertices
+						grassData.geometry.vertices[0][ vL + 9 ] = crd.x + hcos90 * .6 * grassData.strands.baseWidth + cos * grassData.strands.bend * seedBend * .2;
+						grassData.geometry.vertices[0][ vL + 10 ] = crd.y + .5 * ( 1 + grassData.strands.heightVariation ) * grassData.strands.height * seedHeight;
+						grassData.geometry.vertices[0][ vL + 11 ] = crd.z - hsin90 * .6 * grassData.strands.baseWidth - sin * grassData.strands.bend * seedBend * .2;
+
+						grassData.geometry.vertices[0][ vL + 12 ] = crd.x - hcos90 * .6 * grassData.strands.baseWidth + cos * grassData.strands.bend * seedBend * .2;
+						grassData.geometry.vertices[0][ vL + 13 ] = crd.y + .5 * ( 1 + grassData.strands.heightVariation ) * grassData.strands.height * seedHeight;
+						grassData.geometry.vertices[0][ vL + 14 ] = crd.z + hsin90 * .6 * grassData.strands.baseWidth - sin * grassData.strands.bend * seedBend * .2;
+
+						grassData.geometry.vertices[0][ vL + 15 ] = crd.x + cos * .6 * grassData.strands.baseWidth + cos * grassData.strands.bend * seedBend * .2;
+						grassData.geometry.vertices[0][ vL + 16 ] = crd.y + .5 * ( 1 + grassData.strands.heightVariation ) * grassData.strands.height * seedHeight;
+						grassData.geometry.vertices[0][ vL + 17 ] = crd.z - sin * .6 * grassData.strands.baseWidth - sin * grassData.strands.bend * seedBend * .2;
+
+					//Apex
+						//vertex
+						grassData.geometry.vertices[0][ vL + 18 ] = crd.x + cos * grassData.strands.bend * seedBend;
+						grassData.geometry.vertices[0][ vL + 19 ] = crd.y + 1.2 * ( 1 + grassData.strands.heightVariation ) * grassData.strands.height * seedHeight;
+						grassData.geometry.vertices[0][ vL + 20 ] = crd.z - sin * grassData.strands.bend * seedBend;
+
+				//vertices1 & 2
+					//Base
+						//vertices
+						grassData.geometry.vertices[ 1 ][ vL ] = grassData.geometry.vertices[ 2 ][ vL ] = grassData.geometry.vertices[ 0 ][ vL ];
+						grassData.geometry.vertices[ 1 ][ vL + 1 ] = grassData.geometry.vertices[ 2 ][ vL + 1 ] = grassData.geometry.vertices[ 0 ][ vL + 1 ];
+						grassData.geometry.vertices[ 1 ][ vL + 2 ] = grassData.geometry.vertices[ 2 ][ vL + 2 ] = grassData.geometry.vertices[ 0 ][ vL + 2 ];
+
+						grassData.geometry.vertices[ 1 ][ vL + 3 ] = grassData.geometry.vertices[ 2 ][ vL + 3 ] = grassData.geometry.vertices[ 0 ][ vL + 3 ];
+						grassData.geometry.vertices[ 1 ][ vL + 4 ] = grassData.geometry.vertices[ 2 ][ vL + 4 ] = grassData.geometry.vertices[ 0 ][ vL + 4 ];
+						grassData.geometry.vertices[ 1 ][ vL + 5 ] = grassData.geometry.vertices[ 2 ][ vL + 5 ] = grassData.geometry.vertices[ 0 ][ vL + 5 ];
+
+						grassData.geometry.vertices[ 1 ][ vL + 6 ] = grassData.geometry.vertices[ 2 ][ vL + 6 ] = grassData.geometry.vertices[ 0 ][ vL + 6 ];
+						grassData.geometry.vertices[ 1 ][ vL + 7 ] = grassData.geometry.vertices[ 2 ][ vL + 7 ] = grassData.geometry.vertices[ 0 ][ vL + 7 ];
+						grassData.geometry.vertices[ 1 ][ vL + 8 ] = grassData.geometry.vertices[ 2 ][ vL + 8 ] = grassData.geometry.vertices[ 0 ][ vL + 8 ];
+
+					//Middle
+						//vertices
+						grassData.geometry.vertices[ 1 ][ vL + 9 ] = grassData.geometry.vertices[ 2 ][ vL + 9 ] = grassData.geometry.vertices[ 0 ][ vL + 9 ];
+						grassData.geometry.vertices[ 1 ][ vL + 10 ] = grassData.geometry.vertices[ 2 ][ vL + 10 ] = grassData.geometry.vertices[ 0 ][ vL + 10 ];
+						grassData.geometry.vertices[ 1 ][ vL + 11 ] = grassData.geometry.vertices[ 2 ][ vL + 11 ] = grassData.geometry.vertices[ 0 ][ vL + 11 ];
+
+						grassData.geometry.vertices[ 1 ][ vL + 12 ] = grassData.geometry.vertices[ 2 ][ vL + 12 ] = grassData.geometry.vertices[ 0 ][ vL + 12 ];
+						grassData.geometry.vertices[ 1 ][ vL + 13 ] = grassData.geometry.vertices[ 2 ][ vL + 13 ] = grassData.geometry.vertices[ 0 ][ vL + 13 ];
+						grassData.geometry.vertices[ 1 ][ vL + 14 ] = grassData.geometry.vertices[ 2 ][ vL + 14 ] = grassData.geometry.vertices[ 0 ][ vL + 14 ];
+
+						grassData.geometry.vertices[ 1 ][ vL + 15 ] = grassData.geometry.vertices[ 2 ][ vL + 15 ] = grassData.geometry.vertices[ 0 ][ vL + 15 ];
+						grassData.geometry.vertices[ 1 ][ vL + 16 ] = grassData.geometry.vertices[ 2 ][ vL + 16 ] = grassData.geometry.vertices[ 0 ][ vL + 16 ];
+						grassData.geometry.vertices[ 1 ][ vL + 17 ] = grassData.geometry.vertices[ 2 ][ vL + 17 ] = grassData.geometry.vertices[ 0 ][ vL + 17 ];
+
+					//Apex
+						//vertex
+						grassData.geometry.vertices[ 1 ][ vL + 18 ] = grassData.geometry.vertices[ 2 ][ vL + 18 ] = grassData.geometry.vertices[ 0 ][ vL + 18 ];
+						grassData.geometry.vertices[ 1 ][ vL + 19 ] = grassData.geometry.vertices[ 2 ][ vL + 19 ] = grassData.geometry.vertices[ 0 ][ vL + 19 ];
+						grassData.geometry.vertices[ 1 ][ vL + 20 ] = grassData.geometry.vertices[ 2 ][ vL + 20 ] = grassData.geometry.vertices[ 0 ][ vL + 20 ];
+
+				//wind weights
+
+					//Base
+					grassData.geometry.weights[ wL ] = grassData.geometry.weights[ wL + 1 ] = grassData.geometry.weights[ wL + 2 ] = 0;
+
+					//Middle
+					grassData.geometry.weights[ wL + 3 ] = grassData.geometry.weights[ wL + 4 ] = grassData.geometry.weights[ wL + 5 ] = .4;
+
+					//Apex
+					grassData.geometry.weights[ wL + 6 ] = 1;
+
+				//timestamps
+					//Base
+					grassData.geometry.timestamps[ wL ] = grassData.geometry.timestamps[ wL + 1 ] = grassData.geometry.timestamps[ wL + 2 ] = grassData.geometry.timestamps[ wL + 3 ] = grassData.geometry.timestamps[ wL + 4 ] = grassData.geometry.timestamps[ wL + 5 ] = grassData.geometry.timestamps[ wL + 6 ] = Math.random();
+
+				//colors
+
+					//Base
+						grassData.geometry.colors[ cL ] = cR * .6;
+						grassData.geometry.colors[ cL + 1 ] = cG * .6;//greenish : .6, redish : .5
+						grassData.geometry.colors[ cL + 2 ] = cB * .3;
+
+						grassData.geometry.colors[ cL + 3 ] = cR * .6;
+						grassData.geometry.colors[ cL + 4 ] = cG * .6;//greenish : .6, redish : .5
+						grassData.geometry.colors[ cL + 5 ] = cB * .3;
+
+						grassData.geometry.colors[ cL + 6 ] = cR * .3;
+						grassData.geometry.colors[ cL + 7 ] = cG * .4;//greenish : .4, redish : .25
+						grassData.geometry.colors[ cL + 8 ] = cB * .15;
+
+					//Middle
+						grassData.geometry.colors[ cL + 9 ] = cR * .5;
+						grassData.geometry.colors[ cL + 10 ] = cG * .5;//greenish : .5, redish : .4
+						grassData.geometry.colors[ cL + 11 ] = cB * .25;
+
+						grassData.geometry.colors[ cL + 12 ] = cR * .3;//greenish : .3, redish : .5
+						grassData.geometry.colors[ cL + 13 ] = cG * .5;//greenish : .5, redish : .4
+						grassData.geometry.colors[ cL + 14 ] = cB * .25;
+
+						grassData.geometry.colors[ cL + 15 ] = cR * .2;//greenish : .2, redish : .25
+						grassData.geometry.colors[ cL + 16 ] = cG * .25;//greenish : .25, redish : .2
+						grassData.geometry.colors[ cL + 17 ] = cB * .125;
+
+					//Apex
+						grassData.geometry.colors[ cL + 18 ] = cR * .5;//greenish : .5, redish : 1
+						grassData.geometry.colors[ cL + 19 ] = cG * 1;//greenish : 1, redish : .7
+						grassData.geometry.colors[ cL + 20 ] = cB * .4;
+
+				//indices
+
+					grassData.geometry.indices[ fL ] = r;
+					grassData.geometry.indices[ fL + 1 ] = r + 1;
+					grassData.geometry.indices[ fL + 2 ] = r + 3;
+
+					grassData.geometry.indices[ fL + 3 ] = r + 1;
+					grassData.geometry.indices[ fL + 4 ] = r + 4;
+					grassData.geometry.indices[ fL + 5 ] = r + 3;
+
+					grassData.geometry.indices[ fL + 6 ] = r + 1;
+					grassData.geometry.indices[ fL + 7 ] = r + 2;
+					grassData.geometry.indices[ fL + 8 ] = r + 4;
+
+					grassData.geometry.indices[ fL + 9 ] = r + 2;
+					grassData.geometry.indices[ fL + 10 ] = r + 5;
+					grassData.geometry.indices[ fL + 11 ] = r + 4;
+
+					grassData.geometry.indices[ fL + 12 ] = r + 2;
+					grassData.geometry.indices[ fL + 13 ] = r;
+					grassData.geometry.indices[ fL + 14 ] = r + 5;
+
+					grassData.geometry.indices[ fL + 15 ] = r;
+					grassData.geometry.indices[ fL + 16 ] = r + 3;
+					grassData.geometry.indices[ fL + 17 ] = r + 5;
+
+					grassData.geometry.indices[ fL + 18 ] = r + 3;
+					grassData.geometry.indices[ fL + 19 ] = r + 4;
+					grassData.geometry.indices[ fL + 20 ] = r + 6;
+
+					grassData.geometry.indices[ fL + 21 ] = r + 4;
+					grassData.geometry.indices[ fL + 22 ] = r + 5;
+					grassData.geometry.indices[ fL + 23 ] = r + 6;
+
+					grassData.geometry.indices[ fL + 24 ] = r + 5;
+					grassData.geometry.indices[ fL + 25 ] = r + 3;
+					grassData.geometry.indices[ fL + 26 ] = r + 6;
+
+		/*DAISY*/
+
+			} else if ( seed < grassData.daisies.proba ) {
+
+				grassData.daisies.counter++;
+
+				//vertices0
+					var vL = grassData.geometry.vertices[0].length,
+						hAngle = grassData.daisies.flowerAngle + .5 * Math.random();
+					grassData.strands.heightVariation *= Math.random() * 2 - 1;
+
+					//Base
+						grassData.geometry.vertices[ 0 ][ vL ] = crd.x + hcos90 * grassData.daisies.baseWidth * .5;
+						grassData.geometry.vertices[ 0 ][ vL + 1 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 2 ] = crd.z - hsin90 * grassData.daisies.baseWidth * .5;
+
+						grassData.geometry.vertices[ 0 ][ vL + 3 ] = crd.x - hcos90 * grassData.daisies.baseWidth * .5;
+						grassData.geometry.vertices[ 0 ][ vL + 4 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 5 ] = crd.z + hsin90 * grassData.daisies.baseWidth * .5;
+
+						grassData.geometry.vertices[ 0 ][ vL + 6 ] = crd.x + cos * grassData.daisies.baseWidth * .5;
+						grassData.geometry.vertices[ 0 ][ vL + 7 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 8 ] = crd.z - sin * grassData.daisies.baseWidth * .5;
+
+					//Stem
+						grassData.geometry.vertices[ 0 ][ vL + 9 ] = crd.x + hcos90 * .35 * grassData.daisies.baseWidth;
+						grassData.geometry.vertices[ 0 ][ vL + 10 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 11 ] = crd.z - hsin90 * .35 * grassData.daisies.baseWidth;
+
+						grassData.geometry.vertices[ 0 ][ vL + 12 ] = crd.x - hcos90 * .35 * grassData.daisies.baseWidth;
+						grassData.geometry.vertices[ 0 ][ vL + 13 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 14 ] = crd.z + hsin90 * .35 * grassData.daisies.baseWidth;
+
+						grassData.geometry.vertices[ 0 ][ vL + 15 ] = crd.x + cos * .35 * grassData.daisies.baseWidth;
+						grassData.geometry.vertices[ 0 ][ vL + 16 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 17 ] = crd.z - sin * .35 * grassData.daisies.baseWidth;
+
+					//Top
+						grassData.geometry.vertices[ 0 ][ vL + 18 ] = crd.x;
+						grassData.geometry.vertices[ 0 ][ vL + 19 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 20 ] = crd.z;
+
+						grassData.geometry.vertices[ 0 ][ vL + 21 ] = crd.x;
+						grassData.geometry.vertices[ 0 ][ vL + 22 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 23 ] = crd.z;
+
+						grassData.geometry.vertices[ 0 ][ vL + 24 ] = crd.x;
+						grassData.geometry.vertices[ 0 ][ vL + 25 ] = crd.y;
+						grassData.geometry.vertices[ 0 ][ vL + 26 ] = crd.z;
+
+					//flower part 
+
+						//center
+							grassData.geometry.vertices[ 0 ][ vL + 27 ] = crd.x;
+							grassData.geometry.vertices[ 0 ][ vL + 28 ] = crd.y;
+							grassData.geometry.vertices[ 0 ][ vL + 29 ] = crd.z;
+							
+							grassData.geometry.vertices[ 0 ][ vL + 30 ] = crd.x;
+							grassData.geometry.vertices[ 0 ][ vL + 31 ] = crd.y;
+							grassData.geometry.vertices[ 0 ][ vL + 32 ] = crd.z;
+							
+							grassData.geometry.vertices[ 0 ][ vL + 33 ] = crd.x;
+							grassData.geometry.vertices[ 0 ][ vL + 34 ] = crd.y;
+							grassData.geometry.vertices[ 0 ][ vL + 35 ] = crd.z;
+							
+							grassData.geometry.vertices[ 0 ][ vL + 36 ] = crd.x;
+							grassData.geometry.vertices[ 0 ][ vL + 37 ] = crd.y;
+							grassData.geometry.vertices[ 0 ][ vL + 38 ] = crd.z;
+							
+							grassData.geometry.vertices[ 0 ][ vL + 39 ] = crd.x;
+							grassData.geometry.vertices[ 0 ][ vL + 40 ] = crd.y;
+							grassData.geometry.vertices[ 0 ][ vL + 41 ] = crd.z;
+
+							grassData.geometry.vertices[ 0 ][ vL + 42 ] = crd.x;
+							grassData.geometry.vertices[ 0 ][ vL + 43 ] = crd.y;
+							grassData.geometry.vertices[ 0 ][ vL + 44 ] = crd.z;
+
+						//petals
+							for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+								grassData.geometry.vertices[ 0 ][ vL + 45 + i * 15 ] = crd.x;
+								grassData.geometry.vertices[ 0 ][ vL + 46 + i * 15 ] = crd.y;
+								grassData.geometry.vertices[ 0 ][ vL + 47 + i * 15 ] = crd.z;
+								
+								grassData.geometry.vertices[ 0 ][ vL + 48 + i * 15 ] = crd.x;
+								grassData.geometry.vertices[ 0 ][ vL + 49 + i * 15 ] = crd.y;
+								grassData.geometry.vertices[ 0 ][ vL + 50 + i * 15 ] = crd.z;
+								
+								grassData.geometry.vertices[ 0 ][ vL + 51 + i * 15 ] = crd.x;
+								grassData.geometry.vertices[ 0 ][ vL + 52 + i * 15 ] = crd.y;
+								grassData.geometry.vertices[ 0 ][ vL + 53 + i * 15 ] = crd.z;
+								
+								grassData.geometry.vertices[ 0 ][ vL + 54 + i * 15 ] = crd.x;
+								grassData.geometry.vertices[ 0 ][ vL + 55 + i * 15 ] = crd.y;
+								grassData.geometry.vertices[ 0 ][ vL + 56 + i * 15 ] = crd.z;
+								
+								grassData.geometry.vertices[ 0 ][ vL + 57 + i * 15 ] = crd.x;
+								grassData.geometry.vertices[ 0 ][ vL + 58 + i * 15 ] = crd.y;
+								grassData.geometry.vertices[ 0 ][ vL + 59 + i * 15 ] = crd.z;
+							}					
+
+				//vertices1
+
+					//Base
+						grassData.geometry.vertices[ 1 ][ vL ] = crd.x + hcos90 * grassData.daisies.baseWidth * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 1 ] = crd.y;
+						grassData.geometry.vertices[ 1 ][ vL + 2 ] = crd.z - hsin90 * grassData.daisies.baseWidth * .8;
+
+						grassData.geometry.vertices[ 1 ][ vL + 3 ] = crd.x - hcos90 * grassData.daisies.baseWidth * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 4 ] = crd.y;
+						grassData.geometry.vertices[ 1 ][ vL + 5 ] = crd.z + hsin90 * grassData.daisies.baseWidth * .8;
+
+						grassData.geometry.vertices[ 1 ][ vL + 6 ] = crd.x + cos * grassData.daisies.baseWidth * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 7 ] = crd.y;
+						grassData.geometry.vertices[ 1 ][ vL + 8 ] = crd.z - sin * grassData.daisies.baseWidth * .8;
+
+					//Stem
+						grassData.geometry.vertices[ 1 ][ vL + 9 ] = crd.x + hcos90 * .6 * grassData.daisies.baseWidth + cos * grassData.daisies.bend * seedBend * .4;
+						grassData.geometry.vertices[ 1 ][ vL + 10 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 11 ] = crd.z - hsin90 * .6 * grassData.daisies.baseWidth - sin * grassData.daisies.bend * seedBend * .4;
+
+						grassData.geometry.vertices[ 1 ][ vL + 12 ] = crd.x - hcos90 * .6 * grassData.daisies.baseWidth + cos * grassData.daisies.bend * seedBend * .4;
+						grassData.geometry.vertices[ 1 ][ vL + 13 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 14 ] = crd.z + hsin90 * .6 * grassData.daisies.baseWidth - sin * grassData.daisies.bend * seedBend * .4;
+
+						grassData.geometry.vertices[ 1 ][ vL + 15 ] = crd.x + cos * .6 * grassData.daisies.baseWidth + cos * grassData.daisies.bend * seedBend * .4;
+						grassData.geometry.vertices[ 1 ][ vL + 16 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 17 ] = crd.z - sin * .6 * grassData.daisies.baseWidth - sin * grassData.daisies.bend * seedBend * .4;
+
+					//Top
+						grassData.geometry.vertices[ 1 ][ vL + 18 ] = crd.x + hcos90 * .35 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend * .9;
+						grassData.geometry.vertices[ 1 ][ vL + 19 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 20 ] = crd.z - hsin90 * .35 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend * .9;
+
+						grassData.geometry.vertices[ 1 ][ vL + 21 ] = crd.x - hcos90 * .35 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend * .9;
+						grassData.geometry.vertices[ 1 ][ vL + 22 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 23 ] = crd.z + hsin90 * .35 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend * .9;
+
+						grassData.geometry.vertices[ 1 ][ vL + 24 ] = crd.x + cos * .35 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend * .9;
+						grassData.geometry.vertices[ 1 ][ vL + 25 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+						grassData.geometry.vertices[ 1 ][ vL + 26 ] = crd.z - sin * .35 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend * .9;
+
+					//flower part 
+
+						//center
+							//values for the pentagon
+							var rot = Math.PI * 2 / 5,
+								cos1 = Math.cos(rot), sin1 = Math.sin(rot),
+								cos2 = Math.cos(rot*2),sin2 = Math.sin(rot*2);
+							grassData.geometry.vertices[ 1 ][ vL + 27 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * .5;
+							grassData.geometry.vertices[ 1 ][ vL + 28 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+							grassData.geometry.vertices[ 1 ][ vL + 29 ] = crd.z - sin * grassData.daisies.bend * seedBend;
+							
+							grassData.geometry.vertices[ 1 ][ vL + 30 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos1 * .5;
+							grassData.geometry.vertices[ 1 ][ vL + 31 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+							grassData.geometry.vertices[ 1 ][ vL + 32 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * sin1 * .5;
+							
+							grassData.geometry.vertices[ 1 ][ vL + 33 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos2 * .5;
+							grassData.geometry.vertices[ 1 ][ vL + 34 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+							grassData.geometry.vertices[ 1 ][ vL + 35 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * sin2 * .5;
+							
+							grassData.geometry.vertices[ 1 ][ vL + 36 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos2 * .5;
+							grassData.geometry.vertices[ 1 ][ vL + 37 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+							grassData.geometry.vertices[ 1 ][ vL + 38 ] = crd.z - sin * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * sin2 * .5;
+							
+							grassData.geometry.vertices[ 1 ][ vL + 39 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos1 * .5;
+							grassData.geometry.vertices[ 1 ][ vL + 40 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+							grassData.geometry.vertices[ 1 ][ vL + 41 ] = crd.z - sin * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * sin1 * .5;
+
+							grassData.geometry.vertices[ 1 ][ vL + 42 ] = crd.x + cos * grassData.daisies.bend * seedBend;
+							grassData.geometry.vertices[ 1 ][ vL + 43 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8 + grassData.daisies.centerWidth * .4;
+							grassData.geometry.vertices[ 1 ][ vL + 44 ] = crd.z - sin * grassData.daisies.bend * seedBend;
+
+						//petals
+							for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+								var petRot = Math.PI * 2 / grassData.daisies.petals.number * i + Math.random() * .3,
+									a1 = petRot + grassData.daisies.petals.width,
+									a2 = petRot - grassData.daisies.petals.width,
+									cosa = Math.cos(petRot), sina = Math.sin(petRot),
+									cosa1 = Math.cos(a1), sina1 = Math.sin(a1),
+									cosa2 = Math.cos(a2), sina2 = Math.sin(a2),
+									petHeight = ( Math.random() - .5 ) * grassData.daisies.petals.height;
+								grassData.geometry.vertices[ 1 ][ vL + 45 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * .5 * cosa2;
+								grassData.geometry.vertices[ 1 ][ vL + 46 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+								grassData.geometry.vertices[ 1 ][ vL + 47 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * .5 * sina2;
+								
+								grassData.geometry.vertices[ 1 ][ vL + 48 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.petals.length * cosa2 * .5;
+								grassData.geometry.vertices[ 1 ][ vL + 49 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .98;
+								grassData.geometry.vertices[ 1 ][ vL + 50 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * sina2 * .5;
+								
+								grassData.geometry.vertices[ 1 ][ vL + 51 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend;
+								grassData.geometry.vertices[ 1 ][ vL + 52 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight *1.1;
+								grassData.geometry.vertices[ 1 ][ vL + 53 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend;
+								
+								grassData.geometry.vertices[ 1 ][ vL + 54 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.petals.length * cosa1 * .5;
+								grassData.geometry.vertices[ 1 ][ vL + 55 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .98;
+								grassData.geometry.vertices[ 1 ][ vL + 56 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * sina1 * .5;
+								
+								grassData.geometry.vertices[ 1 ][ vL + 57 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * .5 * cosa1;
+								grassData.geometry.vertices[ 1 ][ vL + 58 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
+								grassData.geometry.vertices[ 1 ][ vL + 59 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * .5 * sina1;
+							}
+
+				//vertices2
+
+					//Base
+						grassData.geometry.vertices[ 2 ][ vL ] = crd.x + hcos90 * grassData.daisies.baseWidth;
+						grassData.geometry.vertices[ 2 ][ vL + 1 ] = crd.y;
+						grassData.geometry.vertices[ 2 ][ vL + 2 ] = crd.z - hsin90 * grassData.daisies.baseWidth;
+
+						grassData.geometry.vertices[ 2 ][ vL + 3 ] = crd.x - hcos90 * grassData.daisies.baseWidth;
+						grassData.geometry.vertices[ 2 ][ vL + 4 ] = crd.y;
+						grassData.geometry.vertices[ 2 ][ vL + 5 ] = crd.z + hsin90 * grassData.daisies.baseWidth;
+
+						grassData.geometry.vertices[ 2 ][ vL + 6 ] = crd.x + cos * grassData.daisies.baseWidth;
+						grassData.geometry.vertices[ 2 ][ vL + 7 ] = crd.y;
+						grassData.geometry.vertices[ 2 ][ vL + 8 ] = crd.z - sin * grassData.daisies.baseWidth;
+
+					//Stem
+						grassData.geometry.vertices[ 2 ][ vL + 9 ] = crd.x + hcos90 * .7 * grassData.daisies.baseWidth + cos * grassData.daisies.bend * seedBend * .5;
+						grassData.geometry.vertices[ 2 ][ vL + 10 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+						grassData.geometry.vertices[ 2 ][ vL + 11 ] = crd.z - hsin90 * .7 * grassData.daisies.baseWidth - sin * grassData.daisies.bend * seedBend * .5;
+
+						grassData.geometry.vertices[ 2 ][ vL + 12 ] = crd.x - hcos90 * .7 * grassData.daisies.baseWidth + cos * grassData.daisies.bend * seedBend * .5;
+						grassData.geometry.vertices[ 2 ][ vL + 13 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+						grassData.geometry.vertices[ 2 ][ vL + 14 ] = crd.z + hsin90 * .7 * grassData.daisies.baseWidth - sin * grassData.daisies.bend * seedBend * .5;
+
+						grassData.geometry.vertices[ 2 ][ vL + 15 ] = crd.x + cos * .7 * grassData.daisies.baseWidth + cos * grassData.daisies.bend * seedBend * .5;
+						grassData.geometry.vertices[ 2 ][ vL + 16 ] = crd.y + ( grassData.daisies.height * .4 ) * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+						grassData.geometry.vertices[ 2 ][ vL + 17 ] = crd.z - sin * .7 * grassData.daisies.baseWidth - sin * grassData.daisies.bend * seedBend * .5;
+
+					//Top
+						grassData.geometry.vertices[ 2 ][ vL + 18 ] = crd.x + hcos90 * .4 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend;
+						grassData.geometry.vertices[ 2 ][ vL + 19 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+						grassData.geometry.vertices[ 2 ][ vL + 20 ] = crd.z - hsin90 * .4 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend;
+
+						grassData.geometry.vertices[ 2 ][ vL + 21 ] = crd.x - hcos90 * .4 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend;
+						grassData.geometry.vertices[ 2 ][ vL + 22 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+						grassData.geometry.vertices[ 2 ][ vL + 23 ] = crd.z + hsin90 * .4 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend;
+
+						grassData.geometry.vertices[ 2 ][ vL + 24 ] = crd.x + cos * .4 * grassData.daisies.centerWidth + cos * grassData.daisies.bend * seedBend;
+						grassData.geometry.vertices[ 2 ][ vL + 25 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+						grassData.geometry.vertices[ 2 ][ vL + 26 ] = crd.z - sin * .4 * grassData.daisies.centerWidth - sin * grassData.daisies.bend * seedBend;
+
+					//flower part 
+
+						//center
+							//values for the pentagon
+							var rot = Math.PI * 2 / 5,
+								cos1 = Math.cos(rot), sin1 = Math.sin(rot),
+								cos2 = Math.cos(rot*2),sin2 = Math.sin(rot*2);
+							grassData.geometry.vertices[ 2 ][ vL + 27 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth;
+							grassData.geometry.vertices[ 2 ][ vL + 28 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+							grassData.geometry.vertices[ 2 ][ vL + 29 ] = crd.z - sin * grassData.daisies.bend * seedBend;
+							
+							grassData.geometry.vertices[ 2 ][ vL + 30 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos1;
+							grassData.geometry.vertices[ 2 ][ vL + 31 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+							grassData.geometry.vertices[ 2 ][ vL + 32 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * sin1;
+							
+							grassData.geometry.vertices[ 2 ][ vL + 33 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos2;
+							grassData.geometry.vertices[ 2 ][ vL + 34 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+							grassData.geometry.vertices[ 2 ][ vL + 35 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * sin2;
+							
+							grassData.geometry.vertices[ 2 ][ vL + 36 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos2;
+							grassData.geometry.vertices[ 2 ][ vL + 37 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+							grassData.geometry.vertices[ 2 ][ vL + 38 ] = crd.z - sin * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * sin2;
+							
+							grassData.geometry.vertices[ 2 ][ vL + 39 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * cos1;
+							grassData.geometry.vertices[ 2 ][ vL + 40 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+							grassData.geometry.vertices[ 2 ][ vL + 41 ] = crd.z - sin * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * sin1;
+
+							grassData.geometry.vertices[ 2 ][ vL + 42 ] = crd.x + cos * grassData.daisies.bend * seedBend;
+							grassData.geometry.vertices[ 2 ][ vL + 43 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight + grassData.daisies.centerWidth * .5;
+							grassData.geometry.vertices[ 2 ][ vL + 44 ] = crd.z - sin * grassData.daisies.bend * seedBend;
+
+						//petals
+							for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+								var petRot = Math.PI * 2 / grassData.daisies.petals.number * i + Math.random() * .3,
+									a1 = petRot + grassData.daisies.petals.width,
+									a2 = petRot - grassData.daisies.petals.width,
+									cosa = Math.cos(petRot), sina = Math.sin(petRot),
+									cosa1 = Math.cos(a1), sina1 = Math.sin(a1),
+									cosa2 = Math.cos(a2), sina2 = Math.sin(a2),
+									petHeight = ( Math.random() - .5 ) * grassData.daisies.petals.height;
+								grassData.geometry.vertices[ 2 ][ vL + 45 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * .8 * cosa2;
+								grassData.geometry.vertices[ 2 ][ vL + 46 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+								grassData.geometry.vertices[ 2 ][ vL + 47 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * .8 * sina2;
+								
+								grassData.geometry.vertices[ 2 ][ vL + 48 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.petals.length * cosa2;
+								grassData.geometry.vertices[ 2 ][ vL + 49 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight + petHeight;
+								grassData.geometry.vertices[ 2 ][ vL + 50 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * sina2;
+								
+								grassData.geometry.vertices[ 2 ][ vL + 51 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.petals.length * 1.2 * cosa;
+								grassData.geometry.vertices[ 2 ][ vL + 52 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+								grassData.geometry.vertices[ 2 ][ vL + 53 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * 1.2 * sina;
+								
+								grassData.geometry.vertices[ 2 ][ vL + 54 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.petals.length * cosa1;
+								grassData.geometry.vertices[ 2 ][ vL + 55 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight + petHeight;
+								grassData.geometry.vertices[ 2 ][ vL + 56 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * sina1;
+								
+								grassData.geometry.vertices[ 2 ][ vL + 57 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend + grassData.daisies.centerWidth * .8 * cosa1;
+								grassData.geometry.vertices[ 2 ][ vL + 58 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight;
+								grassData.geometry.vertices[ 2 ][ vL + 59 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.centerWidth * .8 * sina1;
+							}
+
+				//wind weights
+
+					//Base
+						grassData.geometry.weights[ wL ] = grassData.geometry.weights[ wL + 1 ] = grassData.geometry.weights[ wL + 2 ] = 0;
+
+					//Stem
+						grassData.geometry.weights[ wL + 3 ] = grassData.geometry.weights[ wL + 4 ] = grassData.geometry.weights[ wL + 5 ] = .4;
+
+					//Top
+						grassData.geometry.weights[ wL + 6 ] = grassData.geometry.weights[ wL + 7 ] = grassData.geometry.weights[ wL + 8 ] = 1;
+
+					//flower : center
+						grassData.geometry.weights[ wL + 9 ] = 1.3;
+						grassData.geometry.weights[ wL + 10 ] = 1.3;
+						grassData.geometry.weights[ wL + 11 ] = 1.3;
+						grassData.geometry.weights[ wL + 12 ] = 1.3;
+						grassData.geometry.weights[ wL + 13 ] = 1.3;
+						grassData.geometry.weights[ wL + 14 ] = 1.3;
+
+					//petals
+						for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+							grassData.geometry.weights[ wL + 15 + i * 5 ] = 1.3;
+							grassData.geometry.weights[ wL + 16 + i * 5 ] = 1.3;
+							grassData.geometry.weights[ wL + 17 + i * 5 ] = 1.3;
+							grassData.geometry.weights[ wL + 18 + i * 5 ] = 1.3;
+							grassData.geometry.weights[ wL + 19 + i * 5 ] = 1.3;
+						}
+
+				//timestamps
+					var tmstp = Math.random();
+					//Base
+						grassData.geometry.timestamps[ wL ] = grassData.geometry.timestamps[ wL + 1 ] = grassData.geometry.timestamps[ wL + 2 ] = grassData.geometry.timestamps[ wL + 3 ] = grassData.geometry.timestamps[ wL + 4 ] = grassData.geometry.timestamps[ wL + 5 ] = grassData.geometry.timestamps[ wL + 6 ] = grassData.geometry.timestamps[ wL + 7 ] = grassData.geometry.timestamps[ wL + 8 ] = grassData.geometry.timestamps[ wL + 9 ] = grassData.geometry.timestamps[ wL + 10 ] = grassData.geometry.timestamps[ wL + 11 ] = grassData.geometry.timestamps[ wL + 12 ] = grassData.geometry.timestamps[ wL + 13 ] = grassData.geometry.timestamps[ wL + 14 ] = tmstp;
+
+					//petals
+						for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+							grassData.geometry.timestamps[ wL + 15 + i * 5 ] = grassData.geometry.timestamps[ wL + 16 + i * 5 ] = grassData.geometry.timestamps[ wL + 17 + i * 5 ] = grassData.geometry.timestamps[ wL + 18 + i * 5 ] = grassData.geometry.timestamps[ wL + 19 + i * 5 ] = tmstp;
+						}
+
+				//colors	
+
+					//Base
+						grassData.geometry.colors[ cL ] = cR * .6;
+						grassData.geometry.colors[ cL + 1 ] = cG * .6;//greenish : .6, redish : .5
+						grassData.geometry.colors[ cL + 2 ] = cB * .3;
+
+						grassData.geometry.colors[ cL + 3 ] = cR * .6;
+						grassData.geometry.colors[ cL + 4 ] = cG * .6;//greenish : .6, redish : .5
+						grassData.geometry.colors[ cL + 5 ] = cB * .3;
+
+						grassData.geometry.colors[ cL + 6 ] = cR * .3;
+						grassData.geometry.colors[ cL + 7 ] = cG * .4;//greenish : .4, redish : .25
+						grassData.geometry.colors[ cL + 8 ] = cB * .15;
+
+					//Middle
+						grassData.geometry.colors[ cL + 9 ] = cR * .5;
+						grassData.geometry.colors[ cL + 10 ] = cG * .5;//greenish : .5, redish : .4
+						grassData.geometry.colors[ cL + 11 ] = cB * .25;
+
+						grassData.geometry.colors[ cL + 12 ] = cR * .3;//greenish : .3, redish : .5
+						grassData.geometry.colors[ cL + 13 ] = cG * .5;//greenish : .5, redish : .4
+						grassData.geometry.colors[ cL + 14 ] = cB * .25;
+
+						grassData.geometry.colors[ cL + 15 ] = cR * .2;//greenish : .2, redish : .25
+						grassData.geometry.colors[ cL + 16 ] = cG * .25;//greenish : .25, redish : .2
+						grassData.geometry.colors[ cL + 17 ] = cB * .125;
+
+					//Top
+						grassData.geometry.colors[ cL + 18 ] = cR * .5;//greenish : .5, redish : 1
+						grassData.geometry.colors[ cL + 19 ] = cG * 1;//greenish : 1, redish : .7
+						grassData.geometry.colors[ cL + 20 ] = cB * .4;
+
+						grassData.geometry.colors[ cL + 21 ] = cR * .5;//greenish : .5, redish : 1
+						grassData.geometry.colors[ cL + 22 ] = cG * 1;//greenish : 1, redish : .7
+						grassData.geometry.colors[ cL + 23 ] = cB * .4;
+
+						grassData.geometry.colors[ cL + 24 ] = cR * .5;//greenish : .5, redish : 1
+						grassData.geometry.colors[ cL + 25 ] = cG * 1;//greenish : 1, redish : .7
+						grassData.geometry.colors[ cL + 26 ] = cB * .4;
+
+					//center
+						grassData.geometry.colors[ cL + 27 ] = grassData.geometry.colors[ cL + 30 ] = grassData.geometry.colors[ cL + 33 ] = grassData.geometry.colors[ cL + 36 ] = grassData.geometry.colors[ cL + 39 ] = .8;
+						grassData.geometry.colors[ cL + 28 ] = grassData.geometry.colors[ cL + 31 ] = grassData.geometry.colors[ cL + 34 ] = grassData.geometry.colors[ cL + 37 ] = grassData.geometry.colors[ cL + 40 ] = .8;
+						grassData.geometry.colors[ cL + 29 ] = grassData.geometry.colors[ cL + 32 ] = grassData.geometry.colors[ cL + 35 ] = grassData.geometry.colors[ cL + 38 ] = grassData.geometry.colors[ cL + 41 ] = .3;
+						grassData.geometry.colors[ cL + 42 ] = 1;
+						grassData.geometry.colors[ cL + 43 ] = 1;
+						grassData.geometry.colors[ cL + 44 ] = .4;
+
+
+					//petals
+						var color = Math.random(),
+							blue_R = .5, blue_G = .1, blue_B = .7,
+							orange_R = .8, orange_G = .4, orange_B = .3,
+							RED, GREEN, BLUE;
+
+						if ( color < .33 ) {
+							RED = blue_R, GREEN = blue_G, BLUE = blue_B;
+						} else if ( color < .66 ) {
+							RED = orange_R, GREEN = orange_G, BLUE = orange_B;
+						} else {
+							RED = BLUE = GREEN = 1;
+						}
+
+						for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+							grassData.geometry.colors[ cL + 45 + i * 15 ] = Math.random() * .3 + RED;
+							grassData.geometry.colors[ cL + 46 + i * 15 ] = Math.random() * .3 + GREEN;
+							grassData.geometry.colors[ cL + 47 + i * 15 ] = Math.random() * .3 + BLUE;
+							
+							grassData.geometry.colors[ cL + 48 + i * 15 ] = Math.random() * .3 + RED;
+							grassData.geometry.colors[ cL + 49 + i * 15 ] = Math.random() * .3 + GREEN;
+							grassData.geometry.colors[ cL + 50 + i * 15 ] = Math.random() * .3 + BLUE;
+							
+							grassData.geometry.colors[ cL + 51 + i * 15 ] = Math.random() * .3 + RED;
+							grassData.geometry.colors[ cL + 52 + i * 15 ] = Math.random() * .3 + GREEN;
+							grassData.geometry.colors[ cL + 53 + i * 15 ] = Math.random() * .3 + BLUE;
+							
+							grassData.geometry.colors[ cL + 54 + i * 15 ] = Math.random() * .3 + RED;
+							grassData.geometry.colors[ cL + 55 + i * 15 ] = Math.random() * .3 + GREEN;
+							grassData.geometry.colors[ cL + 56 + i * 15 ] = Math.random() * .3 + BLUE;
+							
+							grassData.geometry.colors[ cL + 57 + i * 15 ] = Math.random() * .3 + RED;
+							grassData.geometry.colors[ cL + 58 + i * 15 ] = Math.random() * .3 + GREEN;
+							grassData.geometry.colors[ cL + 59 + i * 15 ] = Math.random() * .3 + BLUE;
+						}
+
+				//indices
+
+					//base
+						grassData.geometry.indices[ fL ] = r;
+						grassData.geometry.indices[ fL + 1 ] = r + 1;
+						grassData.geometry.indices[ fL + 2 ] = r + 3;
+
+						grassData.geometry.indices[ fL + 3 ] = r + 1;
+						grassData.geometry.indices[ fL + 4 ] = r + 4;
+						grassData.geometry.indices[ fL + 5 ] = r + 3;
+
+						grassData.geometry.indices[ fL + 6 ] = r + 1;
+						grassData.geometry.indices[ fL + 7 ] = r + 2;
+						grassData.geometry.indices[ fL + 8 ] = r + 4;
+
+						grassData.geometry.indices[ fL + 9 ] = r + 2;
+						grassData.geometry.indices[ fL + 10 ] = r + 5;
+						grassData.geometry.indices[ fL + 11 ] = r + 4;
+
+						grassData.geometry.indices[ fL + 12 ] = r + 2;
+						grassData.geometry.indices[ fL + 13 ] = r;
+						grassData.geometry.indices[ fL + 14 ] = r + 5;
+
+						grassData.geometry.indices[ fL + 15 ] = r;
+						grassData.geometry.indices[ fL + 16 ] = r + 3;
+						grassData.geometry.indices[ fL + 17 ] = r + 5;
+
+					//stem
+						grassData.geometry.indices[ fL + 18 ] = r + 3;
+						grassData.geometry.indices[ fL + 19 ] = r + 4;
+						grassData.geometry.indices[ fL + 20 ] = r + 6;
+
+						grassData.geometry.indices[ fL + 21 ] = r + 4;
+						grassData.geometry.indices[ fL + 22 ] = r + 7;
+						grassData.geometry.indices[ fL + 23 ] = r + 6;
+
+						grassData.geometry.indices[ fL + 24 ] = r + 4;
+						grassData.geometry.indices[ fL + 25 ] = r + 5;
+						grassData.geometry.indices[ fL + 26 ] = r + 7;
+
+						grassData.geometry.indices[ fL + 27 ] = r + 5;
+						grassData.geometry.indices[ fL + 28 ] = r + 8;
+						grassData.geometry.indices[ fL + 29 ] = r + 7;
+
+						grassData.geometry.indices[ fL + 30 ] = r + 5;
+						grassData.geometry.indices[ fL + 31 ] = r + 3;
+						grassData.geometry.indices[ fL + 32 ] = r + 8;
+
+						grassData.geometry.indices[ fL + 33 ] = r + 3;
+						grassData.geometry.indices[ fL + 34 ] = r + 6;
+						grassData.geometry.indices[ fL + 35 ] = r + 8;
+
+					//flower : center
+						grassData.geometry.indices[ fL + 36 ] = r + 9;
+						grassData.geometry.indices[ fL + 37 ] = r + 10;
+						grassData.geometry.indices[ fL + 38 ] = r + 14;
+
+						grassData.geometry.indices[ fL + 39 ] = r + 10;
+						grassData.geometry.indices[ fL + 40 ] = r + 11;
+						grassData.geometry.indices[ fL + 41 ] = r + 14;
+
+						grassData.geometry.indices[ fL + 42 ] = r + 11;
+						grassData.geometry.indices[ fL + 43 ] = r + 12;
+						grassData.geometry.indices[ fL + 44 ] = r + 14;
+
+						grassData.geometry.indices[ fL + 45 ] = r + 12;
+						grassData.geometry.indices[ fL + 46 ] = r + 13;
+						grassData.geometry.indices[ fL + 47 ] = r + 14;
+
+						grassData.geometry.indices[ fL + 48 ] = r + 13;
+						grassData.geometry.indices[ fL + 49 ] = r + 9;
+						grassData.geometry.indices[ fL + 50 ] = r + 14;	
+
+					//petals
+						for ( var i = 0 ; i < grassData.daisies.petals.number ; i++ ) {
+							grassData.geometry.indices[ fL + 51 + i * 9 ] = r + 15 + 5 * i;
+							grassData.geometry.indices[ fL + 52 + i * 9 ] = r + 16 + 5 * i;
+							grassData.geometry.indices[ fL + 53 + i * 9 ] = r + 19 + 5 * i;
+
+							grassData.geometry.indices[ fL + 54 + i * 9 ] = r + 19 + 5 * i;
+							grassData.geometry.indices[ fL + 55 + i * 9 ] = r + 16 + 5 * i;
+							grassData.geometry.indices[ fL + 56 + i * 9 ] = r + 18 + 5 * i;
+
+							grassData.geometry.indices[ fL + 57 + i * 9 ] = r + 16 + 5 * i;
+							grassData.geometry.indices[ fL + 58 + i * 9 ] = r + 17 + 5 * i;
+							grassData.geometry.indices[ fL + 59 + i * 9 ] = r + 18 + 5 * i;
+						}
+
+			}
+
+		return true;
+	}
+
+	function prepareGrassMesh( msg ) {
+		var img = new Image();
+		img.onload = function () {
+			grassData.texture.POT = img.width;
+			var canvas = document.createElement('canvas');
+			var ctx = canvas.getContext('2d');
+			canvas.width = canvas.height = grassData.texture.POT;
+			ctx.drawImage(img, 0, 0, grassData.texture.POT, grassData.texture.POT);
+			grassData.texture.imgData = ctx.getImageData( 0, 0, grassData.texture.POT, grassData.texture.POT ).data;
+
+			grassMat = new THREE.ShaderMaterial({
+				vertexShader : ['',
+					'uniform float time;',
+					'attribute vec3 color;',
+					'attribute vec3 pos1;',
+					'attribute vec3 pos2;',
+					'attribute float date;',
+					//'attribute float weight;',
+					'varying vec3 vCol;',
+				//	'varying float shade;',
+					//'vec2 windDir = vec2(.0,1.);',
+					//'float hash( vec2 p ){',
+					//'	float h = dot(p,vec2(127.1,311.7));',
+					//'   return -1.0 + 2.0*fract(sin(h)*43758.5453123);',
+					//'}',
+					//'float noise( in vec2 p ){',
+					//'	vec2 i = floor( p );',
+					//'	vec2 f = fract( p );',
+					//'	vec2 u = f*f*(3.0-2.0*f);',
+					//'   return mix( mix( hash( i + vec2(0.0,0.0) ), ',
+					//'                     hash( i + vec2(1.0,0.0) ), u.x),',
+					//'                mix( hash( i + vec2(0.0,1.0) ), ',
+					//'                     hash( i + vec2(1.0,1.0) ), u.x), u.y);',
+					//'}',
+					//'float wind(in vec2 coord){',    
+					//'	float value = noise(coord / 64.) * 64.;',
+					//'	value += noise(coord / 32.) * 32.;',
+					//'	value += noise(coord / 16.) * 16.;',
+					//
+					//'   return value;',
+					//'}',
+					'void main () {',
+					'	vCol = color;',
+				//	'	vec4 light = modelViewMatrix * vec4(-1.,3.,-1.,1.);',
+				//	'	vec4 wNormal = modelViewMatrix * vec4(normal,1.);',
+				//	'	shade = dot(light,wNormal) * .1;',
+					'	vec3 pos = vec3(0.);',
+					'	float a = mod(time * .0002 + date * 3.,3.);',
+					//todo : math way to avoid the ifs
+					'	if ( a < 1. ) {',
+					'		pos = ( 1. - a ) * position + a * pos1;',
+					'	} else if ( a < 2. ) {',
+					'		pos = ( 2. - a ) * pos1 + ( a - 1. ) * pos2;',
+					'	} else {',
+					'		pos = ( 3. - a ) * pos2 + ( a - 2. ) * position;',
+					'	}',
+					//'	if (weight != 0.){',
+					//'		float w = 2. * wind(pos.xz * 8. + windDir * time * .12) - 1.;',
+					//'		w *= .00018;',
+					//'		vCol *= 1. + max(0.,( weight * 2. - 1.)) * ( max(0.,w) * 1.5 );',
+					//'		pos.xz += w * weight;',
+					//'	}',
+					'	gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.);',
+					'}'].join('\n'),
+				fragmentShader : ''+
+					'varying vec3 vCol;'+
+				//	'varying float shade;'+
+					'void main() {'+
+					'	gl_FragColor = vec4(vCol,1.);'+
+					'}',
+				side : THREE.DoubleSide,
+				uniforms : {
+					time : {type : 'f', value : 0}
+				}
+				});
+			grassGeo = new THREE.BufferGeometry();
+			//setRaycaster(grassData.POT);//POT from soil ??
+
+			var target = new THREE.Vector3(0,0,0);
+
+			//check if inside msg to grow flowers there first
+			if ( typeof msg !== 'undefined' ) {
+				for ( var  j = 0 ; j < 128 ; j++ ) {
+					for ( var i = 0 ; i < 128 ; i++ ) {
+						var absX = i/128,
+							absY = j/128,
+							dataCrd = j * 128 + i;
+
+						if ( msg[ dataCrd * 4 + 2 ] < 255 ) {
+							//create target vector
+							//1. horizontal plane
+								target.x = ( absX * 2 - 1 ) * soilData.planeSide / 2; 
+								target.z = - ( 1 - absY * 2 ) * soilData.planeSide / 2; 
+							//2. find vertical 
+								var newI = Math.round( ( ( ( i * 2 - 128 ) / ( 2 + ( 1 - j / 128 ) ) ) + 128 ) / 2 );
+								var dataCoord = newI + 128 * j,
+									luminosity = 0.21 * soilData.imgData[ dataCoord * 4 ] / 255 + 0.72 * soilData.imgData[ dataCoord * 4 + 1 ] / 255 + 0.07 * soilData.imgData[ dataCoord * 4 + 2 ] / 255 - .5,
+									elevation = 0;
+
+								for ( var k = 0; k < soilData.hills.length ; k ++ ) {
+
+								//target.x *= 1 + 2 * ( 1 - py / soilData.POT );
+									var tx = target.x / ( 1 + 2 * ( 1 - ( target.z + soilData.planeSide / 2 ) / soilData.planeSide ) ),
+										hillDistanceX = tx / ( soilData.planeSide  / 2 ) - soilData.hills[ k ].x,
+										hillDistanceY = - target.z / ( soilData.planeSide / 2 ) - soilData.hills[ k ].y,
+										hillDistance = Math.sqrt( hillDistanceX * hillDistanceX + hillDistanceY * hillDistanceY );
+									elevation += Math.max( 0, 1 - hillDistance ) * soilData.hills[ k ].factor;
+								}
+								target.y = luminosity * soilData.displacementScale + elevation;
+
+							//grow 2 flowers !
+							grow( target, true );
+							grow( target, true );
+						}
+					}
+				}
+			}	
+
+			//fil the rest
+			for ( var i = grassData.strands.counter + grassData.daisies.counter ; i < grassData.seeds ; i++ ) {
+				target.x = ( Math.random() * 2 - 1 ) * soilData.planeSide / 2 ;
+				target.z = ( Math.random() * 2 - 1 ) * soilData.planeSide / 2 ;
+
+				//reloop to get y value
+				var px = Math.floor( ( target.x + soilData.planeSide / 2 ) / soilData.planeSide * soilData.POT ), 
+					py = Math.floor( ( target.z + soilData.planeSide / 2 ) / soilData.planeSide * soilData.POT );
+
+				//heart shape
+				var bottom = py > ( 6 / 3 * px + 0 / 3 * soilData.POT ) || py > ( - 6 / 3 * px + 6 / 3 * soilData.POT ),
+					tz = 1 - ( target.z + soilData.planeSide / 2 ) / soilData.planeSide,
+					tz2 = target.z -13,
+					tx = target.x * ( 2 + ( 1 - tz ) ),
+					tx1 = tx + 7,tx2 = tx - 7,
+					top = ! ( tz2 > 0 || Math.sqrt( tx1 * tx1 + tz2 * tz2 ) < ( soilData.planeSide / 3 ) || Math.sqrt( tx2 * tx2 + tz2 * tz2 ) < ( soilData.planeSide / 3 ) );
+
+				if ( top || bottom ) {
+					i--; continue;
+				}
+
+				//if ok then get more info : loop to get y value
+				var	pI = py * soilData.POT + px,
+					luminosity = 0.21 * soilData.imgData[ pI * 4 ] / 255 + 0.72 * soilData.imgData[ pI * 4 + 1 ] / 255 + 0.07 * soilData.imgData[ pI * 4 + 2 ] / 255 - .5,
+					elevation = 0;
+				for ( var k = 0; k < soilData.hills.length ; k ++ ) {
+					var hillDistanceX = target.x / ( soilData.planeSide  / 2 ) - soilData.hills[ k ].x,
+						hillDistanceY = - target.z / ( soilData.planeSide / 2 ) - soilData.hills[ k ].y,
+						hillDistance = Math.sqrt( hillDistanceX * hillDistanceX + hillDistanceY * hillDistanceY );
+					elevation += Math.max( 0, 1 - hillDistance ) * soilData.hills[ k ].factor;
+				}
+				target.x *= 1 + 2 * ( 1 - py / soilData.POT );
+				target.y = luminosity * soilData.displacementScale + elevation;	
+
+				if ( ! grow( target ) ) i--;
+			}
+
+			var vertA0 = new Float32Array(grassData.geometry.vertices[0]);
+			grassGeo.addAttribute('position',new THREE.BufferAttribute(vertA0,3));
+			var vertA1 = new Float32Array(grassData.geometry.vertices[1]);
+			grassGeo.addAttribute('pos1',new THREE.BufferAttribute(vertA1,3));
+			var vertA2 = new Float32Array(grassData.geometry.vertices[2]);
+			grassGeo.addAttribute('pos2',new THREE.BufferAttribute(vertA2,3));
+			//var normA = new Float32Array(grassData.geometry.normals);
+			//grassGeo.addAttribute('normals',new THREE.BufferAttribute(normA,3));
+			var colA = new Float32Array(grassData.geometry.colors);
+			grassGeo.addAttribute('color',new THREE.BufferAttribute(colA,3));
+			var wghtA = new Float32Array(grassData.geometry.weights);
+			grassGeo.addAttribute('weight',new THREE.BufferAttribute(wghtA,1));
+			var tStmpA = new Float32Array(grassData.geometry.timestamps);
+			grassGeo.addAttribute('date',new THREE.BufferAttribute(tStmpA,1));
+			var indA = new Uint32Array(grassData.geometry.indices);
+			grassGeo.setIndex( new THREE.BufferAttribute( indA, 1 ) );
+
+			grass = new THREE.Mesh(grassGeo, grassMat);
+			scene.add(grass);
+			grass.rotation.x = .3;
+		};
+		img.src = grassData.texture.source;
+	}
+
+	function createSky () {
+
+		// Add Sky Mesh
+		sky = new THREE.Sky();
+		scene.add( sky.mesh );
+
+		//set parameters
+		var inclination = .49;
+		var azimuth = 0.2;
+		sky.uniforms.turbidity.value = 10;
+		sky.uniforms.reileigh.value = 2;
+		sky.uniforms.luminance.value = 1;
+		sky.uniforms.mieCoefficient.value = 0.005;
+		sky.uniforms.mieDirectionalG.value = 0.68;
+
+		// Add Sun Helper
+		var distance = 1000;
+		var theta = Math.PI * ( inclination - 0.5 );
+		var phi = 2 * Math.PI * ( azimuth - 0.5 );
+		sunSphere = new THREE.Mesh(
+			new THREE.SphereGeometry( 200, 16, 8 ),
+			new THREE.MeshBasicMaterial( { color: 0xffffff } )
+		);
+		sunSphere.position.x = distance * Math.cos( phi );
+		sunSphere.position.y = distance * Math.sin( phi ) * Math.sin( theta );
+		sunSphere.position.z = distance * Math.sin( phi ) * Math.cos( theta );
+		sunSphere.visible = false;
+		sky.uniforms.sunPosition.value.copy( sunSphere.position );
+		scene.add( sunSphere );
+
+		sunSphere.rotation.x = sky.mesh.rotation.x= .3;
+	}
+
+	function addLake () {
+		waterNormals = new THREE.TextureLoader().load( waterData.normalTexture.source );
+		waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+
+		water = new THREE.Water( renderer, camera, scene, {
+			textureWidth: waterData.mirrorTexture.POT,
+			textureHeight: waterData.mirrorTexture.POT,
+			waterNormals: waterNormals,
+			alpha: 	1.0,
+			sunDirection: sun.position.clone().normalize(),
+			sunColor: 0xffffff,
+			waterColor: waterData.mirrorTexture.waterColor,
+			distortionScale: waterData.mirrorTexture.distortionScale,
+		} );
+
+
+		mirrorMesh = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( waterData.geometry.width, waterData.geometry.width, 50, 50 ),
+			water.material
+		);
+
+		mirrorMesh.add( water );
+		mirrorMesh.rotation.x = - Math.PI * 0.5;
+		mirrorMesh.position.y = .6;
+		scene.add( mirrorMesh );
+	}
+
+	function setRaycaster( POT ) {
+		var raycaster = new THREE.Raycaster();
+		renderer.domElement.addEventListener( 'click', raycast, false );
+		function raycast ( e ) {
+			mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+			mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+			raycaster.setFromCamera( mouse, camera );	
+			var intersect = raycaster.intersectObject( soil );
+			if ( intersect[ 0 ] ) grow( intersect[ 0 ].point, POT );	
+		}
+	}
+
+	function createSoil() {
+		var img = new Image();
+		img.onload = function () {
+			//1. create canvas
+			soilData.POT = img.width;
+			var canvas = document.createElement('canvas');
+			var ctx = canvas.getContext('2d');
+			canvas.width = canvas.height = soilData.POT;
+			ctx.drawImage(img, 0, 0, soilData.POT, soilData.POT);
+
+			//2. create texture from canvas
+			var tx = new THREE.Texture(canvas);
+			tx.minFilter = THREE.LinearFilter;
+			tx.needsUpdate = true;
+
+			//3. create material and map texture
+			var soilMat = new THREE.MeshBasicMaterial({
+				color:0xbbbbbb,
+				map:tx
+			});
+
+			//4. create plane geometry, displaced from canvas greyscale + hill from circles
+			var soilGeo = new THREE.PlaneBufferGeometry( soilData.planeSide, soilData.planeSide, soilData.sideVertices, soilData.sideVertices );
+			soilData.imgData = ctx.getImageData( 0, 0, soilData.POT, soilData.POT ).data;
+
+			for ( var i = 0 ; i < ( soilData.sideVertices ) ; i ++ ) {
+				for ( var j = 0 ; j < ( soilData.sideVertices + 2 ) ; j ++ ) {//dont know why +2 but otherwise the 2 last rows stay flat
+
+
+					var px = ( j * soilData.sideVertices + i ), 
+						luminosity = 0.21 * soilData.imgData[ px * 4 ] / 255 + 0.72 * soilData.imgData[ px * 4 + 1 ] / 255 + 0.07 * soilData.imgData[ px * 4 + 2 ] / 255 - .5,
+						elevation = 0;
+
+					//1.get y value
+					for ( var k = 0; k < soilData.hills.length ; k ++ ) {
+						var hillDistanceX = soilGeo.attributes.position.array[ px * 3 ] / ( soilData.planeSide  / 2 ) - soilData.hills[ k ].x,
+							hillDistanceY = soilGeo.attributes.position.array[ px * 3 + 1 ] / ( soilData.planeSide / 2 ) - soilData.hills[ k ].y;
+						var hillDistance = Math.sqrt( hillDistanceX * hillDistanceX + hillDistanceY * hillDistanceY );
+						elevation += Math.max( 0, 1 - hillDistance ) * soilData.hills[ k ].factor;
+					}
+					soilGeo.attributes.position.array[ px * 3 + 2 ] = luminosity * soilData.displacementScale + elevation;
+
+					//2.resize the foreground to match camera's frustum
+					soilGeo.attributes.position.array[ px * 3 ] *= 1 + 2 * ( 1 - j / soilData.sideVertices );
+
+					soilGeo.attributes.position.needsUpdate = true;
+				}
+			}
+			soilGeo.computeVertexNormals();
+
+			//create mesh
+			soil = new THREE.Mesh(soilGeo,soilMat);
+			soil.rotation.x = -Math.PI/2 + .3;
+			scene.add(soil);
+
+			if ( ! window.location.hash ) prepareGrassMesh();
+		};
+		img.src = soilData.source;
+	}
+
+	function setLighting () {
+		sun = new THREE.DirectionalLight(0xffffff,2);
+		sun.position.copy(sunSphere.position);
+		sun.lookAt(scene.position);
+		scene.add(sun);
+		//scene.add(new THREE.DirectionalLightHelper(sun,3))
+	}
+
+	function setView() {
+		camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,1,1100);
+		camera.position.set(-soilData.planeSide/7,8,30);
+		camera.lookAt(new THREE.Vector3(-1.77, -.35,-.55));
+
+		//controls=new THREE.OrbitControls(camera,renderer.domElement);
+		////controls.enableZoom=false;
+		//controls.enableDamping=true;
+		//controls.dampingFactor=.05;
+		//controls.rotateSpeed=.07;
+		//controls.maxPolarAngle=1.35;
+		//controls.minPolarAngle=.8;
+	}
+
+	function setRenderer() {
+		rendererA=new THREE.WebGLRenderer({antialias:true});
+		rendererA.setSize(innerWidth,innerHeight);
+
+		rendererB=new THREE.WebGLRenderer();
+		rendererB.setSize(innerWidth,innerHeight);
+
+		renderer = rendererA;
+		document.body.appendChild(rendererA.domElement);
+
+		var b = document.createElement('button');
+		b.innerHTML = 'switch antialias';
+		b.style.cssText = ''+
+			'position:absolute;'+
+			'top:0;left:0;';
+		//document.body.appendChild(b);
+		//b.addEventListener( 'click', switchAntialias, false );
+	}
+
+	function switchAntialias ( b ) {
+		if ( typeof b !== 'undefined' && antialias === b ) return;
+		document.body.removeChild(renderer.domElement);
+		renderer = antialias ? rendererB : rendererA;	
+		if ( typeof water !== 'undefined' ) water.renderer = renderer;	
+		//controls.dispose();
+		//controls=new THREE.OrbitControls(camera,renderer.domElement);
+		//controls.target.set(-1.77, -.45,-.55);
+		////controls.enableZoom=false;
+		//controls.enableDamping=true;
+		//controls.dampingFactor=.05;
+		//controls.rotateSpeed=.07;
+		//controls.maxPolarAngle=1.5;
+		//controls.minPolarAngle=.8;
+		antialias = !antialias;
+		document.body.appendChild(renderer.domElement) 
+	}
+
+	function animate ( t ) {
+		requestAnimationFrame( animate );
+
+		//controls.update();
+
+		if ( typeof grassMat !== 'undefined' ) grassMat.uniforms.time.value = t;
+
+		if ( typeof water !== 'undefined' ) {
+			water.material.uniforms.time.value += 1.0 / 60.0;
+			water.render();	
+		}
+
+		renderer.render( scene, camera );
+	}
+</script>
+</body>
+</html>

@@ -85,7 +85,7 @@ THREE.ShaderLib[ 'sky' ] = {
 		"const vec3 up = vec3(0.0, 1.0, 0.0);",
 
 		"const float EE = 1000.0;",
-		"const float sunAngularDiameterCos = 0.999956676946448443553574619906976478926848692873900859324;",
+		"const float sunAngularDiameterCos = 0.999156676946448443553574619906976478926848692873900859324;",
 		"// 66 arc seconds -> degrees, and the cosine of that",
 
 		"// earth shadow hack",
