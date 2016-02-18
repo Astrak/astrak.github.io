@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TITLE</title>
+	<style>
+		/*MAIN*/
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+		/*BUTTON*/
+			button{
+			    position:absolute;
+			    bottom:0;
+			    cursor:pointer;
+			}
+			button span{
+				position:absolute;
+				width:30px;
+				height:5px;
+				margin-left:-15px;
+				margin-top:-2.5px;
+				background:chocolate;
+				border-radius:2px;
+			}
+			button{
+			    outline:0;
+			    background:darkslategrey;
+				border:none;
+			    box-shadow:0px 0px 10px black;
+				left:100%;
+				margin-left:-70px;
+				margin-bottom:7px;
+				border-radius:50%;
+				width:50px;height:50px;
+			}
+		/*SPEED SLIDER*/
+			div.slider-container{
+				position:absolute;
+				left:50%;
+				margin-left:-100px;
+				width:200px;
+				height:60px;
+				bottom:20px;
+			}
+			span.slider-range{
+				position:absolute;
+				left:50%;top:50%;
+				margin-left:-50%;
+				margin-top:-4px;
+				width:100%;
+				height:8px;
+				border-radius:2px;
+				background:chocolate;
+			}
+			span.slider-thumb{
+				left:200px;
+			    background:darkslategrey;
+			    box-shadow:0px 0px 10px black;
+				margin-bottom:7px;
+				width:50px;height:50px;
+				border-radius:50%;
+				margin-left:-50px;
+				position:absolute;
+				margin-top:-21px;/*25-4 of slider-range margin-top*/
+			}
+			p.slider-thumb-content{
+				position:absolute;
+				color:chocolate;
+				font:bold 25px Arial;
+				top:50%;left:50%;
+				padding:0;
+				margin:-15px 0px 0px -10px;
+			}
+			input{
+			    position:absolute;
+			    bottom:-2px;
+			    opacity:0;
+			    cursor:pointer;
+			 	-webkit-appearance: none; 
+			    width:200px;
+			    height:60px;
+			    left:50%;
+			    margin-left:-100px;
+				background:none;
+				border:none;
+			}
+
+		/**********************************/
+		/** SLIDER STYLE FROM CSS TRICKS **/
+		/**********************************/
+
+		/* the real slider is hidden on top of 
+		the visible range and thumb that let 
+		display the value inside the latter */
+
+		/** 1. REMOVE AUTOMATIC STYLES **/
+			input[type=range]::-webkit-slider-thumb {
+			  -webkit-appearance: none;
+			}
+			input[type=range]:focus {
+			  outline: none;
+			}
+			input[type=range]::-ms-track {
+			  cursor: pointer;
+			  background: transparent; /* Hides the slider so custom styles can be added */
+			  border-color: transparent;
+			  color: transparent;
+			}
+
+		/** 2. THE THUMB **/
+			input[type=range]::-webkit-slider-thumb {
+			  -webkit-appearance: none;
+			  height: 50px;
+			  width: 50px;
+			  border-radius: 50%;
+			  background: darkslategrey;
+			  margin-top: -21px; /* needed in Chrome, not in Firefox and IE */
+			  box-shadow:0px 0px 10px #000;
+			}
+			input[type=range]::-moz-range-thumb {
+			  height: 50px;
+			  width: 50px;
+			  border-radius: 50%;
+			  background: darkslategrey;
+			  box-shadow:0px 0px 10px #000;
+			  border:none;
+			}
+			input[type=range]::-ms-thumb {
+			  height: 50px;
+			  width: 50px;
+			  border-radius: 50%;
+			  background: darkslategrey;
+			  box-shadow:0px 0px 10px #000;
+			  border:none;
+			}
+
+		/** 3. THE TRACK **/
+			input[type=range]::-webkit-slider-runnable-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: chocolate;
+			  border-radius: 1.3px;
+			}
+			input[type=range]:focus::-webkit-slider-runnable-track {
+			  background: chocolate;
+			}
+			input[type=range]::-moz-range-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: chocolate;
+			  border-radius: 1.3px;
+			}
+			input[type=range]::-ms-track {
+			  width: 100%;
+			  height: 8.4px;
+			  background: transparent;
+			  border-color: transparent;
+			  border-width: 16px 0;
+			  color: transparent;
+			}
+			input[type=range]::-ms-fill-lower {
+			  background: chocolate;
+			  border-radius: 2.6px;
+			}
+			input[type=range]:focus::-ms-fill-lower {
+			  background: chocolate;
+			}
+			input[type=range]::-ms-fill-upper {
+			  background: chocolate;
+			  border-radius: 2.6px;
+			}
+			input[type=range]:focus::-ms-fill-upper {
+			  background: chocolate;
+			}
+	</style>
+</head>
+<body>
+<script src='../libs/threer72.js'></script>
+<script src='../libs/controls/TrackballControls.js'></script>
+
+<script id='vs' type='x-shader/x-vertex'>
+	uniform sampler2D posTex;
+	uniform float pointSize;
+	uniform float pixelRatio;
+	varying float speed;
+	void main(){
+		vec4 vPosition=texture2D(posTex,position.xy);
+		speed=vPosition.w*3.;
+		vec4 mvPosition=modelViewMatrix*vec4(vPosition.xyz,1.);
+		float l=length(vPosition.xyz);
+
+		gl_PointSize=pointSize*pixelRatio*(5.)/length(mvPosition.xyz);
+		gl_Position=projectionMatrix*mvPosition;
+		//gl_PointSize=3.;
+		//gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+	}
+</script>
+<script id='fs' type='x-shader/x-fragment'>
+	varying float speed;
+	void main(){
+		float d=distance(gl_PointCoord,vec2(.5));
+		float result=-(d-.5)*1.2;
+		gl_FragColor=vec4(.32*.7*speed,.28*.7,1.*.7,result)*result;
+		//gl_FragColor=vec4(1.);
+	}
+</script>
+
+<script>
+	'use strict';
+
+	var scene,renderer,camera,controls,points,galaxy;
+	var texGeometry,texturesScene,orthoCam;
+	var speedTex=[],posTex=[],
+		speedMesh,posMesh,
+		actual=1,before=(actual+1)%2;
+
+	var size=64;
+	var rttype=THREE.FloatType;
+	var gNumber=2;
+	var gravity;
+
+	setScenes();
+
+	addPoints();
+
+	setUI();
+
+	animate();
+
+	/** FUNCTIONS **/
+
+	function setScenes(){
+
+		window.devicePixelRatio=1;
+		
+		//main scene & usual stuff
+		renderer=new THREE.WebGLRenderer();
+		renderer.context.getExtension('OES_texture_float');
+		renderer.setPixelRatio(.8);
+		renderer.setSize(innerWidth,innerHeight);
+		document.body.appendChild(renderer.domElement);
+		scene=new THREE.Scene();
+		camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,10,10000);
+		camera.position.z=400;
+		controls=new THREE.TrackballControls(camera,renderer.domElement);
+		controls.rotateSpeed=7;
+		controls.minDistance=300;
+		controls.noPan=true;
+
+		//texturesScene
+		texturesScene=new THREE.Scene();
+		orthoCam=new THREE.OrthographicCamera(0,1,1,0,-.1,2);
+		orthoCam.position.z=1;
+		orthoCam.lookAt(scene.position);
+
+		window.addEventListener('resize',resize);
+
+		initRT();
+		initTextures();
+
+		//window.addEventListener('click',function(){
+		//	clearSimulation();
+		//	initRT();
+		//	initTextures();
+		//	addPoints();
+		//})
+
+		//scene.add(new THREE.AxisHelper(size/2));
+	}
+
+	function resize(){
+		renderer.setSize(innerWidth,innerHeight);
+		camera.aspect=innerWidth/innerHeight;
+		camera.updateProjectionMatrix();
+		points.material.uniforms.pixelRatio.value=innerHeight;
+	}
+
+	function clearSimulation(){
+		scene.remove(points)
+		speedTex=[],posTex=[],points=undefined,actual=1,before=(actual+1)%2,speedMesh=undefined,posMesh=undefined;
+		galaxy=new Galaxy(size*size,gNumber);
+	}
+
+	function addPoints(){
+		var geometry=new THREE.Geometry();
+		for(var i=0;i<size*size;i++)geometry.vertices.push(new THREE.Vector3(i%size/size+.5/size,-Math.floor(i/size)/size+1-.5/size,0));
+
+		var material=new THREE.ShaderMaterial({
+			vertexShader:document.getElementById('vs').textContent,
+			fragmentShader:document.getElementById('fs').textContent,
+			uniforms:{
+				posTex:{type:'t',value:posTex[actual]},
+				pointSize:{type:'f',value:130/(size)},
+				pixelRatio:{type:'f',value:innerHeight}
+			},
+			transparent:true,
+			depthTest:false,
+			blending:THREE.AdditiveBlending
+		})
+
+		points=new THREE.Points(geometry,material);
+		points.matrixAutoUpdate=false;
+
+		scene.add(points);
+	}
+
+	function initRT(){	
+		var rtParams={
+			format:THREE.RGBAFormat,
+			generateMipmaps:false,
+			magFilter:THREE.NearestFilter,
+			minFilter:THREE.NearestFilter,
+			premultiplyAlpha:false,
+			type:rttype,
+			stencilBuffer:false,
+			depthBuffer:false
+		};
+		speedTex[0]=new THREE.WebGLRenderTarget(size,size,rtParams);
+		speedTex[1]=new THREE.WebGLRenderTarget(size,size,rtParams);
+		posTex[0]=new THREE.WebGLRenderTarget(size,size,rtParams);
+		posTex[1]=new THREE.WebGLRenderTarget(size,size,rtParams);
+	}
+
+	function setTexGeometry(){
+		galaxy=new Galaxy(size*size,gNumber);
+		texGeometry=new THREE.BufferGeometry();
+		var vertices=new Float32Array(size*size*3*6);
+		var initPos=new Float32Array(size*size*3*6);
+		var initSpeed=new Float32Array(size*size*3*6);
+		var starsInitPos=galaxy.getPos();
+		var starsInitSpeed=galaxy.getSpeed();
+		for(var i=0;i<size*size;i++){
+			var a=i%size/size,
+				b=-Math.floor(i/size)/size+1;
+			//top triangle
+			//top left				    //bottom left			 	 //top right
+			vertices[18*i]=a;			vertices[18*i+3]=a;		 	 vertices[18*i+6]=a+1/size;
+			vertices[18*i+1]=b;			vertices[18*i+4]=b-1/size;	 vertices[18*i+7]=b;
+			vertices[18*i+2]=0;			vertices[18*i+5]=0;		 	 vertices[18*i+8]=0;
+
+			//bottom triangle
+			//top right				    //bottom left			 	 //bottom right
+			vertices[18*i+9]=a+1/size;	vertices[18*i+12]=a;	 	 vertices[18*i+15]=a+1/size;
+			vertices[18*i+10]=b;		vertices[18*i+13]=b-1/size;	 vertices[18*i+16]=b-1/size;
+			vertices[18*i+11]=0;		vertices[18*i+14]=0;	 	 vertices[18*i+17]=0;
+
+			initPos[18*i]=initPos[18*i+3]=initPos[18*i+6]=initPos[18*i+9]=initPos[18*i+12]=initPos[18*i+15]=starsInitPos[3*i];
+			initPos[18*i+1]=initPos[18*i+4]=initPos[18*i+7]=initPos[18*i+10]=initPos[18*i+13]=initPos[18*i+16]=starsInitPos[3*i+1];
+			initPos[18*i+2]=initPos[18*i+5]=initPos[18*i+8]=initPos[18*i+11]=initPos[18*i+14]=initPos[18*i+17]=starsInitPos[3*i+2];
+
+			initSpeed[18*i]=initSpeed[18*i+3]=initSpeed[18*i+6]=initSpeed[18*i+9]=initSpeed[18*i+12]=initSpeed[18*i+15]=starsInitSpeed[3*i+0];		
+			initSpeed[18*i+1]=initSpeed[18*i+4]=initSpeed[18*i+7]=initSpeed[18*i+10]=initSpeed[18*i+13]=initSpeed[18*i+16]=starsInitSpeed[3*i+1];
+			initSpeed[18*i+2]=initSpeed[18*i+5]=initSpeed[18*i+8]=initSpeed[18*i+11]=initSpeed[18*i+14]=initSpeed[18*i+17]=starsInitSpeed[3*i+2];
+		}
+		texGeometry.addAttribute('position',new THREE.BufferAttribute(vertices,3));
+		texGeometry.addAttribute('initPos',new THREE.BufferAttribute(initPos,3));
+		texGeometry.addAttribute('initSpeed',new THREE.BufferAttribute(initSpeed,3));
+	}
+
+	function setInitPosSpeed(){
+		var initTexMaterial=new THREE.ShaderMaterial({
+			vertexShader:['',
+						  'uniform float b;',
+						  'attribute vec3 initPos;',
+						  'attribute vec3 initSpeed;',
+						  'varying vec3 vColor;',
+						  'void main(){',
+						  '	vColor=b==0.?initSpeed:initPos;',
+						  '	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+						  '}'].join('\n'),
+			fragmentShader:[''+
+							'varying vec3 vColor;',
+							'void main(){',
+							'	gl_FragColor=vec4(vColor,1.);',
+							'}'].join('\n'),
+			uniforms:{
+				b:{type:'f',value:0}
+			}
+		});
+
+		var initTexMesh=new THREE.Mesh(texGeometry,initTexMaterial);
+
+		texturesScene.add(initTexMesh);
+
+		renderer.render(texturesScene,orthoCam,speedTex[actual]);
+		initTexMesh.material.uniforms.b.value=1;
+		renderer.render(texturesScene,orthoCam,posTex[actual]);
+
+		texturesScene.remove(initTexMesh);
+	}
+
+	function initTextures(){
+		setTexGeometry();
+		setInitPosSpeed();
+
+		gravity=.824/(size*size);
+
+		var posMaterial=new THREE.ShaderMaterial({
+			vertexShader:['',
+						  'varying vec3 vPosition;',
+						  'void main(){',
+						  '	vPosition=position;',
+						  '	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+						  '}'].join('\n'),
+			fragmentShader:['',
+							'uniform sampler2D posTex;',
+							'uniform sampler2D speedTex;',
+							'varying vec3 vPosition;',
+							'void main(){',
+							'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
+							'	vec4 speed=texture2D(speedTex,vPosition.xy);',
+							'	pos+=speed.xyz;',
+							'	gl_FragColor=vec4(pos,speed.w);',
+							'}'].join('\n'),
+			uniforms:{
+				posTex:{type:'t',value:null},
+				speedTex:{type:'t',value:null}
+			}
+		});
+		var speedMaterial=new THREE.ShaderMaterial({
+			vertexShader:['',
+						  'varying vec3 vPosition;',
+						  'void main(){',
+						  '	vPosition=position;',
+						  '	gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
+						  '}'].join('\n'),
+			fragmentShader:['',
+							'precision highp float;',
+							'uniform sampler2D posTex;',
+							'uniform sampler2D speedTex;',
+							'uniform float gravity;',
+							'varying vec3 vPosition;',
+							'const float pix=1./'+size+'.;',
+							'void main(){',
+							'	vec3 speed=texture2D(speedTex,vPosition.xy).xyz;',
+							'	vec3 pos=texture2D(posTex,vPosition.xy).xyz;',
+							'	for(float i=0.;i<1.;i+=pix){',
+							'		for(float j=1.;j>0.;j-=pix){',
+							'			vec3 u=texture2D(posTex,vec2(i,j)).xyz-pos;',
+							'			float d=length(u)+.000001;',
+							'			speed+=gravity*u/(d*d);',
+							'		}',
+							'	}',
+							'	float s=length(speed);',
+							'	gl_FragColor=vec4(speed,s);',
+							'}'].join('\n'),
+			uniforms:{
+				posTex:{type:'t',value:null},
+				speedTex:{type:'t',value:null},
+				gravity:{type:'f',value:gravity}
+			}
+		});
+
+		speedMesh=new THREE.Mesh(texGeometry,speedMaterial);
+		posMesh=new THREE.Mesh(texGeometry,posMaterial);
+	}
+
+	function animate(){
+		requestAnimationFrame(animate);
+		renderer.render(scene,camera);
+		points.material.uniforms.posTex.value=computePositions();
+		controls.update();
+	}
+
+	function computePositions(){
+		before=actual;
+		actual=(actual+1)%2;
+
+		texturesScene.add(speedMesh);
+		speedMesh.material.uniforms.speedTex.value=speedTex[before];
+		speedMesh.material.uniforms.posTex.value=posTex[before];
+		renderer.render(texturesScene,orthoCam,speedTex[actual])
+		texturesScene.remove(speedMesh);
+
+		texturesScene.add(posMesh);
+		posMesh.material.uniforms.speedTex.value=speedTex[actual];
+		posMesh.material.uniforms.posTex.value=posTex[before];
+		renderer.render(texturesScene,orthoCam,posTex[actual])
+		texturesScene.remove(posMesh);
+
+		return posTex[actual];
+	}
+
+	function Galaxy(_n, _galnumber, _axis1, _axis2, _armsAngle, _bulbSize, _ellipticity){
+		var n=(typeof _n === 'undefined')?10000:_n;
+		var galnumber=(typeof _galnumber === 'undefined')?1:Math.floor(_galnumber);
+		var axis1=(typeof _axis1 === 'undefined')?75:_axis1;
+		var axis2=(typeof _axis2 === 'undefined')?(axis1+30+Math.random()*30):_axis2;
+		var maja,mina;
+		axis1>axis2?(maja=axis1,mina=axis2):axis1==axis2?(maja=axis1+1,mina=axis2):(maja=axis2,mina=axis1);
+		var armsAngle;
+		if(typeof _armsAngle === 'undefined'){
+			var b=1;
+			armsAngle=b*(Math.random()*6+3);
+		}else{armsAngle=_armsAngle}
+		var bulbSize=(typeof _bulbSize === 'undefined')?.3:_bulbSize>1?1:_bulbSize<0?0:_bulbSize;
+		var ellipticity=(typeof _ellipticity === 'undefined')?.2+Math.random()*.2:_ellipticity>1?1:_ellipticity<0?0:_ellipticity;
+
+		var starsPos=[],starsSpeeds=[],dist,angle,a,b,f1,f2,saabb,e,phi,theta,radius;
+		for(var i=0;i<n;i++){
+			dist=Math.random();
+			angle=(dist-bulbSize)*armsAngle;
+			a=maja*dist;
+			b=mina*dist;
+			saabb=Math.sqrt(a*a-b*b);
+			f1=a*a/saabb;
+			f2=-f1;
+			e=saabb/a;
+			phi=ellipticity*Math.PI/2*(1-dist)*(Math.random()*2-1);
+			theta=Math.random()*Math.PI*2;
+			radius=Math.sqrt(b*b/(1-e*e*Math.pow(Math.cos(theta),2)))*(1+Math.random()*.1);
+			if(dist>bulbSize)theta+=angle;
+
+			var m=new THREE.Vector3(Math.cos(theta)*radius,Math.sin(theta)*radius,0),
+				mf1=new THREE.Vector3(f1,0,0).sub(m).normalize(),
+				mf2=new THREE.Vector3(f2,0,0).sub(m).normalize(),
+				bissPoint=new THREE.Vector3().subVectors(mf2,mf1).multiplyScalar(.5),
+				biss=new THREE.Vector3().subVectors(bissPoint,m),
+				tan=new THREE.Vector3().copy(biss).applyAxisAngle(new THREE.Vector3(0,0,1),-Math.PI/2);
+			tan.x*=Math.cos(phi),tan.y*=Math.cos(phi),tan.z*=Math.sin(phi);
+			tan.normalize();
+
+			var pos=new THREE.Vector3(
+				Math.cos(phi)*Math.cos(theta)*radius,
+				Math.cos(phi)*Math.sin(theta)*radius,
+				Math.sin(phi)*radius
+			);
+
+			var c=Math.sqrt(pos.length()),
+				speedCoeff=.07,//make it related to the one in the shader
+				arms=armsAngle>0?-1:1;
+			tan.multiplyScalar(speedCoeff*c*arms);
+
+			if(galnumber>1){
+				if(i>n/galnumber){
+					pos.x+=200;
+					pos.y+=50;
+					tan.z-=.25;
+					starsPos.push(pos.x,pos.y,pos.z);
+					starsSpeeds.push(tan.x,tan.y,tan.z)
+				}else{
+					pos.x-=200;
+					pos.z-=50;
+					tan.y+=.25;
+					starsPos.push(pos.x,pos.z,pos.y);
+					starsSpeeds.push(tan.x,tan.z,tan.y)
+				}
+			}else{
+				starsPos.push(pos.x,pos.y,pos.z);
+				starsSpeeds.push(tan.x*Math.sqrt(2),tan.y*Math.sqrt(2),tan.z*Math.sqrt(2))
+			}
+
+		}
+
+		this.getPos=function(){
+			return starsPos;
+		};
+		this.getSpeed=function(){
+			return starsSpeeds;
+		};
+	}
+
+	function setUI(){
+		var sliderContainer, sliderRange, sliderThumb, sliderThumbContent, slider;
+		//1. Appearance
+
+		//container
+		sliderContainer=document.createElement('div');
+		sliderContainer.className='slider-container';
+		document.body.appendChild(sliderContainer);
+
+		//fake slider
+		sliderRange=document.createElement('span');
+		sliderRange.className='slider-range';
+		sliderContainer.appendChild(sliderRange);
+
+		sliderThumb=document.createElement('span');
+		sliderThumb.className='slider-thumb';
+		sliderRange.appendChild(sliderThumb);
+
+		sliderThumbContent=document.createElement('p');
+		sliderThumbContent.className='slider-thumb-content';
+		sliderThumbContent.textContent='G';
+		sliderThumb.appendChild(sliderThumbContent);
+
+		//real invisible slider
+		slider=document.createElement('input');
+		slider.type='range';
+		slider.min=0;slider.max=gravity*2;slider.step=gravity/1000;
+		slider.value=gravity;
+		sliderContainer.appendChild(slider);
+
+		//2. Event listener
+
+		var range=slider.max-slider.min;
+		sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
+
+		slider.addEventListener('input',function(){
+			speedMesh.material.uniforms.gravity.value=slider.value;
+			sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
+			var content=slider.value;
+		},false);
+	}
+</script>
+</body>
+</html>
