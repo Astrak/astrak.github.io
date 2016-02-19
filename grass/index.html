@@ -17,56 +17,34 @@
 			cursor:-webkit-grabbing;
 			cursor:-moz-grabbing;
 		}
-		#infos {
+		#render {
 			position:absolute;
-			top:0;
-			color:#fff;
-			padding:5px 15px;margin:15px;
-			background:linear-gradient(-1deg, #222 49.5%, #333 50%);
-			border-radius:2px;
-			border:solid 1px #444;
+			top:100%;
+			margin-top:-28px;
+			color:#eee;
+			text-shadow:0 -1px 0 #111;
+			background:#1A1A1A;
+			padding:5px 15px;
 		}
-		#infos p {
-			margin:0;
+		#render ul {
+			padding:0;margin:0;
 		}
-		#infos ul, #statsDiv p {
-			list-style-type: none;
-			font-family:'Courier New';
-		}
-		#infos ul li{
-			margin-left: 10px;
-		}
-		#statsDiv, #render {
+		#render ul li, #render ul p {
 			display:inline-block;
-			vertical-align:middle;
-		}
-		#statsDiv {
-			text-align:center;
-			font-size:10px;
-			margin-right:10px;
-			padding-right:10px;
-			border-right:solid 1px #444;
-		}
-		#infos ul {
-			font-size: 17px;
-			padding-left:0px;
+			font:11px 'Lucida Grande', sans-serif;
+			margin:0;
 		}
 	</style>
 </head>
 	<body>
 
-		<div id='infos'>
-			<div id='statsDiv'>
-				<p>click to toggle</p><p>FPS / MS / MB</p>
-			</div>
-			<div id='render'>
-				<ul>
-					<p style='text-decoration:underline;'>renderer.info.render :</p>
-					<li>calls : <span class='value'></span></li>
-					<li>faces : <span class='value'></span></li>
-					<li>vertices : <span class='value'></span></li>
-				</ul>
-			</div>
+		<div id='render'>
+			<ul>
+				<p style='text-decoration:underline;'>renderer.info.render :</p>
+				<li>calls : <span class='value'></span></li>
+				<li>, faces : <span class='value'></span></li>
+				<li>, vertices : <span class='value'></span></li>
+			</ul>
 		</div>
 
 		<script src='../libs/three.js'></script>
@@ -85,7 +63,7 @@
 				faces = document.getElementsByClassName( 'value' )[ 2 ];
 
 
-			var main = { antialias : true };
+			var main = { antialias : false };
 
 			var soil, 
 				soilData = {
@@ -105,8 +83,14 @@
 
 			var grassGeo, grassMat, grass, 
 				grassData = {
-					seeds:25000,
+					seeds:15000,
 					doubleSided:true,
+					mainColor:new THREE.Vector3( 1,1,1),
+					wind:{
+						size:8,
+						speed:.12,
+						influence:1
+					},
 					strands:{
 						height : .3,
 						heightVariation : .1,
@@ -122,7 +106,7 @@
 						heightVariation : 0,
 						flowerAngle:1,
 						petals:{
-							number:10,
+							number:20,
 							width:.1,//rad
 							length:.03,//+-
 							height:.01,//variation to apex , +-
@@ -181,19 +165,25 @@
 				//gui.add( )
 
 				//antialias
-				gui.add( main, 'antialias' ).onChange( function () {
-					document.body.removeChild( renderer.domElement );
-					var t = controls.target.clone();
-					if ( renderer === rendererA ) {
-						renderer = rendererB;
-						controls = controlsB;
-					} else {
-						renderer = rendererA;
-						controls = controlsA;
-					}
-					controls.target.copy( t );
-					document.body.appendChild( renderer.domElement );
-				});
+					gui.add( main, 'antialias' ).onChange( function () {
+						document.body.removeChild( renderer.domElement );
+						var t = controls.target.clone();
+						if ( renderer === rendererA ) {
+							renderer = rendererB;
+							controls = controlsB;
+						} else {
+							renderer = rendererA;
+							controls = controlsA;
+						}
+						controls.target.copy( t );
+						document.body.appendChild( renderer.domElement );
+					});
+
+				//wind params
+					var windFolder = gui.addFolder( 'wind' );
+					var windFolder1 = windFolder.add( grassData.wind, 'size', 0, 150 );windFolder1.listen();windFolder1.onChange( function () { grass.material.uniforms.windSize.value = grassData.wind.size; } );
+					var windFolder2 = windFolder.add( grassData.wind, 'speed', 0, 1.5 );windFolder2.listen();windFolder2.onChange( function () { grass.material.uniforms.windSpeed.value = grassData.wind.speed; } );
+					var windFolder3 = windFolder.add( grassData.wind, 'influence', 0, 10 );windFolder3.listen();windFolder3.onChange( function () { grass.material.uniforms.windInfluence.value = grassData.wind.influence; } );
 
 				//soil params
 					var soilFolder = gui.addFolder( 'soil' );
@@ -209,37 +199,40 @@
 						});
 
 				//main grass params
-				var grassFolder = gui.addFolder( 'grass' );
-				var grassFolder1 = grassFolder.add( grassData, 'seeds', 1000, 90000 );grassFolder1.listen();grassFolder1.onFinishChange( recreateGrass );
-				var grassFolder2 = grassFolder.add( grassData, 'doubleSided', 1000, 90000 );grassFolder2.listen();grassFolder2.onChange( function () {
-					if ( typeof grassMat !== 'undefined' ) grassMat.side = grassData.doubleSided ? THREE.DoubleSide : THREE.FrontSide;
-				} );
+					var grassFolder = gui.addFolder( 'grass' );
+					var grassFolder1 = grassFolder.add( grassData, 'seeds', 1000, 90000 );grassFolder1.listen();grassFolder1.onFinishChange( recreateGrass );
+					var grassFolder2 = grassFolder.add( grassData, 'doubleSided', 1000, 90000 );grassFolder2.listen();grassFolder2.onChange( function () {
+						if ( typeof grassMat !== 'undefined' ) grassMat.side = grassData.doubleSided ? THREE.DoubleSide : THREE.FrontSide;
+					} );
+					var grassFolder3 = grassFolder.add( grassData.mainColor, 'x', 0, 1 );grassFolder3.listen();grassFolder3.name( 'red' );grassFolder3.onChange( function () { grass.material.uniforms.gColor.value = grassData.mainColor; } );
+					var grassFolder4 = grassFolder.add( grassData.mainColor, 'y', 0, 1 );grassFolder4.listen();grassFolder4.name( 'green' );grassFolder4.onChange( function () { grass.material.uniforms.gColor.value = grassData.mainColor; } );
+					var grassFolder5 = grassFolder.add( grassData.mainColor, 'z', 0, 1 );grassFolder5.listen();grassFolder5.name( 'blue' );grassFolder5.onChange( function () { grass.material.uniforms.gColor.value = grassData.mainColor; } );
 
-					//strands params
-					var strandsFolder = grassFolder.addFolder( 'strands' );
-					var strandsFolder1 = strandsFolder.add( grassData.strands, 'height', .01, 3 );strandsFolder1.listen();strandsFolder1.onFinishChange( recreateGrass );
-					var strandsFolder2 = strandsFolder.add( grassData.strands, 'heightVariation', 0, 2.5 );strandsFolder2.listen();strandsFolder2.onFinishChange( recreateGrass );
-					var strandsFolder3 = strandsFolder.add( grassData.strands, 'baseWidth', .01, 2 );strandsFolder3.listen();strandsFolder3.onFinishChange( recreateGrass );
-					var strandsFolder4 = strandsFolder.add( grassData.strands, 'bend', 0, 2 );strandsFolder4.listen();strandsFolder4.onFinishChange( recreateGrass );
+						//strands params
+						var strandsFolder = grassFolder.addFolder( 'strands' );
+						var strandsFolder1 = strandsFolder.add( grassData.strands, 'height', .01, 3 );strandsFolder1.listen();strandsFolder1.onFinishChange( recreateGrass );
+						var strandsFolder2 = strandsFolder.add( grassData.strands, 'heightVariation', 0, 2.5 );strandsFolder2.listen();strandsFolder2.onFinishChange( recreateGrass );
+						var strandsFolder3 = strandsFolder.add( grassData.strands, 'baseWidth', .01, 2 );strandsFolder3.listen();strandsFolder3.onFinishChange( recreateGrass );
+						var strandsFolder4 = strandsFolder.add( grassData.strands, 'bend', 0, 2 );strandsFolder4.listen();strandsFolder4.onFinishChange( recreateGrass );
 
-					//daisies params
-					var daisiesFolder = grassFolder.addFolder( 'daisies' );
-					var stemFolder1 = daisiesFolder.add( grassData.daisies, 'proba', 0, 1 ); stemFolder1.listen(); stemFolder1.onFinishChange( recreateGrass );
-						//stems params
-						var stemFolder = daisiesFolder.addFolder( 'stem' );
-						var stemFolder2 = stemFolder.add( grassData.daisies, 'height', .01, 3 ); stemFolder2.listen(); stemFolder2.onFinishChange( recreateGrass );
-						var stemFolder3 = stemFolder.add( grassData.daisies, 'heightVariation', 0, 1 ); stemFolder3.listen(); stemFolder3.onFinishChange( recreateGrass );
-						var stemFolder4 = stemFolder.add( grassData.daisies, 'baseWidth', 0.1, 2 ); stemFolder4.listen(); stemFolder4.onFinishChange( recreateGrass );
-						var stemFolder5 = stemFolder.add( grassData.daisies, 'bend', 0, 2 ); stemFolder5.listen(); stemFolder5.onFinishChange( recreateGrass );
-						var stemFolder6 = stemFolder.add( grassData.daisies, 'proba', 0, 1 ); stemFolder6.listen(); stemFolder6.onFinishChange( recreateGrass );
-						//flower params
-						var flowerFolder = daisiesFolder.addFolder( 'petals' );
-						var flowerFolder1 = flowerFolder.add( grassData.daisies, 'centerWidth', .01, .5 ); flowerFolder1.listen(); flowerFolder1.onFinishChange( recreateGrass );
-						var flowerFolder2 = flowerFolder.add( grassData.daisies.petals, 'number', 0, 30 ); flowerFolder2.step( 1 ); flowerFolder2.listen(); flowerFolder2.onFinishChange( recreateGrass );
-						var flowerFolder3 = flowerFolder.add( grassData.daisies.petals, 'length', .01, .5 ); flowerFolder3.listen(); flowerFolder3.onFinishChange( recreateGrass );
-						var flowerFolder4 = flowerFolder.add( grassData.daisies.petals, 'height', 0, .1 ); flowerFolder4.listen(); flowerFolder4.onFinishChange( recreateGrass );
-						var flowerFolder5 = flowerFolder.add( grassData.daisies.petals, 'width', .1, Math.PI * 2 / 3 ); flowerFolder5.listen(); flowerFolder5.onFinishChange( recreateGrass );
-						var flowerFolder6 = flowerFolder.add( grassData.daisies.petals, 'multicolor' ); flowerFolder6.listen(); flowerFolder6.onChange( recreateGrass );
+						//daisies params
+						var daisiesFolder = grassFolder.addFolder( 'daisies' );
+						var stemFolder1 = daisiesFolder.add( grassData.daisies, 'proba', 0, 1 ); stemFolder1.listen(); stemFolder1.onFinishChange( recreateGrass );
+							//stems params
+							var stemFolder = daisiesFolder.addFolder( 'stem' );
+							var stemFolder2 = stemFolder.add( grassData.daisies, 'height', .01, 3 ); stemFolder2.listen(); stemFolder2.onFinishChange( recreateGrass );
+							var stemFolder3 = stemFolder.add( grassData.daisies, 'heightVariation', 0, 1 ); stemFolder3.listen(); stemFolder3.onFinishChange( recreateGrass );
+							var stemFolder4 = stemFolder.add( grassData.daisies, 'baseWidth', 0.1, 2 ); stemFolder4.listen(); stemFolder4.onFinishChange( recreateGrass );
+							var stemFolder5 = stemFolder.add( grassData.daisies, 'bend', 0, 2 ); stemFolder5.listen(); stemFolder5.onFinishChange( recreateGrass );
+							var stemFolder6 = stemFolder.add( grassData.daisies, 'proba', 0, 1 ); stemFolder6.listen(); stemFolder6.onFinishChange( recreateGrass );
+							//flower params
+							var flowerFolder = daisiesFolder.addFolder( 'petals' );
+							var flowerFolder1 = flowerFolder.add( grassData.daisies, 'centerWidth', .01, .5 ); flowerFolder1.listen(); flowerFolder1.onFinishChange( recreateGrass );
+							var flowerFolder2 = flowerFolder.add( grassData.daisies.petals, 'number', 0, 30 ); flowerFolder2.step( 1 ); flowerFolder2.listen(); flowerFolder2.onFinishChange( recreateGrass );
+							var flowerFolder3 = flowerFolder.add( grassData.daisies.petals, 'length', .01, .5 ); flowerFolder3.listen(); flowerFolder3.onFinishChange( recreateGrass );
+							var flowerFolder4 = flowerFolder.add( grassData.daisies.petals, 'height', 0, .1 ); flowerFolder4.listen(); flowerFolder4.onFinishChange( recreateGrass );
+							var flowerFolder5 = flowerFolder.add( grassData.daisies.petals, 'width', .1, Math.PI * 2 / 3 ); flowerFolder5.listen(); flowerFolder5.onFinishChange( recreateGrass );
+							var flowerFolder6 = flowerFolder.add( grassData.daisies.petals, 'multicolor' ); flowerFolder6.listen(); flowerFolder6.onChange( recreateGrass );
 
 			}
 
@@ -329,6 +322,10 @@
 				grassMat = new THREE.ShaderMaterial({
 					vertexShader : ['',
 						'uniform float time;',
+						'uniform vec3 gColor;',
+						'uniform float windSize;',
+						'uniform float windSpeed;',
+						'uniform float windInfluence;',
 						'attribute vec3 color;',
 						'attribute vec3 pos1;',
 						'attribute vec3 pos2;',
@@ -358,7 +355,7 @@
 						'   return value;',
 						'}',
 						'void main () {',
-						'	vCol = color;',
+						'	vCol = color * gColor;',
 						'	vec4 light = modelViewMatrix * vec4(-1.,3.,-1.,1.);',
 						'	vec4 wNormal = modelViewMatrix * vec4(normal,1.);',
 						'	shade = dot(light,wNormal) * .1;',
@@ -373,8 +370,8 @@
 						'		pos = ( 3. - a ) * pos2 + ( a - 2. ) * position;',
 						'	}',
 						'	if (weight != 0.){',
-						'		float w = 2. * wind(pos.xz * 8. + windDir * time * .12) - 1.;',
-						'		w *= .00018;',
+						'		float w = 2. * wind(pos.xz * windSize + windDir * time * windSpeed ) - 1.;',
+						'		w *= .00018 * windInfluence;',
 						'		vCol *= 1. + max(0.,( weight * 2. - 1.)) * ( max(0.,w) * 1.5 );',
 						'		pos.xz += w * weight;',
 						'	}',
@@ -387,7 +384,11 @@
 						'	gl_FragColor = vec4(vCol,1.);'+
 						'}',
 					uniforms : {
-						time : {type : 'f', value : 0}
+						time : {type : 'f', value : 0},
+						windSize : { type : 'f', value : grassData.wind.size },
+						windSpeed : { type : 'f', value : grassData.wind.speed },
+						windInfluence : { type : 'f', value : grassData.wind.influence },
+						gColor : { type : 'v3', value : grassData.mainColor }
 					}
 					});
 
@@ -411,7 +412,7 @@
 				controlsB.rotateSpeed=.07;
 				controlsB.maxPolarAngle=2;
 
-				controls = controlsA;
+				controls = main.antialias ? controlsA : controlsB;
 
 				window.addEventListener( 'resize', resize, false );
 			}
@@ -494,10 +495,10 @@
 			function addStats () {
 				stats = new Stats();
 				stats.setMode( 0 );
-				//stats.domElement.style.cssText = ''+
-				//	'position : absolute;'+
-				//	'left : 0; top : 0;';
-				document.getElementById( 'statsDiv' ).appendChild( stats.domElement );
+				stats.domElement.style.cssText = ''+
+					'position : absolute;'+
+					'left : 0; top : 0;';
+				document.body.appendChild( stats.domElement );
 			}
 
 			function resize () {
