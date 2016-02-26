@@ -41,6 +41,7 @@
 	<script id='fShader' type='x-fragment/x-shader'>
 		uniform float gasRatio;
 		uniform float colorAmount;
+		uniform float luminosity;
 		uniform sampler2D tex;
 		uniform float useTex;
 		varying vec3 vPosition;
@@ -53,7 +54,7 @@
 				float look = starlook + gaslook; 
 				gl_FragColor = vec4( vColor * .0002, 1. ) * look * ( 1. - a * .35 );
 			}else{
-				gl_FragColor = texture2D(tex,gl_PointCoord.xy)*vec4(vColor*.02,1.)*colorAmount*.1;
+				gl_FragColor = texture2D(tex,gl_PointCoord.xy)*vec4(vColor*colorAmount,1.)*luminosity;
 			}
 		}
 	</script>
@@ -73,7 +74,8 @@
 			gasRatio:.5,
 			source:0,
 			useTex:false,
-			colorAmount:3
+			luminosity:.3,
+			colorAmount:.02
 		};
 
 		var preview = document.getElementById('preview'),
@@ -127,7 +129,7 @@
 					av = ( R + G + B ) / 3;
 				if ( av > Math.random() * 255 ) {
 					vertices[ i * 3 ] = ( x - preview.width / 2 ) * 2 * 20 / preview.width;
-					vertices[ i * 3 + 1 ] = ( Math.random() * 2 - 1 ) * av / 255 * 1.2;
+					vertices[ i * 3 + 1 ] = ( Math.random() * 2 - 1) * av / 255 * 1.2 * ( 1 + 8*(Math.random() - .5));
 					vertices[ i * 3 + 2 ] = ( preview.height / 2 - y ) * 2 * 20 / preview.height;
 					colors[ i * 3 ] = R;
 					colors[ i * 3 + 1 ] = G;
@@ -153,7 +155,10 @@
 			var ch = gui.add(params, 'useTex' );ch.onChange( function () {
 				galaxy.material.uniforms.useTex.value = params.useTex ? 1 : 0;
 			} );
-			var c = gui.add(params, 'colorAmount', 0, 4 );c.onChange( function () {
+			var c = gui.add(params, 'luminosity', 0, .5 );c.onChange( function () {
+				galaxy.material.uniforms.luminosity.value = params.luminosity;
+			} );
+			var cA = gui.add(params, 'colorAmount', 0, .1 );cA.onChange( function () {
 				galaxy.material.uniforms.colorAmount.value = params.colorAmount;
 			} );
 		}
@@ -169,7 +174,8 @@
 						gasRatio:{type:'f',value:params.gasRatio},
 						tex:{type:'t',value:new THREE.TextureLoader().load('star2.png')},
 						useTex:{type:'f',value:params.useTex ? 1 : 0},
-						colorAmount:{type:'f',value:params.colorAmount}
+						colorAmount:{type:'f',value:params.colorAmount},
+						luminosity:{type:'f',value:params.luminosity}
 					},
 					transparent:true,
 					depthTest:false,
