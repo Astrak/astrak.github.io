@@ -63,7 +63,7 @@
 				faces = document.getElementsByClassName( 'value' )[ 2 ];
 
 
-			var main = { antialias : true, color : "#427526" };
+			var main = { antialias : false, gColor : "#72961B", bColor : "#636B4F" };
 
 			var soil, 
 				soilData = {
@@ -83,9 +83,9 @@
 
 			var grassGeo, grassMat, grass, 
 				grassData = {
-					seeds:9000,
+					seeds:6000,
 					doubleSided:true,
-					mainColor:new THREE.Color( parseInt( main.color.replace(/#/,'0x') ) ),
+					mainColor:new THREE.Color( parseInt( main.gColor.replace(/#/,'0x') ) ),
 					wind:{
 						size:42,
 						speed:.06,
@@ -94,12 +94,12 @@
 					strands:{
 						height : .3,
 						heightVariation : .1,
-						baseRadius : .02,
+						baseRadius : .03,
 						bend : .2,
 						counter:0
 					},
 					daisies:{
-						baseRadius : .02,
+						baseRadius : .03,
 						bend : .2,
 						centerWidth:.015,
 						height : .6,
@@ -121,13 +121,31 @@
 						counter:0
 					},
 					tree:{
-						baseRadius:.2,
-						sliceVertices:7,
-						baseHeight:null,
+						barkColor:new THREE.Color( parseInt( main.bColor.replace(/#/,'0x') ) ),
+						baseDirection:0,
+						baseAngle:0,
+						baseRadius:.05,
+						height:1,
+						baseHeight:.25,
+						baseRelief:0,
+						sharpShape:0,
+						twist:0,
+						rootsRelief:0,
+						rootsHeight:0,
+						baseReliefWidth:0,//integer : number of shapes 
+						sliceVertices:20,//min=3
+						verticalVertices:20,//min=3
 						crd:{
-							x:1,y:0,z:1
-						}
-
+							x:0,y:.6,z:0
+						},
+						radiusRatio:.35,
+						branches:10,
+						branchWidthVertices:5,//min=3
+						branchLengthVertices:10,//min=3
+						branchLength:.3,
+						branchAngle:0,
+						subbranches:null,
+						verticalAttraction:0
 					},
 					geometry:{
 						vertices:[
@@ -169,9 +187,6 @@
 			function addController () {
 				gui = new dat.GUI();
 
-				//presets
-				//gui.add( )
-
 				//antialias
 					gui.add( main, 'antialias' ).onChange( function () {
 						document.body.removeChild( renderer.domElement );
@@ -208,41 +223,69 @@
 
 				//main grass params
 					var grassFolder = gui.addFolder( 'grass' );
-					var grassFolder1 = grassFolder.add( grassData, 'seeds', 1000, 90000 );grassFolder1.listen();grassFolder1.onFinishChange( recreateGrass );
+					var grassFolder1 = grassFolder.add( grassData, 'seeds', 0, 90000 );grassFolder1.listen();grassFolder1.onFinishChange( recreateGrass );
 					var grassFolder2 = grassFolder.add( grassData, 'doubleSided', 1000, 90000 );grassFolder2.listen();grassFolder2.onChange( function () {
 						if ( typeof grassMat !== 'undefined' ) grassMat.side = grassData.doubleSided ? THREE.DoubleSide : THREE.FrontSide;
 					} );
-					var grassFolder3 = grassFolder.addColor( main, 'color' );grassFolder3.listen();grassFolder3.onChange( function () { 
-						grassData.mainColor.setHex( parseInt( main.color.replace(/#/,'0x') ) );
+					var grassFolder3 = grassFolder.addColor( main, 'gColor' );grassFolder3.listen();grassFolder3.name( 'grass color' );grassFolder3.onChange( function () { 
+						grassData.mainColor.setHex( parseInt( main.gColor.replace(/#/,'0x') ) );
 						grass.material.uniforms.gColor.value = grassData.mainColor;
 					 } );
 
-						//strands params
+					//strands params
 						var strandsFolder = grassFolder.addFolder( 'strands' );
 						var strandsFolder1 = strandsFolder.add( grassData.strands, 'height', .01, 3 );strandsFolder1.listen();strandsFolder1.onFinishChange( recreateGrass );
 						var strandsFolder2 = strandsFolder.add( grassData.strands, 'heightVariation', 0, 2.5 );strandsFolder2.listen();strandsFolder2.onFinishChange( recreateGrass );
 						var strandsFolder3 = strandsFolder.add( grassData.strands, 'baseRadius', .01, .4 );strandsFolder3.listen();strandsFolder3.onFinishChange( recreateGrass );
 						var strandsFolder4 = strandsFolder.add( grassData.strands, 'bend', 0, 1 );strandsFolder4.listen();strandsFolder4.onFinishChange( recreateGrass );
 
-						//daisies params
+					//daisies params
 						var daisiesFolder = grassFolder.addFolder( 'daisies' );
 						var stemFolder1 = daisiesFolder.add( grassData.daisies, 'proba', 0, 1 ); stemFolder1.listen(); stemFolder1.onFinishChange( recreateGrass );
-							//stems params
+						//stems params
 							var stemFolder = daisiesFolder.addFolder( 'stem' );
 							var stemFolder2 = stemFolder.add( grassData.daisies, 'height', .01, 3 ); stemFolder2.listen(); stemFolder2.onFinishChange( recreateGrass );
 							var stemFolder3 = stemFolder.add( grassData.daisies, 'heightVariation', 0, 1 ); stemFolder3.listen(); stemFolder3.onFinishChange( recreateGrass );
 							var stemFolder4 = stemFolder.add( grassData.daisies, 'baseRadius', 0.01, .2 ); stemFolder4.listen(); stemFolder4.onFinishChange( recreateGrass );
 							var stemFolder5 = stemFolder.add( grassData.daisies, 'bend', 0, 2 ); stemFolder5.listen(); stemFolder5.onFinishChange( recreateGrass );
 							var stemFolder6 = stemFolder.add( grassData.daisies, 'proba', 0, 1 ); stemFolder6.listen(); stemFolder6.onFinishChange( recreateGrass );
-							//flower params
+						//flower params
 							var flowerFolder = daisiesFolder.addFolder( 'petals' );
-							var flowerFolder1 = flowerFolder.add( grassData.daisies, 'centerWidth', .01, .5 ); flowerFolder1.listen(); flowerFolder1.onFinishChange( recreateGrass );
+							var flowerFolder1 = flowerFolder.add( grassData.daisies, 'centerWidth', .01, .12 ); flowerFolder1.listen(); flowerFolder1.onFinishChange( recreateGrass );
 							var flowerFolder2 = flowerFolder.add( grassData.daisies.petals, 'number', 0, 30 ); flowerFolder2.step( 1 ); flowerFolder2.listen(); flowerFolder2.onFinishChange( recreateGrass );
-							var flowerFolder3 = flowerFolder.add( grassData.daisies.petals, 'length', .01, .5 ); flowerFolder3.listen(); flowerFolder3.onFinishChange( recreateGrass );
+							var flowerFolder3 = flowerFolder.add( grassData.daisies.petals, 'length', .01, .25 ); flowerFolder3.listen(); flowerFolder3.onFinishChange( recreateGrass );
 							var flowerFolder4 = flowerFolder.add( grassData.daisies.petals, 'height', 0, .1 ); flowerFolder4.listen(); flowerFolder4.onFinishChange( recreateGrass );
 							var flowerFolder5 = flowerFolder.add( grassData.daisies.petals, 'width', .1, Math.PI * 2 / 3 ); flowerFolder5.listen(); flowerFolder5.onFinishChange( recreateGrass );
 							var flowerFolder6 = flowerFolder.add( grassData.daisies.petals, 'multicolor' ); flowerFolder6.listen(); flowerFolder6.onChange( recreateGrass );
 
+				//tree params
+					var treeFolder = gui.addFolder( 'tree' );
+						var treeFolder1 = treeFolder.addColor( main, 'bColor' );treeFolder1.listen();treeFolder1.name( 'bark color' );treeFolder1.onChange( function () {
+							grassData.tree.barkColor.setHex( parseInt( main.bColor.replace(/#/,'0x') ) );
+							grass.material.uniforms.bColor.value = grassData.tree.barkColor;
+						});
+						var treeFolder2 = treeFolder.add( grassData.tree, 'height', .1, 5 );treeFolder2.listen();treeFolder2.onFinishChange( recreateGrass );
+						var treeFolder3 = treeFolder.add( grassData.tree, 'baseRadius', .01, 1 );treeFolder3.listen();treeFolder3.name( 'radius' );treeFolder3.onFinishChange( recreateGrass );
+					var trunkFolder = treeFolder.addFolder( 'trunk' );
+						var trunkFolder0A = trunkFolder.add( grassData.tree, 'baseAngle', 0, Math.PI / 2 );trunkFolder0A.listen();trunkFolder0A.onFinishChange( recreateGrass );
+						var trunkFolder0D = trunkFolder.add( grassData.tree, 'baseDirection', 0, Math.PI * 2 );trunkFolder0D.listen();trunkFolder0D.onFinishChange( recreateGrass );
+						var trunkFolder2 = trunkFolder.add( grassData.tree, 'baseHeight', .01, 1 );trunkFolder2.listen();trunkFolder2.onFinishChange( recreateGrass );
+						var trunkFolder4 = trunkFolder.add( grassData.tree, 'sliceVertices', 3, 50 );trunkFolder4.step( 1 );trunkFolder4.listen();trunkFolder4.onFinishChange( recreateGrass );
+						var trunkFolder5 = trunkFolder.add( grassData.tree, 'verticalVertices', 3, 40 );trunkFolder5.step( 1 );trunkFolder5.listen();trunkFolder5.onFinishChange( recreateGrass );
+						var trunkFolder6 = trunkFolder.add( grassData.tree, 'baseRelief', 0, 2 );trunkFolder6.listen();trunkFolder6.onFinishChange( recreateGrass );
+						var trunkFolder7 = trunkFolder.add( grassData.tree, 'baseReliefWidth', 0, 40 );trunkFolder7.step( 1 );trunkFolder7.listen();trunkFolder7.onFinishChange( recreateGrass );
+						var trunkFolder8 = trunkFolder.add( grassData.tree, 'sharpShape', 0, 1 );trunkFolder8.listen();trunkFolder8.onFinishChange( recreateGrass );
+						var trunkFolder8r = trunkFolder.add( grassData.tree, 'rootsRelief', 0, 1 );trunkFolder8r.listen();trunkFolder8r.onFinishChange( recreateGrass );
+						var trunkFolder8c = trunkFolder.add( grassData.tree, 'rootsHeight', 0, .5 );trunkFolder8c.listen();trunkFolder8c.onFinishChange( recreateGrass );
+						var trunkFolder9 = trunkFolder.add( grassData.tree, 'twist', -8, 8 );trunkFolder9.listen();trunkFolder9.onFinishChange( recreateGrass );
+					var branchFolder = treeFolder.addFolder( 'branches' );
+						var branchFolder1 = branchFolder.add( grassData.tree, 'branches', 1, 40 );branchFolder1.step( 1 );branchFolder1.listen();branchFolder1.onFinishChange( recreateGrass );
+						var branchFolder2 = branchFolder.add( grassData.tree, 'radiusRatio', .1, 1 );branchFolder2.listen();branchFolder2.onFinishChange( recreateGrass );
+						var branchFolder3 = branchFolder.add( grassData.tree, 'branchLength', .1, 5 );branchFolder3.listen();branchFolder3.onFinishChange( recreateGrass );
+						var branchFolder4 = branchFolder.add( grassData.tree, 'branchWidthVertices', 3, 20 );branchFolder4.step( 1 );branchFolder4.listen();branchFolder4.onFinishChange( recreateGrass );
+						var branchFolder5 = branchFolder.add( grassData.tree, 'branchLengthVertices', 3, 20 );branchFolder5.step( 1 );branchFolder5.listen();branchFolder5.onFinishChange( recreateGrass );
+						var branchFolder6 = branchFolder.add( grassData.tree, 'branchAngle', -Math.PI / 2, Math.PI / 2 );branchFolder6.listen();branchFolder6.onFinishChange( recreateGrass );
+						var branchFolder7 = branchFolder.add( grassData.tree, 'verticalAttraction', -5, 5 );branchFolder7.listen();branchFolder7.onFinishChange( recreateGrass );
 			}
 
 			function recreateGrass () {
@@ -335,6 +378,7 @@
 					vertexShader : ['',
 						'uniform float time;',
 						'uniform vec3 gColor;',
+						'uniform vec3 bColor;',
 						'uniform float windSize;',
 						'uniform float windSpeed;',
 						'uniform float windInfluence;',
@@ -370,7 +414,8 @@
 						'void main () {',
 						'	float type = data.x, weight = data.z, date = data.y;',
 						'	vCol = color ;',
-						'	if ( type != 2. ) vCol = 2. * color.y * gColor;',// '2 *' is a bit hacky because color.y does not exceed .5 roughly in the color attribute
+						'	if ( type != 2. && type != 3. ) vCol = 2. * color.y * gColor;',// '2 *' is a bit hacky because color.y does not exceed .5 roughly in the color attribute
+						'	if ( type == 3. ) vCol = 5. * color.y * bColor;',//same, because tree colors do not exceed 1.5
 						'	vec4 light = modelViewMatrix * vec4(-1.,3.,-1.,1.);',
 						'	vec4 wNormal = modelMatrix * vec4(normal,1.);',
 						'	shade = dot(light,wNormal) ;',
@@ -403,7 +448,8 @@
 						windSize : { type : 'f', value : grassData.wind.size },
 						windSpeed : { type : 'f', value : grassData.wind.speed },
 						windInfluence : { type : 'f', value : grassData.wind.influence },
-						gColor : { type : 'c', value : grassData.mainColor }
+						gColor : { type : 'c', value : grassData.mainColor },
+						bColor : { type : 'c', value : grassData.tree.barkColor },
 					}
 					});
 
@@ -535,13 +581,19 @@
 			function growTree ( crd, index ) {
 				/* SETTINGS */
 
-						var gT = grassData.tree;
+					var gT = grassData.tree;
+
+					//vertices settings
+						var sV = gT.sliceVertices,
+							vV = gT.verticalVertices,
+							vL = grassData.geometry.vertices[ 0 ].length;
 
 					//colors settings
 						var cL = grassData.geometry.colors.length;
 
 					//data settings
-						var dL = grassData.geometry.data.length;
+						var dL = grassData.geometry.data.length, 
+							tmStmp = Math.random();
 
 					//indices settings
 						var fL = grassData.geometry.indices.length,
@@ -550,15 +602,184 @@
 				/* MAIN */
 
 					//vertices
-						var sV = gT.sliceVertices,
-							vL = grassData.geometry.vertices[ 0 ].length;
-						for ( var i = 0 ; i < sV ; i++ ) {
-							var angle = Math.PI * 2 / sV * i, 
-								cosA = Math.cos( angle ), sinA = Math.sin( angle );
-							grassData.geometry.vertices[ 0 ][ vL + i * 3 ] = grassData.geometry.vertices[ 1 ][ vL + i * 3 ] = grassData.geometry.vertices[ 2 ][ vL + i * 3 ] = crd.x + cosA * gT.baseRadius;
-							grassData.geometry.vertices[ 0 ][ vL + i * 3 + 1 ] = grassData.geometry.vertices[ 1 ][ vL + i * 3 + 1 ] = grassData.geometry.vertices[ 2 ][ vL + i * 3 + 1 ] = crd.y;
-							grassData.geometry.vertices[ 0 ][ vL + i * 3 + 2 ] = grassData.geometry.vertices[ 1 ][ vL + i * 3 + 2 ] = grassData.geometry.vertices[ 2 ][ vL + i * 3 + 2 ] = crd.z + sinA * gT.baseRadius;
-						}
+						//trunk
+							var hR = 1 / ( vV - 1 ),
+								h = gT.height * hR, 
+								reliefTotal = Math.PI * gT.baseReliefWidth, 
+								reliefStep = reliefTotal / sV, 
+								twistStep = gT.twist / ( vV - 1 ), 
+								sinBA = Math.sin( gT.baseAngle ), 
+								cosBA = Math.cos( gT.baseAngle ), 
+								sinBD = Math.sin( gT.baseDirection ), 
+								cosBD = Math.cos( gT.baseDirection );
+							for ( var j = 0 ; j < vV - 1; j++ ) {
+								for ( var i = 0 ; i < sV ; i++ ) {
+									var angle = Math.PI * 2 / sV * i + j * twistStep, 
+										cosA = Math.cos( angle ), sinA = Math.sin( angle ),
+										vS = ( j * sV + i ) * 3, 
+										relief = Math.abs( Math.sin ( i * reliefStep ) );
+									grassData.geometry.vertices[ 0 ][ vL + vS ] = grassData.geometry.vertices[ 1 ][ vL + vS ] = grassData.geometry.vertices[ 2 ][ vL + vS ] = crd.x + cosBD * sinBA * j / vV + cosA * gT.baseRadius * ( 1 - j * hR ) * ( 1 + relief * gT.baseRelief + gT.rootsRelief * 50 * Math.max( 0, gT.rootsHeight - j / vV * gT.height ) + gT.sharpShape * ( 2 * Math.random() - 1 ) );
+									grassData.geometry.vertices[ 0 ][ vL + vS + 1 ] = grassData.geometry.vertices[ 1 ][ vL + vS + 1 ] = grassData.geometry.vertices[ 2 ][ vL + vS + 1 ] = crd.y + j * cosBA / vV  * gT.height;
+									grassData.geometry.vertices[ 0 ][ vL + vS + 2 ] = grassData.geometry.vertices[ 1 ][ vL + vS + 2 ] = grassData.geometry.vertices[ 2 ][ vL + vS + 2 ] = crd.z - sinBD * sinBA * j / vV + sinA * gT.baseRadius * ( 1 - j * hR ) * ( 1 + relief * gT.baseRelief + gT.rootsRelief * 50 * Math.max( 0, gT.rootsHeight - j / vV * gT.height ) + gT.sharpShape * ( 2 * Math.random() - 1 ) );
+								}
+							}
+							var vS = ( vV - 1 ) * sV * 3;
+							grassData.geometry.vertices[ 0 ][ vL + vS ] = grassData.geometry.vertices[ 1 ][ vL + vS ] = grassData.geometry.vertices[ 2 ][ vL + vS ] = crd.x + cosBD * sinBA;
+							grassData.geometry.vertices[ 0 ][ vL + vS + 1 ] = grassData.geometry.vertices[ 1 ][ vL + vS + 1 ] = grassData.geometry.vertices[ 2 ][ vL + vS + 1 ] = crd.y + gT.height * cosBA;
+							grassData.geometry.vertices[ 0 ][ vL + vS + 2 ] = grassData.geometry.vertices[ 1 ][ vL + vS + 2 ] = grassData.geometry.vertices[ 2 ][ vL + vS + 2 ] = crd.z - sinBD * sinBA;
+						//branches
+							var bN = gT.branches,
+								radius = gT.baseRadius * gT.radiusRatio,
+								zV = vL + vS + 3,
+								lR = 1 / ( gT.branchLengthVertices );
+							for ( var i = 0 ; i < bN ; i++ ) {
+								var hAngle = Math.PI * 2 * Math.random(), pAngle = hAngle + Math.PI / 2,
+									coshA = Math.cos( hAngle ), sinhA = Math.sin( hAngle ),
+									cospA = Math.cos( pAngle ), sinpA = Math.sin( pAngle ),
+									gCoeff = Math.random(),
+									bH = ( 1 - gCoeff ) * ( gT.height - gT.baseHeight ) + gT.baseHeight;
+								for ( var k = 0 ; k < gT.branchLengthVertices - 1 ; k++ ) {
+									for ( var j = 0 ; j < gT.branchWidthVertices ; j++ ) {
+										var zVS = zV + 3 * ( j + gT.branchWidthVertices * k + i * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + 1 ) ),
+											angle = j * Math.PI * 2 / gT.branchWidthVertices,
+											cos = Math.cos( angle ), sin = Math.sin( angle );
+										grassData.geometry.vertices[ 0 ][ zVS ] = grassData.geometry.vertices[ 1 ][ zVS ] = grassData.geometry.vertices[ 2 ][ zVS ] = crd.x + cosBD * sinBA * bH / gT.height + gCoeff * ( coshA * k * lR * gT.branchLength + cos * radius * ( 1 - k * lR ) * cospA );
+										grassData.geometry.vertices[ 0 ][ zVS + 1 ] = grassData.geometry.vertices[ 1 ][ zVS + 1 ] = grassData.geometry.vertices[ 2 ][ zVS + 1 ] = crd.y + bH * cosBA + sin * radius * ( 1 - k * lR) * gCoeff + k / gT.branchLengthVertices * Math.sin ( gT.branchAngle + gT.verticalAttraction * k / gT.branchLengthVertices ) * gCoeff ;
+										grassData.geometry.vertices[ 0 ][ zVS + 2 ] = grassData.geometry.vertices[ 1 ][ zVS + 2 ] = grassData.geometry.vertices[ 2 ][ zVS + 2 ] = crd.z - sinBD * sinBA * bH / gT.height - gCoeff * ( sinhA * k * lR * gT.branchLength + cos * radius * ( 1 - k * lR ) * sinpA );
+									}
+								}
+								var jkO = zV + 3 * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + i * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + 1 ) );
+								grassData.geometry.vertices[ 0 ][ jkO ] = grassData.geometry.vertices[ 1 ][ jkO ] = grassData.geometry.vertices[ 2 ][ jkO ] = crd.x + cosBD * sinBA * bH / gT.height + coshA * gT.branchLength * gCoeff;
+								grassData.geometry.vertices[ 0 ][ jkO + 1 ] = grassData.geometry.vertices[ 1 ][ jkO + 1 ] = grassData.geometry.vertices[ 2 ][ jkO + 1 ] = crd.y + bH * cosBA + Math.sin ( gT.branchAngle + gT.verticalAttraction ) * gCoeff;
+								grassData.geometry.vertices[ 0 ][ jkO + 2 ] = grassData.geometry.vertices[ 1 ][ jkO + 2 ] = grassData.geometry.vertices[ 2 ][ jkO + 2 ] = crd.z - sinBD * sinBA * bH / gT.height - sinhA * gT.branchLength * gCoeff;
+							}
+
+					//colors
+						var R = .12, G = .1, B = .05; 
+						//trunk
+							for ( var j = 0 ; j < vV - 1; j++ ) {
+								for ( var i = 0 ; i < sV ; i++ ) {
+									var vS = ( j * sV + i ) * 3, 
+										factor = 1 + .8 * ( Math.random() * 2 - 1 );
+									grassData.geometry.colors[ cL + vS ] = R * factor;
+									grassData.geometry.colors[ cL + vS + 1 ] = G * factor;
+									grassData.geometry.colors[ cL + vS + 2 ] = B * factor;
+								}
+							}
+							var vS = ( vV - 1 ) * sV * 3, 
+								factor = 1 + .8 * ( Math.random() * 2 - 1 );
+							grassData.geometry.colors[ cL + vS ] = R * factor;
+							grassData.geometry.colors[ cL + vS + 1 ] = G * factor;
+							grassData.geometry.colors[ cL + vS + 2 ] = B * factor;
+						//branches
+							var bN = gT.branches,
+								zV = cL + vS + 3;
+							for ( var i = 0 ; i < bN ; i++ ) {
+								for ( var k = 0 ; k < gT.branchLengthVertices - 1 ; k++ ) {
+									for ( var j = 0 ; j < gT.branchWidthVertices ; j++ ) {
+										var zVS = zV + 3 * ( j + gT.branchWidthVertices * k + i * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + 1 ) ), 
+											factor = 1 + .8 * ( Math.random() * 2 - 1 );
+										grassData.geometry.colors[ zVS ] = R * factor;
+										grassData.geometry.colors[ zVS + 1 ] = G * factor;
+										grassData.geometry.colors[ zVS + 2 ] = B * factor;
+									}
+								}
+								var jkO = zV + 3 * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + i * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + 1 ) ), 
+									factor = 1 + .8 * ( Math.random() * 2 - 1 );
+								grassData.geometry.colors[ jkO ] = R * factor;
+								grassData.geometry.colors[ jkO + 1 ] = G * factor;
+								grassData.geometry.colors[ jkO + 2 ] = B * factor;
+							}
+
+					//data
+						//trunk
+							for ( var j = 0 ; j < vV - 1; j++ ) {
+								for ( var i = 0 ; i < sV ; i++ ) {
+									var vS = ( j * sV + i ) * 4;
+									//.x : type = 3
+										grassData.geometry.data[ dL + vS ] = 3;
+									//.y : timestamp
+										grassData.geometry.data[ dL + vS + 1 ] = tmStmp;
+									//.z : weights
+										grassData.geometry.data[ dL + vS + 2 ] = 0;
+									//.w : index
+										grassData.geometry.data[ dL + vS + 3 ] = index ? index : 0;
+								}
+							}
+							var vS = ( vV - 1 ) * sV * 4;
+							//.x : type = 3
+								grassData.geometry.data[ dL + vS ] = 3;
+							//.y : timestamp
+								grassData.geometry.data[ dL + vS + 1 ] = tmStmp;
+							//.z : weights
+								grassData.geometry.data[ dL + vS + 2 ] = 0;
+							//.w : index
+								grassData.geometry.data[ dL + vS + 3 ] = index ? index : 0;
+						//branches
+							var bN = gT.branches,
+								zV = dL + vS + 4;
+							for ( var i = 0 ; i < bN ; i++ ) {
+								for ( var k = 0 ; k < gT.branchLengthVertices - 1 ; k++ ) {
+									for ( var j = 0 ; j < gT.branchWidthVertices ; j++ ) {
+										var zVS = zV + 4 * ( j + gT.branchWidthVertices * k + i * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + 1 ) );
+										grassData.geometry.data[ zVS ] = 3;
+										grassData.geometry.data[ zVS + 1 ] = tmStmp;
+										grassData.geometry.data[ zVS + 2 ] = 0;
+										grassData.geometry.data[ zVS + 3 ] = index ? index : 0;
+									}
+								}
+								var jkO = zV + 4 * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + i * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + 1 ) );
+								grassData.geometry.data[ jkO ] = 3;
+								grassData.geometry.data[ jkO + 1 ] = tmStmp;
+								grassData.geometry.data[ jkO + 2 ] = 0;
+								grassData.geometry.data[ jkO + 3 ] = index ? index : 0;
+							}
+
+					//indices
+						//trunk
+							for ( var j = 0 ; j < vV - 2 ; j++ ) {
+								for ( var i = 0 ; i < sV ; i++ ) {
+									var rS = ( i + j * sV ) * 6;
+									grassData.geometry.indices[ fL + rS ] = r + j * sV + i;
+									grassData.geometry.indices[ fL + rS + 1 ] = r + j * sV + i + sV;
+									grassData.geometry.indices[ fL + rS + 2 ] = r + j * sV + ( i + 1 ) % sV;
+
+									grassData.geometry.indices[ fL + rS + 3 ] = r + j * sV + i + sV;
+									grassData.geometry.indices[ fL + rS + 4 ] = r + j * sV + sV + ( i + 1 ) % sV;
+									grassData.geometry.indices[ fL + rS + 5 ] = r + j * sV + ( i + 1 ) % sV;
+								}
+							}
+							var rS = ( vV - 2 ) * sV;
+							for ( var i = 0 ; i < sV ; i++ ) {
+								grassData.geometry.indices[ fL + 6 * rS + i * 3 ] = r + rS + sV ;
+								grassData.geometry.indices[ fL + 6 * rS + i * 3 + 1 ] = r + rS + ( i + 1 ) % sV;
+								grassData.geometry.indices[ fL + 6 * rS + i * 3 + 2 ] = r + rS + i;
+							}
+						//branches
+							var nRS = r + rS + sV + 1,
+								fLS = fL + 6 * rS + sV * 3 + 3;
+							for ( var i = 0 ; i < bN ; i++ ) {
+								for ( var k = 0 ; k < gT.branchLengthVertices - 2 ; k++ ) {
+									for ( var j = 0 ; j < gT.branchWidthVertices ; j++ ) {
+										var zFI = fLS + 3 * ( 2 * j + gT.branchWidthVertices * ( i + 2 * ( k + i * ( gT.branchLengthVertices - 2 ) ) ) ),
+											zN = nRS + gT.branchWidthVertices * k + i * ( 1 + ( gT.branchLengthVertices - 1 ) * gT.branchWidthVertices );
+										grassData.geometry.indices[ zFI ] = zN + j + gT.branchWidthVertices;
+										grassData.geometry.indices[ zFI + 1 ] = zN + j;
+										grassData.geometry.indices[ zFI + 2 ] = zN + ( j + 1 ) % gT.branchWidthVertices;
+
+										grassData.geometry.indices[ zFI + 3 ] = zN + ( j + 1 ) % gT.branchWidthVertices + gT.branchWidthVertices;
+										grassData.geometry.indices[ zFI + 4 ] = zN + j + gT.branchWidthVertices;
+										grassData.geometry.indices[ zFI + 5 ] = zN + ( j + 1 ) % gT.branchWidthVertices;
+									}
+								}
+								var fKO = fLS + 3 * gT.branchWidthVertices * ( 2 * ( gT.branchLengthVertices - 2 ) + i * ( 1 + 2 * ( gT.branchLengthVertices - 2 ) ) ),
+									nnN = nRS + i * ( gT.branchWidthVertices * ( gT.branchLengthVertices - 1 ) + 1 ) + gT.branchWidthVertices * ( gT.branchLengthVertices - 2 );
+								for ( var k = 0 ; k < gT.branchWidthVertices ; k++ ) {
+									grassData.geometry.indices[ fKO + 3 * k ] = nnN + gT.branchWidthVertices;
+									grassData.geometry.indices[ fKO + 3 * k + 1 ] = nnN + k;
+									grassData.geometry.indices[ fKO + 3 * k + 2 ] = nnN + ( k + 1 ) % gT.branchWidthVertices ;
+								}
+							}
 
 			}
 
@@ -693,8 +914,8 @@
 								grassData.geometry.data[ dL + 24 + 2 ] = 1;
 
 							//.w : indices
-								grassData.geometry.data[ dL + 3 ] = grassData.geometry.data[ dL + 4 + 3 ] = grassData.geometry.data[ dL + 8 + 3 ] = 0;
-								grassData.geometry.data[ dL + 12 + 3 ] = grassData.geometry.data[ dL + 16 + 3 ] = grassData.geometry.data[ dL + 20 + 3 ] = .4;
+								grassData.geometry.data[ dL + 3 ] = grassData.geometry.data[ dL + 4 + 3 ] = grassData.geometry.data[ dL + 8 + 3 ] = index ? index : 0;
+								grassData.geometry.data[ dL + 12 + 3 ] = grassData.geometry.data[ dL + 16 + 3 ] = grassData.geometry.data[ dL + 20 + 3 ] = index ? index : 0;
 								grassData.geometry.data[ dL + 24 + 3 ] = index ? index : 0;
 
 						//colors
@@ -963,7 +1184,7 @@
 										
 										grassData.geometry.vertices[ 1 ][ vL + 54 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend *.9 + grassData.daisies.petals.length * cosa1 * .3;
 										grassData.geometry.vertices[ 1 ][ vL + 55 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .83;
-										grassData.geometry.vertices[ 1 ][ vL + 56 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend - grassData.daisies.petals.length * sina1 * .3;
+										grassData.geometry.vertices[ 1 ][ vL + 56 + i * 15 ] = crd.z - sin * grassData.daisies.bend * seedBend *.9 - grassData.daisies.petals.length * sina1 * .3;
 										
 										grassData.geometry.vertices[ 1 ][ vL + 57 + i * 15 ] = crd.x + cos * grassData.daisies.bend * seedBend *.9 + grassData.daisies.centerWidth * .5 * cosa1;
 										grassData.geometry.vertices[ 1 ][ vL + 58 + i * 15 ] = crd.y + grassData.daisies.height * ( 1 + grassData.daisies.heightVariation ) * seedHeight * .8;
