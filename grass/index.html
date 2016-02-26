@@ -47,6 +47,77 @@
 			</ul>
 		</div>
 
+		<script id=vertexShader type=x-shader/x-vertex>
+			uniform float time;
+			uniform vec3 gColor;
+			uniform vec3 bColor;
+			uniform float windSize;
+			uniform float windSpeed;
+			uniform float windInfluence;
+			attribute vec3 color;
+			attribute vec3 pos1;
+			attribute vec3 pos2;
+			attribute vec4 data;
+			varying vec3 vCol;
+			varying float shade;
+			vec2 windDir = vec2(.0,1.);
+			float hash( vec2 p ){
+				float h = dot(p,vec2(127.1,311.7));
+			   return -1.0 + 2.0*fract(sin(h)*43758.5453123);
+			}
+			float noise( in vec2 p ){
+				vec2 i = floor( p );
+				vec2 f = fract( p );
+				vec2 u = f*f*(3.0-2.0*f);
+			   return mix( mix( hash( i + vec2(0.0,0.0) ), 
+			                     hash( i + vec2(1.0,0.0) ), u.x),
+			                mix( hash( i + vec2(0.0,1.0) ), 
+			                     hash( i + vec2(1.0,1.0) ), u.x), u.y);
+			}
+			float wind(in vec2 coord){
+				float value = noise(coord / 64.) * 64.;
+				value += noise(coord / 32.) * 32.;
+				value += noise(coord / 16.) * 16.;
+				value += noise(coord / 8.) * 8.;
+				value += noise(coord / 4.) * 4.;
+	
+			   return value;
+			}
+			void main () {
+				float type = data.x, weight = data.z, date = data.y;
+				vCol = color ;
+				if ( type != 2. && type != 3. ) vCol = 2. * color.y * gColor;// '2 *' is a bit hacky because color.y does not exceed .5 roughly in the color attribute
+				if ( type == 3. ) vCol = 5. * color.y * bColor;//same, because tree colors do not exceed 1.5
+				vec4 light = modelViewMatrix * vec4(-1.,3.,-1.,1.);
+				vec4 wNormal = modelMatrix * vec4(normal,1.);
+				shade = dot(light,wNormal) ;
+				vec3 pos = vec3(0.);
+				float a = mod(time * .0002 + date * 3.,3.);
+			//todo : math way to avoid the ifs
+				if ( a < 1. ) {
+					pos = ( 1. - a ) * position + a * pos1;
+				} else if ( a < 2. ) {
+					pos = ( 2. - a ) * pos1 + ( a - 1. ) * pos2;
+				} else {
+					pos = ( 3. - a ) * pos2 + ( a - 2. ) * position;
+				}
+				if (weight != 0.){
+					float w = 2. * wind(pos.xz * windSize + windDir * time * windSpeed ) - 1.;
+					w *= .00018 * windInfluence;
+					vCol *= 1. + max(0.,( weight * 2. - 1.)) * ( max(0.,w) * 3.5 );
+					pos.xz += w * weight;
+				}
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.);
+			}
+		</script>
+		<script id=fragmentShader type="x-shader/x-fragment">
+			varying vec3 vCol;
+			varying float shade;
+			void main() {
+				gl_FragColor = vec4(vCol,1.);
+			}
+		</script>
+
 		<script src='../libs/three.js'></script>
 		<script src='../libs/controls/OrbitControls.js'></script>
 		<script src='../libs/stats.min.js'></script>
@@ -375,74 +446,8 @@
 				grassData.texture.imgData = ctx.getImageData( 0, 0, grassData.texture.POT, grassData.texture.POT );
 
 				grassMat = new THREE.ShaderMaterial({
-					vertexShader : ['',
-						'uniform float time;',
-						'uniform vec3 gColor;',
-						'uniform vec3 bColor;',
-						'uniform float windSize;',
-						'uniform float windSpeed;',
-						'uniform float windInfluence;',
-						'attribute vec3 color;',
-						'attribute vec3 pos1;',
-						'attribute vec3 pos2;',
-						'attribute vec4 data;',
-						'varying vec3 vCol;',
-						'varying float shade;',
-						'vec2 windDir = vec2(.0,1.);',
-						'float hash( vec2 p ){',
-						'	float h = dot(p,vec2(127.1,311.7));',
-						'   return -1.0 + 2.0*fract(sin(h)*43758.5453123);',
-						'}',
-						'float noise( in vec2 p ){',
-						'	vec2 i = floor( p );',
-						'	vec2 f = fract( p );',
-						'	vec2 u = f*f*(3.0-2.0*f);',
-						'   return mix( mix( hash( i + vec2(0.0,0.0) ), ',
-						'                     hash( i + vec2(1.0,0.0) ), u.x),',
-						'                mix( hash( i + vec2(0.0,1.0) ), ',
-						'                     hash( i + vec2(1.0,1.0) ), u.x), u.y);',
-						'}',
-						'float wind(in vec2 coord){',    
-						'	float value = noise(coord / 64.) * 64.;',
-						'	value += noise(coord / 32.) * 32.;',
-						'	value += noise(coord / 16.) * 16.;',
-						'	value += noise(coord / 8.) * 8.;',
-						'	value += noise(coord / 4.) * 4.;',
-						
-						'   return value;',
-						'}',
-						'void main () {',
-						'	float type = data.x, weight = data.z, date = data.y;',
-						'	vCol = color ;',
-						'	if ( type != 2. && type != 3. ) vCol = 2. * color.y * gColor;',// '2 *' is a bit hacky because color.y does not exceed .5 roughly in the color attribute
-						'	if ( type == 3. ) vCol = 5. * color.y * bColor;',//same, because tree colors do not exceed 1.5
-						'	vec4 light = modelViewMatrix * vec4(-1.,3.,-1.,1.);',
-						'	vec4 wNormal = modelMatrix * vec4(normal,1.);',
-						'	shade = dot(light,wNormal) ;',
-						'	vec3 pos = vec3(0.);',
-						'	float a = mod(time * .0002 + date * 3.,3.);',
-						//todo : math way to avoid the ifs
-						'	if ( a < 1. ) {',
-						'		pos = ( 1. - a ) * position + a * pos1;',
-						'	} else if ( a < 2. ) {',
-						'		pos = ( 2. - a ) * pos1 + ( a - 1. ) * pos2;',
-						'	} else {',
-						'		pos = ( 3. - a ) * pos2 + ( a - 2. ) * position;',
-						'	}',
-						'	if (weight != 0.){',
-						'		float w = 2. * wind(pos.xz * windSize + windDir * time * windSpeed ) - 1.;',
-						'		w *= .00018 * windInfluence;',
-						'		vCol *= 1. + max(0.,( weight * 2. - 1.)) * ( max(0.,w) * 3.5 );',
-						'		pos.xz += w * weight;',
-						'	}',
-						'	gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.);',
-						'}'].join('\n'),
-					fragmentShader : ''+
-						'varying vec3 vCol;'+
-						'varying float shade;'+
-						'void main() {'+
-						'	gl_FragColor = vec4(vCol,1.);'+
-						'}',
+					vertexShader : document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader : document.getElementById( 'fragmentShader' ).textContent,
 					uniforms : {
 						time : { type : 'f', value : 0 },
 						windSize : { type : 'f', value : grassData.wind.size },
