@@ -25,16 +25,19 @@
 	<script src='../libs/dat.gui.js'></script>
 
 	<script id='vShader' type='x-vertex/x-shader'>
+		uniform float gasRatio;
 	  	uniform float size;
 		uniform float pixelRatio;
+		uniform float gasRadiusRatio;
 		attribute vec3 color;
 		varying vec3 vPosition;
 		varying vec3 vColor;
 		void main(){
 			vColor = color;
 			vPosition = position;
+			float gasRadius = ( .5 + distance( position, vec3(.0))*gasRadiusRatio);
 			vec4 mvPosition = modelViewMatrix * vec4( position, 1. );
-			gl_PointSize = pixelRatio * size / length( mvPosition.xyz );
+			gl_PointSize = pixelRatio * gasRadius * size / length( mvPosition.xyz );
 			gl_Position = mvPosition * projectionMatrix;
 		}
 	</script>
@@ -75,7 +78,8 @@
 			source:0,
 			useTex:false,
 			luminosity:.3,
-			colorAmount:.02
+			colorAmount:.02,
+			gasRadiusRatio:0
 		};
 
 		var preview = document.getElementById('preview'),
@@ -120,16 +124,17 @@
 				colors = [];
 
 			for ( var i = 0 ; i < params.points ; i++ ) {
-				var x = Math.random() * preview.width, fx = Math.floor( x ),
-					y = Math.random() * preview.height, fy = Math.floor( y ),
+				var x = Math.random() * preview.width, fx = Math.floor( x ),distx = fx * 2 - preview.width,
+					y = Math.random() * preview.height, fy = Math.floor( y ),disty = fy * 2 - preview.height,
 					index = fy * preview.height + fx,
 					R = galData[ index * 4 ],
 					G = galData[ index * 4 + 1 ],
 					B = galData[ index * 4 + 2 ],
-					av = ( R + G + B ) / 3;
-				if ( av > Math.random() * 255 ) {
+					av = ( R + G + B ) / 3, 
+					dist = Math.sqrt(distx*distx+disty*disty);
+				if ( av > Math.random() * 255 * ( 1 + dist * params.gasRadiusRatio )) {
 					vertices[ i * 3 ] = ( x - preview.width / 2 ) * 2 * 20 / preview.width;
-					vertices[ i * 3 + 1 ] = ( Math.random() * 2 - 1) * av / 255 * 1.2 * ( 1 + 8*(Math.random() - .5));
+					vertices[ i * 3 + 1 ] = ( Math.random() * 2 - 1) * av / 255 * 1.2 * ( 1 + 5*(Math.random() - .5));
 					vertices[ i * 3 + 2 ] = ( preview.height / 2 - y ) * 2 * 20 / preview.height;
 					colors[ i * 3 ] = R;
 					colors[ i * 3 + 1 ] = G;
@@ -161,6 +166,10 @@
 			var cA = gui.add(params, 'colorAmount', 0, .1 );cA.onChange( function () {
 				galaxy.material.uniforms.colorAmount.value = params.colorAmount;
 			} );
+			var cA = gui.add(params, 'gasRadiusRatio', 0, 1 );cA.onChange( function () {
+				galaxy.material.uniforms.gasRadiusRatio.value = params.gasRadiusRatio;
+				createGalGeo();
+			} );
 		}
 
 		function createGalaxy () {
@@ -175,6 +184,7 @@
 						tex:{type:'t',value:new THREE.TextureLoader().load('star2.png')},
 						useTex:{type:'f',value:params.useTex ? 1 : 0},
 						colorAmount:{type:'f',value:params.colorAmount},
+						gasRadiusRatio:{type:'f',value:params.gasRadiusRatio},
 						luminosity:{type:'f',value:params.luminosity}
 					},
 					transparent:true,
