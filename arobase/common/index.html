@@ -26,11 +26,11 @@
 		<script src="./index_files/AC_RunActiveContent.js" type="text/javascript"></script>
 
 		<script language="text/javascript" type="text/javascript">
-		function popupcentree(page,nom,largeur,hauteur,options){
-			var top=(screen.height-hauteur)/2;
-			var left=(screen.width-largeur)/2;
-			window.open(page,nom,"top="+top+",left="+left+",width="+largeur+",height="+hauteur+","+options);
-		}
+			function popupcentree(page,nom,largeur,hauteur,options){
+				var top=(screen.height-hauteur)/2;
+				var left=(screen.width-largeur)/2;
+				window.open(page,nom,"top="+top+",left="+left+",width="+largeur+",height="+hauteur+","+options);
+			}
 		</script>
 
 		<script type="text/javascript" src="./index_files/highslide-full.js"></script>
@@ -56,7 +56,7 @@
 
 		<style type="text/css">
 			@import url('https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz');
-			
+
 			.highslide img {
 				cursor: url(/html/highslide/graphics/zoomin.cur), pointer !important;
 			}
@@ -525,6 +525,7 @@
 						'bat2_floor0_intersect',
 						'bat2_floor1_intersect',
 						'bat2_floor2',
+						'ground'
 					],
 					images : {
 						'bat1_floor0' : null,
@@ -532,7 +533,8 @@
 						'bat1_floor2' : null,
 						'bat2_floor0' : null,
 						'bat2_floor2' : null,
-						'bat2_floor1' : null
+						'bat2_floor1' : null,
+						'ground' : null
 					}
 				};
 			
@@ -680,11 +682,8 @@
 				}
 
 				function loadResources () {
-					//implement webworkers
 
-					//if not window.webworker...
-
-					var nFiles = 16,// 2 * resources.geometries.length - 4, //geometries + images - windows geometries
+					var nFiles = 18,
 						counter = 0;
 					var loader = new THREE.JSONLoader();
 
@@ -711,7 +710,7 @@
 
 					function updateProgress () {
 						counter ++;
-						progress.style.width = (counter / nFiles * 98).toString() + 'px';
+						progress.style.width = ( counter / nFiles * 98 ).toString() + 'px';
 						if ( counter === nFiles ) {
 							makeObjects();
 							setScene();

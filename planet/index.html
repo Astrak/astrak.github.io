@@ -64,8 +64,10 @@
 			    return value;
 			}
 			void main() {
-				float noise = .02*(1.+cos(time*200.))*wind(1000.*(vUv*vec2(2.,1.)+vec2(-1.*time,.0)));
-				vec2 uv = mod( vUv + vec2( - .2*time, .0 )+vec2(.001*noise), 1. ) * vec2(2.,1.);
+				vec2 crd = vUv*vec2(2.,1.)+vec2(-time,.0);
+				float noise1 = .02*wind(300.*crd);
+				float noise2 = .02*wind(1000.*crd);
+				vec2 uv = mod( vUv + vec2( - .2*time, .0 )+vec2(.001*noise1*noise2), 1. ) * vec2(2.,1.);
 				vec4 mainCol;
 				if(uv.x > 1. ) {
 					mainCol = 2. * texture2D( cloudTex2, uv - vec2(1.,0.) );
@@ -139,7 +141,7 @@
 			function animate (t) {
 				requestAnimationFrame(animate);
 				controls.update();
-				if ( clouds.hasOwnProperty('material') ) clouds.material.uniforms.time.value=.0000008*t;
+				if ( clouds.hasOwnProperty('material') ) clouds.material.uniforms.time.value=.000001*t;
 				renderer.render(scene, camera)
 			}
 		</script>
