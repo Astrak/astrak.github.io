@@ -517,10 +517,13 @@
 					geometries : [
 						'bat1_floor0',
 						'bat1_floor1',
+						//'bat1_floor0_windows',
+						//'bat1_floor1_windows',
 						'bat1_floor0_intersect',
 						'bat1_floor1_intersect',
 						'bat1_floor2',
 						'bat2_floor0',
+						//'bat2_floor0_windows',
 						'bat2_floor1',
 						'bat2_floor0_intersect',
 						'bat2_floor1_intersect',
@@ -539,7 +542,7 @@
 				};
 			
 			//basics
-			var scene,renderer,camera,controls;
+			var scene,renderer,camera,controls,raycaster;
 
 			//objects
 			var arobase, cubeCamera;
@@ -740,17 +743,27 @@
 			function setScene () {
 				//basics
 				scene=new THREE.Scene();
-				camera=new THREE.PerspectiveCamera(30,552/318,.1,600);
-				camera.position.set( 13, 5, 6 );
-				controls=new THREE.OrbitControls(camera,renderer.domElement);
-				controls.enableDamping=true;
-				controls.enableZoom=false;
-				controls.enablePan=false;
-				controls.dampingFactor=.05;
-				controls.rotateSpeed=.07;
-				controls.maxPolarAngle=Math.PI/2;
 
-				//objects
+				setView();
+
+				addMeshes();
+
+				addSprites();
+
+				initSky();
+
+				//setRaycaster();
+
+				//lighting
+				//setLighting();
+
+				//interaction
+				addInteraction();
+
+				animate();
+			}
+
+			function addMeshes () {
 				cubeCamera = new THREE.CubeCamera( .1, 500, 128 );
 				arobase = new THREE.Object3D();
 				arobase.name = 'arobase';
@@ -758,7 +771,7 @@
 					envMap : cubeCamera.renderTarget,
 					combine : THREE.MixOperation,
 					reflectivity : 1,
-					color : 0x000000, 
+					color : 0x555555, 
 					shading : THREE.FlatShading,
 					transparent : true,
 					alphaTest : .9,
@@ -801,19 +814,76 @@
 
 				scene.add( arobase, cubeCamera );
 
-				//render once objects get added
+				//render once objects are added
 				camera.update = true;
+			}
 
-				//sky
-				initSky();
+			function addSprites () {
 
-				//lighting
-				//setLighting();
+				//sprites
+				bat1_rdc_intersect.userData.sprites = [],
+				bat1_1er_intersect.userData.sprites = [],
+				bat2_rdc_intersect.userData.sprites = [],
+				bat2_1er_intersect.userData.sprites = [];
 
-				//interaction
-				addInteraction();
+				var a1RDC = arobase1.levels[ 0 ].locations;
+				for ( var i = 0 ; i < a1RDC.length ; i++ ) {
+					var sprite = makeTextSprite( a1RDC[ i ].title, i );
+					sprite.position.set( a1RDC[ i ].x * 9, 0, a1RDC[ i ].y * 6 ).add(new THREE.Vector3(-.35,1,-3));
+					bat1_rdc_intersect.userData.sprites.push( sprite );
+				}
+				var a11 = arobase1.levels[ 1 ].locations;
+				for ( var i = 0 ; i < a11.length ; i++ ) {
+					var sprite = makeTextSprite( a11[ i ].title, i );
+					sprite.position.set( a11[ i ].x * 9, 0, a11[ i ].y * 6 ).add(new THREE.Vector3(-.35,1.5,-3));
+					bat1_1er_intersect.userData.sprites.push( sprite );
+				}
+				var a2RDC = arobase2.levels[ 0 ].locations;
+				for ( var i = 0 ; i < a2RDC.length ; i++ ) {
+					var sprite = makeTextSprite( a2RDC[ i ].title, i );
+					sprite.position.set( a2RDC[ i ].x * 12, 0, a2RDC[ i ].y * 9 ).add(new THREE.Vector3(-12.5,1,-3));
+					bat2_rdc_intersect.userData.sprites.push( sprite );
+				}
+				var a21 = arobase2.levels[ 1 ].locations;
+				for ( var i = 0 ; i < a21.length ; i++ ) {
+					var sprite = makeTextSprite( a21[ i ].title, i );
+					sprite.position.set( a21[ i ].x * 12, 0, a21[ i ].y * 9 ).add(new THREE.Vector3(-12.5,1.5,-3));
+					bat2_1er_intersect.userData.sprites.push( sprite );
+				}
 
-				animate();
+	            function makeTextSprite(message,i){
+	                var canvas=document.createElement('canvas');
+	                var context=canvas.getContext('2d');
+	                canvas.width=256;canvas.height=128;
+	                
+	                context.fillStyle="rgba(0,0,0,0)";
+	                context.fillRect(0,43*(i%3),256,33);
+	                context.fillStyle="rgba(255,255,255,1)";
+	                context.lineWidth=2;
+	                context.textAlign='center';
+	                context.font="Bold 20px Lucida Grande";
+	                context.fillText(message,128,22*(1+2*(i%3)));
+	                context.strokeStyle="rgba(255,255,255,1)";
+	                context.lineWidth=3;
+					context.moveTo(128,33*(1+1.3*(i%3)));
+					context.lineTo(128,128);
+					context.stroke();
+	                
+	                var texture=new THREE.Texture(canvas);
+	                texture.minFilter=THREE.LinearFilter;
+           			texture.needsUpdate=true;
+	                
+	                var sprite=new THREE.Sprite(new THREE.SpriteMaterial({ 
+	                		color:0xffffff,
+	                        map:texture,
+	                        depthTest:false,
+	                        transparent:true,
+	                        opacity:0
+	                        })
+	                    );
+	                sprite.scale.set(2,1,1)
+	                return sprite;
+	            }
 			}
 
 			function addInteraction () {
@@ -890,7 +960,7 @@
 							if ( attr === 'b1' || attr === 'b2' ) {
 								var button = document.createElement( 'button' );
 								button.innerHTML = menu[ p ][ attr ];
-								var margin = ( p === 'les bureaux' ) ? '0 30px 0 30px;' : '0px 60px 0px 60px;' ;
+								var margin = ( p === 'les bureaux' ) ? '0 20px 0 20px;' : '0px 60px 0px 60px;' ;
 								button.style.cssText = ''+
 									'position:relative;'+
 									'background:hsl(345,12%,100%);'+
@@ -925,24 +995,30 @@
 						}
 
 						if ( p === 'les bureaux' ) {
-							var toggle = document.createElement( 'img' );
-							toggle.src = "../switch.png";
+							var toggle = document.createElement( 'button' );
+							toggle.innerHTML = "voir RDC";
 							toggle.style.cssText = '' +
+								'position:relative;'+
+								'width:121px;'+
+								'background:hsl(345,12%,85%);'+
+								'cursor:pointer;'+
+								"font-family: 'Yanone Kaffeesatz', sans-serif;"+
+					   			'font-size: 25px;'+
+								'margin:0px 30px;'+
+				   					'color:#1693C1;'+
 								'display:inline-block;'+
 								'padding:5px 25px;'+
-								'border-radius:5px;'+
-								'background:hsl(345,12%,85%);'+
+								'border-radius:5px 5px 0px 0px;'+
 				   				'box-shadow:5px 5px 5px #333;'+
-								'height:20px;'+
-								'position:relative;'+
-								'cursor:pointer;'+
-								'margin:0px 30px;';
+									'border:none;';
 							toggle.onmousedown = function () { toggle.style.background = 'hsl(345,12%,100%)'; } ;
 							toggle.onmouseup = function () { toggle.style.background = 'hsl(345,12%,85%)'; } ;
+							toggle.onmouseover = onMouseOver;
+							toggle.onmouseout = onMouseOut;
 							subMenu.appendChild( toggle );
 							menu[ p ].toggle = toggle;
 							menu[ p ].toggle.rdc = false;
-							menu[ p ].toggle.onclick = function () { this.rdc = !this.rdc ;};
+							menu[ p ].toggle.onclick = function () { this.rdc = !this.rdc ; this.innerHTML = this.rdc ? 'voir 1er' : 'voir RDC';};
 						}
 
 						//create menu
@@ -1023,8 +1099,6 @@
 
 				function interact () {
 
-					//bureaux
-
 					var b = menu[ 'les bureaux' ];
 
 					var offset = 7 ,
@@ -1035,7 +1109,7 @@
 						arobase1CameraPosition : { x : 1.5, y : 9, z : 5 },
 						arobase2Position : { x : 7, y : 0, z : -1 },
 						arobase2CameraPosition : { x : -1, y : 10, z : 6.5 },
-					}
+					};
 
 					var tween = {
 						cameraX : camera.position.x,
@@ -1047,8 +1121,12 @@
 						bat1_1er : bat1_1er.position.y,
 						bat1_Plafond : bat1_Plafond.position.y,
 						bat2_1er : bat2_1er.position.y,
-						bat2_Plafond : bat2_Plafond.position.y
-					}
+						bat2_Plafond : bat2_Plafond.position.y,
+						sprites1RDC : 0,
+						sprites11 : 0,
+						sprites2RDC : 0,
+						sprites21 : 0
+					};
 
 					//setTimeout to let b1.active or b2.active be set, and detect the click origin quick inside a single function
 					b.button.addEventListener( 'click', function () { setTimeout( tweenfunction, 0 )}, false );
@@ -1056,34 +1134,22 @@
 					b.b2.addEventListener( 'click', function () { setTimeout( tweenfunction, 0 )}, false );
 					b.toggle.addEventListener( 'click', function () { setTimeout( tweenfunction, 0 )}, false );
 
-					//sprites
-					bat1_rdc_intersect.userData.sprites = [],
-					bat1_1er_intersect.userData.sprites = [],
-					bat2_rdc_intersect.userData.sprites = [],
-					bat2_1er_intersect.userData.sprites = [];
-
-					var a = arobase1.levels[ 0 ].locations;
-					for ( var i = 0 ; i < a.length ; i++ ) {
-						var sprite = makeTextSprite( a.title );
-						sprite.position.set( a.x, a.z );
-						scene.add( sprite )
-					}
-					 
-
-					//b.button.addEventListener( 'click', addSprites, false );
-					//menu[ 'situation' ].button.addEventListener( 'click', removeSprites, false );
-					//menu[ 'nos services' ].button.addEventListener( 'click', removeSprites, false );
-
 					function tweenfunction () {
 						tween.cameraX = camera.position.x;
 						tween.cameraY = camera.position.y;
 						tween.cameraZ = camera.position.z;
+
 						var cameraPosition = b.b1.active ? occupationRefs.arobase1CameraPosition : occupationRefs.arobase2CameraPosition;
 						var arobasePosition = b.b1.active ? occupationRefs.arobase1Position : occupationRefs.arobase2Position;
 						var bat1_1er_offset = b.b1.active ? b.toggle.rdc ? offset : 0 : 0 ;
 						var bat1_Plafond_offset = b.b1.active ? offset : 0 ;
 						var bat2_1er_offset = b.b2.active ? b.toggle.rdc ? offset : 0 : 0 ;
 						var bat2_Plafond_offset = b.b2.active ? offset : 0 ;
+						var sprites1RDC = b.b1.active ? b.toggle.rdc ? 1 : 0 : 0;
+						var sprites11 = b.b1.active ? b.toggle.rdc ? 0 : 1 : 0;
+						var sprites2RDC = b.b2.active ? b.toggle.rdc ? 1 : 0 : 0;
+						var sprites21 = b.b2.active ? b.toggle.rdc ? 0 : 1 : 0;
+
 						TweenLite.to( tween, duration, {
 							cameraX : cameraPosition.x,
 							cameraY : cameraPosition.y,
@@ -1095,44 +1161,83 @@
 							bat1_Plafond : bat1_Plafond_offset,
 							bat2_1er : bat2_1er_offset,
 							bat2_Plafond : bat2_Plafond_offset,
-							onUpdate : update
+							sprites1RDC : sprites1RDC,
+							sprites11 : sprites11,
+							sprites2RDC : sprites2RDC,
+							sprites21 : sprites21,
+							onUpdate : onUpdate,
+							onComplete : onComplete
 						} );
-
-						function update () {
-							camera.position.set( tween.cameraX, tween.cameraY, tween.cameraZ );
-							arobase.position.set( tween.arobaseX, tween.arobaseY, tween.arobaseZ );
-							bat1_1er.position.z = - tween.bat1_1er;
-							bat1_Plafond.position.z = - tween.bat1_Plafond;
-							bat2_1er.position.z = - tween.bat2_1er;
-							bat2_Plafond.position.z = - tween.bat2_Plafond;
-							camera.update = true;
-						}
 					}
 
-		            function makeTextSprite(message){
-		                var canvas=document.createElement('canvas');
-		                var context=canvas.getContext('2d');
-		                
-		                context.font="Bold 18px Arial";
-		                context.fillStyle="rgba(0,0,0,1)";
-		                context.strokeStyle="rgba(255,255,255,1)";
-		                context.lineWidth=2;
-		                context.fillText('zone '+message,4,22);
-		                
-		                var texture=new THREE.Texture(canvas);
-		                texture.minFilter=THREE.LinearFilter;
-		                
-		                var sprite=new THREE.Sprite(new THREE.SpriteMaterial({ 
-		                        map:texture, 
-		                        depthTest:false
-		                        })
-		                    );
-		                return sprite;
-		            }
+					function onUpdate () {
+						camera.position.set( tween.cameraX, tween.cameraY, tween.cameraZ );
+						arobase.position.set( tween.arobaseX, tween.arobaseY, tween.arobaseZ );
+						bat1_1er.position.z = - tween.bat1_1er;
+						bat1_Plafond.position.z = - tween.bat1_Plafond;
+						bat2_1er.position.z = - tween.bat2_1er;
+						bat2_Plafond.position.z = - tween.bat2_Plafond;
+
+						if ( tween.sprites1RDC > 0 ) {
+							var a = bat1_rdc_intersect.userData.sprites;
+							for ( var i = 0 ; i < a.length ; i++ ) {
+								a[ i ].material.opacity = tween.sprites1RDC;
+								if ( ! a[ i ].parent ) arobase.add( a[ i ] );
+							}
+						}
+						if ( tween.sprites11 > 0 ) {
+							var a = bat1_1er_intersect.userData.sprites;
+							for ( var i = 0 ; i < a.length ; i++ ) {
+								a[ i ].material.opacity = tween.sprites11;
+								if ( ! a[ i ].parent ) arobase.add( a[ i ] );
+							}
+						}
+						if ( tween.sprites2RDC > 0 ) {
+							var a = bat2_rdc_intersect.userData.sprites;
+							for ( var i = 0 ; i < a.length ; i++ ) {
+								a[ i ].material.opacity = tween.sprites2RDC;
+								if ( ! a[ i ].parent ) arobase.add( a[ i ] );
+							}
+						}
+						if ( tween.sprites21 > 0 ) {
+							var a = bat2_1er_intersect.userData.sprites;
+							for ( var i = 0 ; i < a.length ; i++ ) {
+								a[ i ].material.opacity = tween.sprites21;
+								if ( ! a[ i ].parent ) arobase.add( a[ i ] );
+							}
+						}
+						camera.update = true;
+					}
+
+					function onComplete () {
+						var a = arobase.children;
+						for ( var i = 0 ; i < a.length ; i++ ) if ( a[ i ].type === 'Sprite' && a[ i ].material.opacity === 0 ) arobase.remove( a[ i ] );
+					}
 				}
 			}
 
-			function animate(){
+			function setRaycaster () {
+				raycaster = new THREE.Raycaster();
+				renderer.domElement.addEventListener('click', raycast, false);
+			}
+
+			function raycast ( e ) {
+				var mouse = {};
+				mouse.x = 2 * e.offsetX / 552 - 1;
+				mouse.y = 1 - 2 * e.offsetY / 318;
+				raycaster.setFromCamera( mouse, camera );
+
+				var intersects = raycaster.intersectObjects( arobase.children );
+
+				for ( var i = 0 ; i < intersects.length ; i++ ) {
+					if ( intersects[ i ].object.type === 'Sprite' ) {
+						intersects[ i ].object.material.color = 0xff0000;
+						break;
+					}
+				}
+			}
+
+			function animate () {
 				rQAID = requestAnimationFrame(animate);
 
 				lastPosition.copy( camera.position );
@@ -1141,12 +1246,24 @@
 				distance.subVectors(actualPosition,lastPosition);
 
 				if ( distance.length() > .001 || camera.update ) {
-					//scene.remove( arobase );
-					cubeCamera.updateCubeMap( renderer, scene );
-					//scene.add( arobase );
+					scene.remove( arobase );
+					//cubeCamera.updateCubeMap( renderer, scene );
+					scene.add( arobase );
 					renderer.render( scene, camera );
 					camera.update = false;
 				}
+			}
+
+			function setView () {
+				camera=new THREE.PerspectiveCamera(30,552/318,.1,600);
+				camera.position.set( 13, 5, 6 );
+				controls=new THREE.OrbitControls(camera,renderer.domElement);
+				controls.enableDamping=true;
+				//controls.enableZoom=false;
+				//controls.enablePan=false;
+				controls.dampingFactor=.05;
+				controls.rotateSpeed=.07;
+				controls.maxPolarAngle=Math.PI/2;
 			}
 
 			function initSky () {
@@ -1177,7 +1294,7 @@
 				sunSphere.position.z = distance * Math.sin( phi ) * Math.cos( theta );
 				sunSphere.visible = false;
 				sky.uniforms.sunPosition.value.copy( sunSphere.position );
-				scene.add( sunSphere );
+				//scene.add( sunSphere );
 			}
 
 			function setLighting () {
