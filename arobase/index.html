@@ -525,7 +525,8 @@
 						'bat2_floor0_intersect',
 						'bat2_floor1_intersect',
 						'bat2_floor2',
-						'ground'
+						'ground', 
+						'causse'
 					],
 					images : {
 						'bat1_floor0' : null,
@@ -534,7 +535,8 @@
 						'bat2_floor0' : null,
 						'bat2_floor2' : null,
 						'bat2_floor1' : null,
-						'ground' : null
+						'ground' : null, 
+						'causse' : null
 					},
 					sprites : {
 						equipements : [
@@ -1232,7 +1234,7 @@
 						arobase2Position : { x : 7, y : 0, z : -1 },
 						arobase2CameraPosition : { x : -1, y : 10, z : 6.5 },
 						defaultCameraPosition : { x : 13, y : 5, z : 6 },
-						causseCameraPosition : { x : 13, y : 20, z : -30 },
+						causseCameraPosition : { x : -272, y : 164, z : 44 },
 						regionCameraPosition : { x : -100, y : 200, z : 300 },
 						equipCamera : { x : 14, y : 5.4, z : 2.3 },
 						servicesCam : { x: .7, y : 6.2, z : 13.8 }
@@ -1454,6 +1456,7 @@
 					scene.add( arobase );
 					renderer.render( scene, camera );
 					camera.update = false;
+					console.log(camera.position)
 				}
 			}
 
