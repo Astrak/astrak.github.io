@@ -18,7 +18,8 @@ self.addEventListener('fetch',function(e){
 	e.respondWith(
 		caches.match(e.request).then( function (res){
 			if ( res ) return res;
-			console.log('why do i log',e.request.clone())
+			console.log('use network')
+			return fetch(e.request);
 		}).catch( function ( err ) {
 			console.log('nothing in cache',err)
 		})
