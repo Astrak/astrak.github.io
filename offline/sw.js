@@ -21,7 +21,7 @@ self.addEventListener('fetch',function(e){
 				console.log('match in cache !', res);
 				return res;
 			}
-			console.log('why do i log')
+			console.log(e.request)
 		}).catch( function ( err ) {
 			console.log('nothing in cache',err)
 		})
