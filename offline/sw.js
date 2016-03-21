@@ -17,11 +17,8 @@ self.addEventListener('install', function(event) {
 self.addEventListener('fetch',function(e){
 	e.respondWith(
 		caches.match(e.request).then( function (res){
-			if ( res ) {
-				console.log('match in cache !', res);
-				return res;
-			}
-			console.log(e.request)
+			if ( res ) return res;
+			console.log('why do i log',e.request.clone())
 		}).catch( function ( err ) {
 			console.log('nothing in cache',err)
 		})
