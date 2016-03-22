@@ -6,8 +6,8 @@ var urlsToCache = [
 self.addEventListener( 'install' , function ( e ) {
 	e.waitUntil(
 		caches.open( CACHE_NAME ).then( function ( cache ) {
-			return cache.addAll( urlsToCache );
 			console.log(self)
+			return cache.addAll( urlsToCache );
 		})
 	);
 });
@@ -35,14 +35,14 @@ self.addEventListener( 'fetch' , function ( e ) {
 	);
 });
 
-self.addEventListener( 'activate' , function ( e ) {
-	e.waitUntil(
-		caches.keys().then( function ( cacheNames ) {
-			return Promise.all(
-				cacheNames.map( function ( cacheName ) {
-					if ( urlsToCache.indexOf( cacheName ) === -1 ) return caches.delete( cacheName );
-				})
-			)
-		})
-	);
-});
+// self.addEventListener( 'activate' , function ( e ) {
+// 	e.waitUntil(
+// 		caches.keys().then( function ( cacheNames ) {
+// 			return Promise.all(
+// 				cacheNames.map( function ( cacheName ) {
+// 					if ( urlsToCache.indexOf( cacheName ) === -1 ) return caches.delete( cacheName );
+// 				})
+// 			)
+// 		})
+// 	);
+// });
