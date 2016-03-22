@@ -1,4 +1,4 @@
-var CACHE_NAME = 'v3';
+var CACHE_NAME = '1';
 var urlsToCache = [
   '/index.html'
 ];
@@ -6,7 +6,7 @@ var urlsToCache = [
 self.addEventListener( 'install' , function ( e ) {
 	e.waitUntil(
 		caches.open( CACHE_NAME ).then( function ( cache ) {
-			console.log('youre in v1')
+			console.log('CACHE_NAME : ' + CACHE_NAME)
 			return cache.addAll( urlsToCache );
 		})
 	);
@@ -22,7 +22,6 @@ self.addEventListener( 'fetch' , function ( e ) {
 				if ( cache ) return cache;
 				return fetch( fetchRequest ).then( 
 					function ( res ) {
-						console.log('has fetched : '+fetchRequest.clone())
 						var cacheRes = res.clone(),
 							retRes = res.clone();
 						caches.open( CACHE_NAME ).then( function ( cache ) {
