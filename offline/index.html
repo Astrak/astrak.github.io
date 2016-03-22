@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Testing Service Worker</title>
+</head>
+<body>
+
+	<h1>Hello offline world !!!</h1>
+	<script>
+		if ( 'serviceWorker' in navigator ) {
+			navigator.serviceWorker.register( 'sw.js' ).then( function ( res ){
+				console.log(res);
+			}).catch( function ( err ) {
+				console.log(err);
+			})
+		}
+	</script>
+</body>
+</html>

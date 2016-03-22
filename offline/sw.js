@@ -1,6 +1,6 @@
 var CACHE_NAME = 'v1';
 var urlsToCache = [
-  '/index.html',
+  '/index2.html',
 ];
 
 self.addEventListener('install', function(event) {
