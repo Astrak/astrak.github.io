@@ -13,7 +13,9 @@
 			}).catch( function ( err ) {
 				console.log(err);
 			});
-			navigator.serviceWorker.controller.addEventListener('message',function(e){console.log(e)});
+			var c = navigator.serviceWorker.controller
+			console.log( c );
+			if (c) c.addEventListener('message',function(e){console.log(e)});
 		}
 	</script>
 </body>
