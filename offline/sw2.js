@@ -20,8 +20,14 @@ self.addEventListener('fetch',function(e){
 	e.respondWith(
 		caches.match(e.request).then( function (res){
 			if ( res ) return res;
-			console.log('use network')
-			return fetch(e.request);
+			var req = e.request.clone();
+			return fetch( req ).then( function ( res ) {
+				if ( ! res || res.status !== 200 || res.type !== 'basic' ) return res;
+				var cacheRes = res.clone();
+				caches.open( CACHE_NAME ).then( function( cache ) {
+					cache.put( e.request, cacheRes );
+				})
+			})
 		})
 	);
 });
