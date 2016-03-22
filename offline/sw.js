@@ -1,12 +1,13 @@
 var CACHE_NAME = 'v2';
 var urlsToCache = [
-  '/index.html'
+  '/index.html',
+  '/sw.js'
 ];
 
 self.addEventListener( 'install' , function ( e ) {
 	e.waitUntil(
 		caches.open( CACHE_NAME ).then( function ( cache ) {
-			console.log('youre in v3')
+			console.log('youre in v4')
 			return cache.addAll( urlsToCache );
 		})
 	);
