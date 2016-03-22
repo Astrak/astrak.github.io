@@ -12,7 +12,8 @@
 				console.log(res);
 			}).catch( function ( err ) {
 				console.log(err);
-			})
+			});
+			navigator.serviceWorker.addEventListener('message',function(e){console.log(e)});
 		}
 	</script>
 </body>

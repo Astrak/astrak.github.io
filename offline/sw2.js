@@ -8,15 +8,15 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Opened cache' + CACHE_NAME );
+        postMessage('Opened cache' + CACHE_NAME );
         return cache.addAll(urlsToCache);
       })
   );
-  console.log('installation complete')
+  postMessage('installation complete')
 });
 
 self.addEventListener('fetch',function(e){
-	console.log(e)
+	postMessage(e)
 	e.respondWith(
 		caches.match(e.request).then( function (res){
 			if ( res ) return res;
