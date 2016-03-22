@@ -6,7 +6,7 @@ var urlsToCache = [
 self.addEventListener( 'install' , function ( e ) {
 	e.waitUntil(
 		caches.open( CACHE_NAME ).then( function ( cache ) {
-			console.log(self)
+			console.log('youre in v3')
 			return cache.addAll( urlsToCache );
 		})
 	);
@@ -17,7 +17,7 @@ self.addEventListener( 'fetch' , function ( e ) {
 		cacheRequest = e.request.clone();
 	e.respondWith( 
 		caches.match( cacheRequest )
-			.then( function ( cache ) { return cache; } )
+			.then( function ( cache ) { console.log(cache);return cache; } )
 			.catch( 
 				function ( err ) {
 					fetch( fetchRequest ).then( 
