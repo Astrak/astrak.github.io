@@ -22,6 +22,6 @@ self.addEventListener('fetch',function(e){
 			if ( res ) return res;
 			console.log('use network')
 			return fetch(e.request);
-		});
+		})
 	);
 });
