@@ -4,30 +4,29 @@ var urlsToCache = [
 ];
 
 self.addEventListener('install', function(event) {
-  // Perform install steps
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        return cache.addAll(urlsToCache);
-      })
-  );
+	event.waitUntil(
+		caches.open( CACHE_NAME ).then( function ( cache ) {
+			return cache.addAll( urlsToCache );
+		})
+	);
 });
 
 self.addEventListener('fetch',function(e){
 	var fetchRequest = e.request.clone(),
 		cacheRequest = e.request.clone();
-
 	e.respondWith( 
-		caches.match( cacheRequest )
-			.then( function ( cache ) { return cache; })
+		caches.match( cacheRequest ).then( function ( cache ) { return cache; })
 			.catch( function ( err ) {
-				fetch( fetchRequest )
-					.then( function ( res ) {
-						caches.open( CACHE_NAME ).then( function ( cache ) {
-								cache.put( fetchRequest, res );
-							})
-					})
+				fetch( fetchRequest ).then( function ( res ) {
+					var cacheRes = res.clone(),
+						retRes = res.clone();
+					caches.open( CACHE_NAME ).then( function ( cache ) {
+							cache.put( fetchRequest, cacheRes );
+						});
+					return retRes;
+				});
 			});
+	);
 });
 
 	// e.respondWith(
