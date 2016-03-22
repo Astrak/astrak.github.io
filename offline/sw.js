@@ -17,10 +17,9 @@ self.addEventListener( 'fetch' , function ( e ) {
 		cacheRequest = e.request.clone();
 	e.respondWith( 
 		caches.match( cacheRequest )
-			.then( function ( cache ) { console.log(cache);return cache; } )
-			.catch( 
-				function ( err ) {
-					fetch( fetchRequest ).then( 
+			.then( function ( cache ) { 
+				if ( cache ) return cache;
+				return fetch( fetchRequest ).then( 
 						function ( res ) {
 							var cacheRes = res.clone(),
 								retRes = res.clone();
@@ -30,8 +29,8 @@ self.addEventListener( 'fetch' , function ( e ) {
 							return retRes;
 						}
 					);
-				}
-			)
+			})
+				
 	);
 });
 
