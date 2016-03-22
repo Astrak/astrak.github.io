@@ -21,10 +21,10 @@ self.addEventListener( 'fetch' , function ( e ) {
 				if ( cache ) return cache;
 				return fetch( fetchRequest ).then( 
 					function ( res ) {
+						console.log('has fetched : '+fetchRequest.clone())
 						var cacheRes = res.clone(),
 							retRes = res.clone();
 						caches.open( CACHE_NAME ).then( function ( cache ) {
-							console.log('has fetched : '+fetchRequest.clone())
 							cache.put( fetchRequest, cacheRes );
 						});
 						return retRes;
