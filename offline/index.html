@@ -9,9 +9,9 @@
 	<script>
 		if ( 'serviceWorker' in navigator ) {
 			navigator.serviceWorker.register( 'sw.js' ).then( function ( res ){
-				console.log(res);
+				console.log('service worker installation complete, the app will be available offline after this session');
 			}).catch( function ( err ) {
-				console.log(err);
+				console.log('the service worker failed to install, the app will not be available offline after this session');
 			});
 			var c = navigator.serviceWorker.controller
 			console.log( c );
