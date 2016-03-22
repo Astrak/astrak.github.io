@@ -15,17 +15,22 @@ self.addEventListener('fetch',function(e){
 	var fetchRequest = e.request.clone(),
 		cacheRequest = e.request.clone();
 	e.respondWith( 
-		caches.match( cacheRequest ).then( function ( cache ) { return cache; })
-			.catch( function ( err ) {
-				fetch( fetchRequest ).then( function ( res ) {
-					var cacheRes = res.clone(),
-						retRes = res.clone();
-					caches.open( CACHE_NAME ).then( function ( cache ) {
-							cache.put( fetchRequest, cacheRes );
-						});
-					return retRes;
-				});
-			});
+		caches.match( cacheRequest )
+			.then( function ( cache ) { return cache; } )
+			.catch( 
+				function ( err ) {
+					fetch( fetchRequest ).then( 
+						function ( res ) {
+							var cacheRes = res.clone(),
+								retRes = res.clone();
+							caches.open( CACHE_NAME ).then( function ( cache ) {
+									cache.put( fetchRequest, cacheRes );
+								});
+							return retRes;
+						}
+					);
+				}
+			)
 	);
 });
 
