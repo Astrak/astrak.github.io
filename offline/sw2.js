@@ -8,15 +8,15 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        postMessage('Opened cache' + CACHE_NAME );
+        navigator.serviceWorker.controller.postMessage('Opened cache' + CACHE_NAME );
         return cache.addAll(urlsToCache);
       })
   );
-  postMessage('installation complete')
+  navigator.serviceWorker.controller.postMessage('installation complete')
 });
 
 self.addEventListener('fetch',function(e){
-	postMessage(e)
+	navigator.serviceWorker.controller.postMessage(e)
 	e.respondWith(
 		caches.match(e.request).then( function (res){
 			if ( res ) return res;
