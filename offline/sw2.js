@@ -3,15 +3,16 @@ var urlsToCache = [
   '/index.html'
 ];
 
-self.addEventListener('install', function(event) {
-	event.waitUntil(
+self.addEventListener( 'install' , function ( e ) {
+	e.waitUntil(
 		caches.open( CACHE_NAME ).then( function ( cache ) {
 			return cache.addAll( urlsToCache );
+			console.log(self)
 		})
 	);
 });
 
-self.addEventListener('fetch',function(e){
+self.addEventListener( 'fetch' , function ( e ) {
 	var fetchRequest = e.request.clone(),
 		cacheRequest = e.request.clone();
 	e.respondWith( 
@@ -34,16 +35,14 @@ self.addEventListener('fetch',function(e){
 	);
 });
 
-	// e.respondWith(
-	// 	caches.match(e.request.clone()).then( function (res){
-	// 		if ( res ) return res;
-	// 		var req = e.request.clone();
-	// 		return fetch( req ).then( function ( res ) {
-	// 			if ( ! res || res.status !== 200 || res.type !== 'basic' ) return res;
-	// 			var cacheRes = res.clone();
-	// 			caches.open( CACHE_NAME ).then( function( cache ) {
-	// 				cache.put( e.request, cacheRes );
-	// 			})
-	// 		})
-	// 	})
-	// );
+self.addEventListener( 'activate' , function ( e ) {
+	e.waitUntil(
+		caches.keys().then( function ( cacheNames ) {
+			return Promise.all(
+				cacheNames.map( function ( cacheName ) {
+					if ( urlsToCache.indexOf( cacheName ) === -1 ) return caches.delete( cacheName );
+				})
+			)
+		})
+	);
+});
