@@ -31,6 +31,7 @@ self.addEventListener( 'fetch', function ( e ) {
     var requestUrl = new URL( e.request.url );
 
     if ( requestUrl.hostname === 'interascope.com' ) {
+        console.log('fetch is same domain')
          e.respondWith(
             caches.open( CACHE_NAME ).then( function ( cache ) {
                 return cache.match( e.request).then(function ( response ) {
@@ -58,6 +59,7 @@ self.addEventListener( 'fetch', function ( e ) {
 function fetchAndCache( e, cache) {
     return fetch( e.request.clone() ).then( function ( response ) {
         if ( response.status < 400 ) {
+            console.log('cache updated')
             cache.put( e.request, response.clone() );
         }
         return response;
