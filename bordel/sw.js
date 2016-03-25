@@ -26,30 +26,6 @@ self.addEventListener('activate', function ( e ) {
     );
 });
 
-//cache or fetch
-/*self.addEventListener( 'fetch', function ( e ) {
-	var fetchRequest = e.request.clone(),
-		cacheRequest = e.request.clone();
-	e.respondWith( 
-		caches.match( cacheRequest )
-			.then( function ( cache ) { 
-				console.log(cache)
-				if ( cache ) return cache;
-				return fetch( fetchRequest ).then( 
-					function ( res ) {
-						var cacheRes = res.clone(),
-							retRes = res.clone();
-						caches.open( CACHE_NAME ).then( function ( cache ) {
-							cache.put( fetchRequest, cacheRes );
-						});
-						return retRes;
-					}
-				);
-			})
-				
-	);
-});*/
-
 //cache + fetch&cache or fetch&cache
 self.addEventListener( 'fetch', function ( e ) {
     var requestUrl = new URL( e.request.url );
@@ -87,4 +63,28 @@ function fetchAndCache( e, cache) {
         return response;
     });
 }
+
+//cache or fetch
+/*self.addEventListener( 'fetch', function ( e ) {
+	var fetchRequest = e.request.clone(),
+		cacheRequest = e.request.clone();
+	e.respondWith( 
+		caches.match( cacheRequest )
+			.then( function ( cache ) { 
+				console.log(cache)
+				if ( cache ) return cache;
+				return fetch( fetchRequest ).then( 
+					function ( res ) {
+						var cacheRes = res.clone(),
+							retRes = res.clone();
+						caches.open( CACHE_NAME ).then( function ( cache ) {
+							cache.put( fetchRequest, cacheRes );
+						});
+						return retRes;
+					}
+				);
+			})
+				
+	);
+});*/
 
