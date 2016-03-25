@@ -10,7 +10,6 @@
 		'use strict';
 		
 		var scene, renderer, camera, controls;
-		var raycaster, mouse = { x : 0, y : 0 };
 		
 		setScene();
 
@@ -21,6 +20,7 @@
 
 
 			camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 1, 100 );
+			//camera.position.z = 2;
 			controls = new THREE.DeviceOrientationControls( camera );
 
 			scene = new THREE.Scene();
@@ -29,10 +29,17 @@
 				new THREE.SphereBufferGeometry(15,30,30),
 				new THREE.MeshBasicMaterial({
 					map:new THREE.TextureLoader().load('sky.png'),
-					color:0xffffff
+					color:0xffffff,
+					side:THREE.BackSide
 				}));
 
 			scene.add( sphere );
+
+			window.addEventListener( 'resize', function () {
+				renderer.setSize( innerWidth, innerHeight );
+				camera.aspect = innerWidth / innerHeight;
+				camera.updateProjectionMatrix();
+			}, false );
 
 			animate();
 		}
@@ -44,16 +51,16 @@
 		}
 	</script>
 	<script>
-		if ( 'serviceWorker' in navigator ) {
-			navigator.serviceWorker.register( 'sw.js' ).then( function ( res ){
-				console.info('service worker installation complete, the app will be available offline after this session');
-			}).catch( function ( err ) {
-				console.info('the service worker failed to install, the app will not be available offline after this session');
-			});
-			var c = navigator.serviceWorker.controller
-			console.log( c );
-			if (c) c.addEventListener('message',function(e){console.log(e)});
-		}
+		// if ( 'serviceWorker' in navigator ) {
+		// 	navigator.serviceWorker.register( 'sw.js' ).then( function ( res ){
+		// 		console.info('service worker installation complete, the app will be available offline after this session');
+		// 	}).catch( function ( err ) {
+		// 		console.info('the service worker failed to install, the app will not be available offline after this session');
+		// 	});
+		// 	var c = navigator.serviceWorker.controller
+		// 	console.log( c );
+		// 	if (c) c.addEventListener('message',function(e){console.log(e)});
+		// }
 	</script>
 </body>
 </html>
