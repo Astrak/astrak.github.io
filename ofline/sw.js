@@ -3,7 +3,7 @@ var urlsToCache = [
   '/index.html'
 ];
 
-self.addEventListener( 'install' , function ( e ) {
+self.addEventListener( 'install', function ( e ) {
 	e.waitUntil(
 		caches.open( CACHE_NAME ).then( function ( cache ) {
 			console.log('CACHE_NAME : ' + CACHE_NAME)
@@ -12,7 +12,22 @@ self.addEventListener( 'install' , function ( e ) {
 	);
 });
 
-self.addEventListener( 'fetch' , function ( e ) {
+self.addEventListener('activate', function ( e ) {
+    e.waitUntil(
+        caches.keys().then( function ( cacheNames ) {
+            return Promise.all(
+                cacheNames.map( function ( cacheName ) {
+                    if ( cacheName !== CACHE_NAME ) {
+                        return caches.delete( cacheName );
+                    }
+                })
+            );
+        })
+    );
+});
+
+//cache or fetch
+/*self.addEventListener( 'fetch', function ( e ) {
 	var fetchRequest = e.request.clone(),
 		cacheRequest = e.request.clone();
 	e.respondWith( 
@@ -33,18 +48,43 @@ self.addEventListener( 'fetch' , function ( e ) {
 			})
 				
 	);
+});*/
+
+//cache + fetch&cache or fetch&cache
+self.addEventListener( 'fetch', function ( e ) {
+    var requestUrl = new URL( e.request.url );
+
+    if ( requestUrl.hostname === 'interascope.com' ) {
+         e.respondWith(
+            caches.open( CACHE_NAME ).then( function ( cache ) {
+                return cache.match( e.request).then(function ( response ) {
+                    if ( response ) {
+                        fetchAndCache( e, cache);
+                        return response;
+                    } else {
+                        return fetchAndCache( e, cache);
+                    }
+                }).catch(function (error) {
+                    console.error('  Error in fetch handler:', error);
+                    throw error;
+                });
+            })
+        );
+    } else {
+        e.respondWith(
+            caches.match( e.request).then(function (response) {
+                return response || fetch( e.request);
+            })
+        );
+    }
 });
 
-self.addEventListener('activate', function (event) {
-    event.waitUntil(
-        caches.keys().then(function (cacheNames) {
-            return Promise.all(
-                cacheNames.map(function (cacheName) {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
-    );
-});
+function fetchAndCache( e, cache) {
+    return fetch( e.request.clone() ).then( function ( response ) {
+        if ( response.status < 400 ) {
+            cache.put( e.request, response.clone() );
+        }
+        return response;
+    });
+}
+
