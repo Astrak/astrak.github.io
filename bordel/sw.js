@@ -30,7 +30,7 @@ self.addEventListener('activate', function ( e ) {
 self.addEventListener( 'fetch', function ( e ) {
     var requestUrl = new URL( e.request.url );
     console.log(requestUrl)
-    if ( requestUrl.hostname === 'interascope.com' ) {
+    if ( requestUrl.hostname === 'astrak.github.io' ) {
         console.log('fetch is same domain')
          e.respondWith(
             caches.open( CACHE_NAME ).then( function ( cache ) {
