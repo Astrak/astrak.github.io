@@ -29,7 +29,7 @@ self.addEventListener('activate', function ( e ) {
 //cache + fetch&cache or fetch&cache
 self.addEventListener( 'fetch', function ( e ) {
     var requestUrl = new URL( e.request.url );
-
+    console.log(requestUrl)
     if ( requestUrl.hostname === 'interascope.com' ) {
         console.log('fetch is same domain')
          e.respondWith(
