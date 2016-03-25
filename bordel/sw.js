@@ -1,4 +1,4 @@
-var CACHE_NAME = '2';
+var CACHE_NAME = '1';
 var urlsToCache = [
   '/index.html'
 ];
@@ -6,7 +6,6 @@ var urlsToCache = [
 self.addEventListener( 'install', function ( e ) {
 	e.waitUntil(
 		caches.open( CACHE_NAME ).then( function ( cache ) {
-			console.log('CACHE_NAME : ' + CACHE_NAME)
 			return cache.addAll( urlsToCache );
 		})
 	);
@@ -29,9 +28,7 @@ self.addEventListener('activate', function ( e ) {
 //cache + fetch&cache or fetch&cache
 self.addEventListener( 'fetch', function ( e ) {
     var requestUrl = new URL( e.request.url );
-    console.log(requestUrl)
     if ( requestUrl.hostname === 'astrak.github.io' ) {
-        console.log('fetch is same domain')
          e.respondWith(
             caches.open( CACHE_NAME ).then( function ( cache ) {
                 return cache.match( e.request).then(function ( response ) {
@@ -42,7 +39,6 @@ self.addEventListener( 'fetch', function ( e ) {
                         return fetchAndCache( e, cache);
                     }
                 }).catch(function (error) {
-                    console.error('  Error in fetch handler:', error);
                     throw error;
                 });
             })
@@ -59,7 +55,6 @@ self.addEventListener( 'fetch', function ( e ) {
 function fetchAndCache( e, cache) {
     return fetch( e.request.clone() ).then( function ( response ) {
         if ( response.status < 400 ) {
-            console.log('cache updated')
             cache.put( e.request, response.clone() );
         }
         return response;

@@ -3,9 +3,46 @@
 <head>
 	<title>Testing Service Worker</title>
 </head>
-<body>
+<body style='margin:0;'>
+	<script src='../libs/three.js'></script>
+	<script src='../libs/controls/DeviceOrientationControls.js'></script>
+	<script>
+		'use strict';
+		
+		var scene, renderer, camera, controls;
+		var raycaster, mouse = { x : 0, y : 0 };
+		
+		setScene();
 
-	<h1>Fuck fuck !!</h1>
+		function setScene(){
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( innerWidth, innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+
+			camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 1, 100 );
+			controls = new THREE.DeviceOrientationControls( camera );
+
+			scene = new THREE.Scene();
+
+			var sphere = new THREE.Mesh(
+				new THREE.SphereBufferGeometry(15,30,30),
+				new THREE.MeshBasicMaterial({
+					map:new THREE.TextureLoader().load('sky.png'),
+					color:0xffffff
+				}));
+
+			scene.add( sphere );
+
+			animate();
+		}
+
+		function animate () {
+			requestAnimationFrame( animate );
+			controls.update();
+			renderer.render( scene, camera );
+		}
+	</script>
 	<script>
 		if ( 'serviceWorker' in navigator ) {
 			navigator.serviceWorker.register( 'sw.js' ).then( function ( res ){
