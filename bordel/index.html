@@ -73,10 +73,10 @@
 				right.applyQuaternion( camera.quaternion );
 
 				mov.addVectors( 
-					right.multiplyScalar( e.acceleration.x ),
-					up.multiplyScalar( e.acceleration.y )
+					right.clone().multiplyScalar( e.acceleration.x ),
+					up.clone().multiplyScalar( e.acceleration.y )
 					)
-					.add( eye.multiplyScalar( e.acceleration.z ) );
+					.add( eye.clone().multiplyScalar( e.acceleration.z ) );
 
 				camera.position.add( mov );
 
