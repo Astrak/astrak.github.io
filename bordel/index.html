@@ -3,7 +3,7 @@
 <head>
 	<title>Testing Service Worker</title>
 </head>
-<body style='margin:0;'>
+<body style='margin:0;overflow:hidden;'>
 	<script src='../libs/three.js'></script>
 	<script src='../libs/controls/DeviceOrientationControls.js'></script>
 	<script>
@@ -20,7 +20,7 @@
 
 
 			camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 1, 100 );
-			//camera.position.z = 2;
+			camera.position.z = 2;
 			controls = new THREE.DeviceOrientationControls( camera );
 
 			scene = new THREE.Scene();
@@ -41,7 +41,22 @@
 				camera.updateProjectionMatrix();
 			}, false );
 
+			setMotionInfo();
+
 			animate();
+		}
+
+		function setMotionInfo () {
+			var p = document.createElement( 'p' );
+			p.style.cssText = ''+
+				'position:absolute;'+
+				'top:0;left:0;padding:10px;'+
+				'color:#fff;font-size:20px;';
+			document.body.appendChild( p );
+			window.addEventListener( 'devicemotion', function ( e ) {
+				p.innerHTML = '';
+				for ( var p in e ) p.innerHTML += p + ' : ' + e[ p ] + ', <br>';
+			}, false );
 		}
 
 		function animate () {
