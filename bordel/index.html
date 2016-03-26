@@ -63,7 +63,7 @@
 			window.addEventListener( 'devicemotion', function ( e ) {
 				p.innerHTML = '';
 				for ( var k in e ) {
-					if ( k === 'acceleration' || k === 'accelerationIncludingGravity' ) {
+					if ( k === 'acceleration' ) {
 						p.innerHTML += k + ' :<br>';
 						for ( var l in e[ k ] ) p.innerHTML += '     ' + l + ' : ' + e[ k ][ l ] + ', <br>';
 					}
@@ -79,6 +79,8 @@
 					.add( eye.multiplyScalar( e.acceleration.z ) );
 
 				camera.position.add( mov );
+
+				p.innerHTML += mov.x + '<br>' + mov.y + '<br>' + mov.z;
 			}, false );
 		}
 
