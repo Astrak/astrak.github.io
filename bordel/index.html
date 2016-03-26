@@ -5,7 +5,7 @@
 </head>
 <body style='margin:0;overflow:hidden;'>
 	<script src='../libs/three.js'></script>
-	<script src='../libs/controls/DeviceOrientationControls.js'></script>
+	<script src='../libs/controls/OrbitControls.js'></script>
 	<script>
 		'use strict';
 		
@@ -21,7 +21,7 @@
 
 			camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 1, 100 );
 			camera.position.z = 2;
-			controls = new THREE.DeviceOrientationControls( camera );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 			scene = new THREE.Scene();
 
@@ -53,6 +53,12 @@
 				'top:0;left:0;padding:10px;'+
 				'color:#fff;font-size:20px;';
 			document.body.appendChild( p );
+
+
+			var eye = new THREE.Vector3(0,0,-1),
+				up = new THREE.Vector3(0,1,0),
+				right = new THREE.Vector3(1,0,0);
+
 			window.addEventListener( 'devicemotion', function ( e ) {
 				p.innerHTML = '';
 				for ( var k in e ) {
@@ -61,6 +67,15 @@
 						for ( var l in e[ k ] ) p.innerHTML += '     ' + l + ' : ' + e[ k ][ l ] + ', <br>';
 					}
 				}
+				eye.applyQuaternion( camera.quaternion );
+				up.applyQuaternion( camera.quaternion );
+				right.applyQuaternion( camera.quaternion );
+
+				camera.position.add( 
+					right.multiplyScalar( e.acceleration.x ),
+					up.multiplyScalar( e.acceleration.y ),
+					eye.multiplyScalar( e.acceleration.z )
+					);
 			}, false );
 		}
 
