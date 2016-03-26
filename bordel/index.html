@@ -55,7 +55,12 @@
 			document.body.appendChild( p );
 			window.addEventListener( 'devicemotion', function ( e ) {
 				p.innerHTML = '';
-				for ( var p in e ) p.innerHTML += p + ' : ' + e[ p ] + ', <br>';
+				for ( var k in e ) {
+					if ( k === 'acceleration' || k === 'accelerationIncludingGravity' ) {
+						p.innerHTML += k + ' :<br>';
+						for ( var l in e[ k ] ) p.innerHTML += '     ' + l + ' : ' + e[ k ][ l ] + ', <br>';
+					}
+				}
 			}, false );
 		}
 
