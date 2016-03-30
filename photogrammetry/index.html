@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Agoût's tide - Castres, France</title>
+		<style>
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script src='../libs/threer75.js'></script>
+		<script src='../libs/controls/OrbitControlsr75.js'></script>
+
+		<script>
+			'use strict';
+			
+			var scene, renderer, camera, controls;
+			var loader = new THREE.JSONLoader();
+			
+			setScene();
+
+			function setScene(){
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( innerWidth, innerHeight );
+				document.body.appendChild( renderer.domElement );
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 1, 100 );
+				camera.position.z = 5;
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', function () { renderer.render(scene, camera); }, false );
+				controls.maxPolarAngle = 2;
+
+				loader.load('part1.json',function(g){
+					var mat = new THREE.MeshBasicMaterial({
+						color:0xffffff,
+						map:new THREE.TextureLoader().load('texture1024.png')
+					});
+					var mesh = new THREE.Mesh(g,mat);
+					mesh.rotation.y = 3.4;
+					mesh.position.set(5,0,6);
+					scene.add(mesh);
+					//timeout not working..?
+					setInterval(function(){renderer.render(scene,camera);},1000);
+				});
+			}
+		</script>
+	</body>
+</html>
