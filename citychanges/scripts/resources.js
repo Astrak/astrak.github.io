@@ -1,5 +1,5 @@
 var linearFilteredSmoothLambertMaterial=new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true});
-var nearestFilteredFlatLambertMaterial=new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading});
+var nearestFilteredFlatLambertMaterial=new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading});
 var resources = {
     textures:[
         // 18 textures = madness
@@ -101,19 +101,19 @@ var resources = {
         {//8
             geometry:13,
             map:16,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'gardens'
         },
         {//9
             geometry:14,
             map:13,//minFilter set to Linear in loadTextures
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'routes'
         },
         {//10
             geometry:15,
             map:14,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'trottoirs'
         },
         {//11
@@ -147,7 +147,7 @@ var resources = {
         {//15
             geometry:8,
             map:undefined,
-            material:new THREE.MeshLambertMaterial({
+            material:new THREE.MeshPhongMaterial({
 				color:0xaaaaff,
 				shading:THREE.FlatShading,
 				depthTest:false,depthWrite:true,
@@ -161,7 +161,7 @@ var resources = {
         {//16
             geometry:7,
             map:6,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'commerces',
             steps:[false,false,true]
         },
@@ -175,14 +175,14 @@ var resources = {
         {//18
             geometry:6,
             map:4,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'chantier1',
             steps:[false,true,false]
         },
         {//19
             geometry:0,
             map:0,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading,side:THREE.DoubleSide}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading,side:THREE.DoubleSide}),
             name:'hospital',
             infos:{title:"Informations sur le bâtiment principal de l'hôpital",description:"Il a été bâti en 1982"},
             steps:[true,false,false]
@@ -190,25 +190,25 @@ var resources = {
         {//20
             geometry:3,
             map:2,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'gambetta'
         },
         {//21
             geometry:4,
             map:1,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'gambetta2'
         },
         {//22
             geometry:1,
             map:3,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'hugo'
         },
         {//23
             geometry:2,
             map:17,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
             name:'gambettacity'
         }
         ]
