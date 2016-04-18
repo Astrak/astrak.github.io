@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Evolution</title>
+		<style>
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+			/*SPEED SLIDER*/
+				div.slider-container{
+					position:absolute;
+					left:50%;
+					margin-left:-100px;
+					width:200px;
+					height:60px;
+					bottom:2px;
+				}
+				span.slider-range{
+					position:absolute;
+					left:50%;top:50%;
+					margin-left:-50%;
+					margin-top:-4px;
+					width:100%;
+					height:8px;
+					border-radius:2px;
+					background:chocolate;
+				}
+				span.slider-thumb{
+					left:50px;
+				    background:darkslategrey;
+				    box-shadow:0px 0px 10px black;
+					margin-bottom:7px;
+					width:50px;height:50px;
+					border-radius:50%;
+					margin-left:-50px;
+					position:absolute;
+					margin-top:-21px;/*25-4 of slider-range margin-top*/
+				}
+				input{
+				    position:absolute;
+				    bottom:-2px;
+				    opacity:0;
+				    cursor:pointer;
+				 	-webkit-appearance: none; 
+				    width:200px;
+				    height:60px;
+				    left:50%;
+				    margin-left:-100px;
+					background:none;
+					border:none;
+				}
+
+			/**********************************/
+			/** SLIDER STYLE FROM CSS TRICKS **/
+			/**********************************/
+
+			/* the real slider is hidden on top of 
+			the visible range and thumb that let 
+			display the value inside the latter */
+
+			/** 1. REMOVE AUTOMATIC STYLES **/
+				input[type=range]::-webkit-slider-thumb {
+				  -webkit-appearance: none;
+				}
+				input[type=range]:focus {
+				  outline: none;
+				}
+				input[type=range]::-ms-track {
+				  cursor: pointer;
+				  background: transparent; /* Hides the slider so custom styles can be added */
+				  border-color: transparent;
+				  color: transparent;
+				}
+
+			/** 2. THE THUMB **/
+				input[type=range]::-webkit-slider-thumb {
+				  -webkit-appearance: none;
+				  height: 50px;
+				  width: 50px;
+				  border-radius: 50%;
+				  background: darkslategrey;
+				  margin-top: -21px; /* needed in Chrome, not in Firefox and IE */
+				  box-shadow:0px 0px 10px #000;
+				}
+				input[type=range]::-moz-range-thumb {
+				  height: 50px;
+				  width: 50px;
+				  border-radius: 50%;
+				  background: darkslategrey;
+				  box-shadow:0px 0px 10px #000;
+				  border:none;
+				}
+				input[type=range]::-ms-thumb {
+				  height: 50px;
+				  width: 50px;
+				  border-radius: 50%;
+				  background: darkslategrey;
+				  box-shadow:0px 0px 10px #000;
+				  border:none;
+				}
+
+			/** 3. THE TRACK **/
+				input[type=range]::-webkit-slider-runnable-track {
+				  width: 100%;
+				  height: 8.4px;
+				  background: chocolate;
+				  border-radius: 1.3px;
+				}
+				input[type=range]:focus::-webkit-slider-runnable-track {
+				  background: chocolate;
+				}
+				input[type=range]::-moz-range-track {
+				  width: 100%;
+				  height: 8.4px;
+				  background: chocolate;
+				  border-radius: 1.3px;
+				}
+				input[type=range]::-ms-track {
+				  width: 100%;
+				  height: 8.4px;
+				  background: transparent;
+				  border-color: transparent;
+				  border-width: 16px 0;
+				  color: transparent;
+				}
+				input[type=range]::-ms-fill-lower {
+				  background: chocolate;
+				  border-radius: 2.6px;
+				}
+				input[type=range]:focus::-ms-fill-lower {
+				  background: chocolate;
+				}
+				input[type=range]::-ms-fill-upper {
+				  background: chocolate;
+				  border-radius: 2.6px;
+				}
+				input[type=range]:focus::-ms-fill-upper {
+				  background: chocolate;
+				}
+		</style>
+	</head>
+	<body>
+
+		<script src='../libs/threer75.js'></script>
+		<script src='../libs/controls/OrbitControlsr75.js'></script>
+
+		<script>
+			'use strict';
+			
+			var scene, renderer, camera, controls, mesh;
+
+			var loader = new THREE.JSONLoader();
+			
+			setScene();
+			animate();
+
+			function setScene(){
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( innerWidth, innerHeight );
+				document.body.appendChild( renderer.domElement );
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 30, innerWidth / innerHeight, 1, 100 );
+				camera.position.z = 35;
+				camera.update = false;
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', function () { camera.update = true; }, false );
+				controls.enableDamping = true;
+				controls.dampingFactor = .05;
+				controls.rotateSpeed = .07;
+
+				setLighting();
+
+				setSlider();
+
+				makeSkulls();
+
+				window.addEventListener('resize',function(){
+					camera.aspect=innerWidth/innerHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize(innerWidth,innerHeight);
+				},false)
+			}
+
+			function setLighting () {
+				var light1 = new THREE.PointLight( 0xffffff, 1, 20 );
+				light1.position.set(5,5,10);
+				var light2 = new THREE.PointLight( 0xffffff, 2, 30 );
+				light2.position.set(-15,-2,-10);
+				var light3 = new THREE.PointLight( 0xffffff, 1, 30 );
+				light3.position.set( 0, 5, 15 );
+				var light4 = new THREE.PointLight( 0xffffff, 1, 30 );
+				light4.position.set( 0, -8, -15 );
+				var ambient = new THREE.AmbientLight( 0x222222 );
+				scene.add( light1, light4, ambient );
+
+				light1.castShadow = light2.castShadow = light3.castShadow = light4.castShadow = true;
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMapWidth = renderer.shadowMapHeight = 2048;
+				renderer.shadowMap.autoUpdate = false;
+			}
+
+			function makeSkulls () {
+				loader.load( 'evol.js', function ( g ) {
+					g.computeVertexNormals();
+					g.computeMorphNormals();
+
+					var t = new THREE.TextureLoader().load( 'normals.png', function () { camera.update = true; });
+					var t2 = new THREE.TextureLoader().load( 'noise.jpg', function () { camera.update = true; });
+
+					mesh = new THREE.Mesh( g, new THREE.MeshPhongMaterial({
+						color : 0xffcc99,
+						normalMap : t,
+						specularMap : t2,
+						map : t2,
+						morphTargets : true,
+						morphNormals : true,
+						shininess : 50,
+						specular : 0x444444
+					}));
+					mesh.receiveShadow = mesh.castShadow = true;
+					scene.add( mesh );
+					camera.update = true;
+					renderer.shadowMap.needsUpdate = true;
+				});
+			}
+
+			function setSlider(){
+				//1. Appearance
+
+				//container
+				var sliderContainer=document.createElement('div');
+				sliderContainer.className='slider-container';
+				document.body.appendChild(sliderContainer);
+
+				//fake slider
+				var sliderRange=document.createElement('span');
+				sliderRange.className='slider-range';
+				sliderContainer.appendChild(sliderRange);
+
+				var sliderThumb=document.createElement('span');
+				sliderThumb.className='slider-thumb';
+				sliderRange.appendChild(sliderThumb);
+
+				//real slider
+				var slider=document.createElement('input');
+			    slider.type='range';
+			    slider.min=0;slider.max=1;slider.step=0.001;
+			    slider.value=0;
+			    sliderContainer.appendChild(slider);
+
+			    //2. Event listener
+
+			    var range=slider.max-slider.min;
+
+			    slider.addEventListener('input',function(){
+					if ( mesh ) mesh.morphTargetInfluences = [ 1 - this.value, this.value ];
+					sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
+					camera.update = renderer.shadowMap.needsUpdate = true;
+			    },false);
+			}
+
+			function animate () {
+				requestAnimationFrame(animate);
+				controls.update();
+
+				if ( camera.update ) {
+					renderer.render( scene, camera );
+					camera.update = false;
+				}
+			}
+		</script>
+	</body>
+</html>
