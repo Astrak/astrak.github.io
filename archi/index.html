@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Evolution</title>
+		<title>TITLE</title>
 		<style>
 			body{
 			    margin:0;
@@ -154,13 +154,12 @@
 
 		<script src='../libs/threer75.js'></script>
 		<script src='../libs/controls/OrbitControlsr75.js'></script>
+		<script src='../libs/shaders/SkyShader.js'></script>
 
 		<script>
 			'use strict';
 			
-			var scene, renderer, camera, controls, mesh;
-
-			var loader = new THREE.JSONLoader();
+			var scene, renderer, camera, controls, sky, sunSphere, light1;
 			
 			setScene();
 			animate();
@@ -170,65 +169,48 @@
 				renderer.setSize( innerWidth, innerHeight );
 				document.body.appendChild( renderer.domElement );
 				scene = new THREE.Scene();
-				camera = new THREE.PerspectiveCamera( 30, innerWidth / innerHeight, 1, 100 );
-				camera.position.z = 35;
+				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 1, 500 );
+				camera.position.set( 5, 1.5, 0 );
 				camera.update = false;
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
 				controls.addEventListener( 'change', function () { camera.update = true; }, false );
 				controls.enableDamping = true;
 				controls.dampingFactor = .05;
 				controls.rotateSpeed = .07;
+				controls.target.set(0,1.5,0);
 
 				setLighting();
 
+				initSky();
+
+				var mesh = new THREE.Mesh(
+					new THREE.BoxGeometry( 1, 1, 1 ),
+					new THREE.MeshLambertMaterial({
+						color:0xff0000
+					})
+					);
+
+				var ground = new THREE.Mesh(
+					new THREE.PlaneBufferGeometry( 500, 500, 10, 10 ),
+					new THREE.MeshLambertMaterial({
+						color:0x00bb00,
+						side:THREE.DoubleSide
+					})
+					);
+				ground.rotation.x = - Math.PI / 2;
+				ground.position.y = -.5;
+
+				scene.add( mesh, ground );
+
+				mesh.castShadow = mesh.receiveShadow = ground.castShadow = ground.receiveShadow = true;
+
 				setSlider();
 
-				makeSkulls();
-
-				window.addEventListener('resize',function(){
-					camera.aspect=innerWidth/innerHeight;
+				window.addEventListener( 'resize', function () {
+					camera.aspect = innerWidth / innerHeight;
 					camera.updateProjectionMatrix();
 					renderer.setSize(innerWidth,innerHeight);
-					camera.update = true;
-				},false);
-			}
-
-			function setLighting () {
-				var light1 = new THREE.PointLight( 0xffffff, 1, 20 );
-				light1.position.set(5,5,10);
-				var light4 = new THREE.PointLight( 0xffffff, 1, 30 );
-				light4.position.set( 0, -8, -15 );
-				var ambient = new THREE.AmbientLight( 0x444444 );
-				scene.add( light1, light4, ambient );
-
-				light1.castShadow = light4.castShadow = renderer.shadowMap.enabled = true;
-				renderer.shadowMapWidth = renderer.shadowMapHeight = 2048;
-				renderer.shadowMap.autoUpdate = false;
-			}
-
-			function makeSkulls () {
-				loader.load( 'evol.js', function ( g ) {
-					g.computeVertexNormals();
-					g.computeMorphNormals();
-
-					var t = new THREE.TextureLoader().load( 'normals.png', function () { camera.update = true; });
-					var t2 = new THREE.TextureLoader().load( 'noise.jpg', function () { camera.update = true; });
-
-					mesh = new THREE.Mesh( g, new THREE.MeshPhongMaterial({
-						color : 0xffcc99,
-						normalMap : t,
-						specularMap : t2,
-						map : t2,
-						morphTargets : true,
-						morphNormals : true,
-						shininess : 50,
-						specular : 0x444444
-					}));
-					mesh.receiveShadow = mesh.castShadow = true;
-					scene.add( mesh );
-					camera.update = true;
-					renderer.shadowMap.needsUpdate = true;
-				});
+				}, false );
 			}
 
 			function setSlider(){
@@ -260,10 +242,67 @@
 			    var range=slider.max-slider.min;
 
 			    slider.addEventListener('input',function(){
-					if ( mesh ) mesh.morphTargetInfluences = [ 1 - this.value, this.value ];
+			    	updateSky( this.value + 1, .9 );
 					sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
 					camera.update = renderer.shadowMap.needsUpdate = true;
 			    },false);
+			}
+
+			function setLighting () {
+				light1 = new THREE.DirectionalLight( 0xffffff, 2 );
+				light1.position.set(-10,5,5);
+				var ambient = new THREE.AmbientLight( 0x444444 );
+				scene.add( light1, ambient );
+
+				light1.castShadow = renderer.shadowMap.enabled = true;
+				renderer.shadowMapWidth = renderer.shadowMapHeight = 512;
+				renderer.shadowMap.autoUpdate = false;
+				renderer.shadowMap.needsUpdate = true;
+			}
+
+			function initSky () {
+
+				// Add Sky Mesh
+				sky = new THREE.Sky();
+				scene.add( sky.mesh );
+
+				//set parameters
+				var inclination = 0.72;
+				var azimuth = 0.9;
+				sky.uniforms.turbidity.value = 10;
+				sky.uniforms.reileigh.value = 2;
+				sky.uniforms.luminance.value = 1;
+				sky.uniforms.mieCoefficient.value = 0.005;
+				sky.uniforms.mieDirectionalG.value = 0.99;
+
+				// Add Sun Helper
+				var distance = 1000;
+				var theta = Math.PI * ( inclination - 0.5 );
+				var phi = 2 * Math.PI * ( azimuth - 0.5 );
+				sunSphere = new THREE.Mesh(
+					new THREE.SphereGeometry( 200, 16, 8 ),
+					new THREE.MeshBasicMaterial( { color: 0xffffff } )
+				);
+				sunSphere.position.x = distance * Math.cos( phi );
+				sunSphere.position.y = distance * Math.sin( phi ) * Math.sin( theta );
+				sunSphere.position.z = distance * Math.sin( phi ) * Math.cos( theta );
+				sunSphere.visible = false;
+				sky.uniforms.sunPosition.value.copy( sunSphere.position );
+				//scene.add( sunSphere );
+			}
+
+			function updateSky ( i, a ) {
+				var distance = 1000, lightDistance = 10;
+				var theta = Math.PI * ( i - 0.5 );
+				var phi = 2 * Math.PI * ( a - 0.5 );
+				sunSphere.position.x = distance * Math.cos( phi );
+				sunSphere.position.y = distance * Math.sin( phi ) * Math.sin( theta );
+				sunSphere.position.z = distance * Math.sin( phi ) * Math.cos( theta );
+				light1.position.x = lightDistance * Math.cos( phi );
+				light1.position.y = lightDistance * Math.sin( phi ) * Math.sin( theta );
+				light1.position.z = lightDistance * Math.sin( phi ) * Math.cos( theta );
+				sky.uniforms.sunPosition.value.copy( sunSphere.position );
+				renderer.shadowMap.needsUpdate = true;
 			}
 
 			function animate () {
