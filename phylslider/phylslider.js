@@ -18,7 +18,7 @@ var PhylSlider = function ( params ) {
 		'width:50px;height:50px;'+
 		'border-radius:50%;'+
 		'background:darkslategrey;'+
-		'margin:-17px 0 0 -17px;';
+		'margin:-25px 0 0 -25px;';
 
 	var wrapper = document.createElement( 'div' );
 	wrapper.style.position = 'relative';
@@ -55,7 +55,7 @@ var PhylSlider = function ( params ) {
 
 		checkTree( self.tree );
 
-		thumb.style.top = ( self.tree.yStart - 8 ) + 'px';
+		thumb.style.top = self.tree.yStart + 'px';
 		thumb.style.left = self.tree.xStart + 'px';
 
 		traverse( self.tree, function ( o ) {
@@ -181,7 +181,7 @@ var PhylSlider = function ( params ) {
 		posY = !! e.touches ? e.touches[ 0 ].clientY : e.clientY;
 		result = getResult( posX - container.offsetLeft, posY - container.offsetTop );
 		thumb.style.left = result.x + 'px';
-		thumb.style.top = ( result.y - 8 ) + 'px';
+		thumb.style.top = result.y + 'px';
 		self.callback( result.tween );
 	}
 	
