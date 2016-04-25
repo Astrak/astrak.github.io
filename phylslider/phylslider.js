@@ -1,0 +1,274 @@
+var PhylSlider = function ( params ) {
+
+	'use strict';
+
+	var self = this;
+
+	var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+	svg.setAttribute( 'class', 'phylslider-svg' );
+	if ( params.width ) svg.setAttribute( 'width', params.width );
+	if ( params.height ) svg.setAttribute( 'height', params.height );
+
+	var thumb = document.createElement( 'div' );
+	thumb.className = 'phylslider-thumb';
+	thumb.style.cssText = ''+
+		'position:absolute;'+
+		'cursor:pointer;'+
+		'box-shadow:0 0 10px black;'+
+		'width:50px;height:50px;'+
+		'border-radius:50%;'+
+		'background:darkslategrey;'+
+		'margin:-17px 0 0 -17px;';
+
+	var wrapper = document.createElement( 'div' );
+	wrapper.style.position = 'relative';
+	var container = document.createElement( 'div' );
+
+	container.appendChild( wrapper );
+	wrapper.appendChild( svg );
+	wrapper.appendChild( thumb );
+
+	this.slider = container;
+
+	this.fill = params.fill ? params.fill : 'none';
+	this.strokeWidth = params.strokeWidth ? params.strokeWidth : 8;
+	this.strokeLinecap = params.strokeLinecap ? params.strokeLinecap : 'round';
+	this.stroke = params.stroke ? params.stroke : 'chocolate';
+	this.fontFamily = params.fontFamily ? params.fontFamily : 'Verdana';
+	this.fontSize = params.fontSize ? params.fontSize : 30;
+	this.bezier = params.hasOwnProperty( 'bezier' ) ? params.bezier : false;
+	this.callback = params.callback ? params.callback : function () {};
+
+	this.svg = svg;
+
+	if ( ! params.hasOwnProperty( 'tree' ) ) 
+		return console.error( 'PhylSlider needs a tree !' );
+
+	this.tree = params.tree;
+
+	var maxX = 0;
+
+	this.setSlider = function () {
+		while ( svg.firstChild ) {
+		    svg.removeChild( svg.firstChild );
+		}
+
+		checkTree( self.tree );
+
+		thumb.style.top = ( self.tree.yStart - 8 ) + 'px';
+		thumb.style.left = self.tree.xStart + 'px';
+
+		traverse( self.tree, function ( o ) {
+			maxX = Math.max( o.xEnd, maxX );
+			drawPath( o );
+		});
+
+		container.addEventListener( 'mousedown', onMouseDown, false );
+		container.addEventListener( 'touchstart', onMouseDown, false );
+		svg.addEventListener( 'click', onClick, false );
+	};
+
+	var minAge = 0, maxAge = 0, tweenFrom;
+
+	function checkTree ( o, newMax, fatherTween ) {
+		if ( o.hasOwnProperty( 'age' ) ) {
+			minAge = minAge < o.age ? minAge : o.age;
+			maxAge = maxAge > o.age ? maxAge : o.age;
+		} else {
+			o.age = typeof newMax === 'undefined' ? 0 : newMax;
+		}
+
+		//forces creation of a tween property
+		( o.hasOwnProperty( 'tween' ) && typeof o.tween === 'object' ) ? tweenFrom = o.tween : o.tween = {};
+
+		//caches fatherTween
+		o.tweenFrom = typeof fatherTween === 'undefined' ? o.tween : fatherTween;
+
+		if ( o.hasOwnProperty( 'children' ) ) {
+			var fatherX = o.hasOwnProperty( 'xEnd' ) ? o.xEnd : 10;
+			var fatherY = o.hasOwnProperty( 'yEnd' ) ? o.yEnd : svg.height / 2;
+			o.children.forEach( function ( v ) {
+				v.xStart = fatherX, v.yStart = fatherY;
+				checkTree( v, maxAge + 1, o.tween );
+			});
+		}
+	}
+
+	function stylePath ( p ) {
+		p.setAttribute( 'fill', self.fill );
+		p.setAttribute( 'stroke-width', self.strokeWidth );
+		p.setAttribute( 'stroke-linecap', self.strokeLinecap );
+		p.setAttribute( 'stroke', self.stroke );
+		p.style.cursor = 'pointer';
+	}
+
+	function styleText ( t ) {
+		t.setAttribute( 'font-size', self.fontSize );
+		t.setAttribute( 'font-family', self.fontFamily );
+	}
+
+	var bez1, bez2;
+
+	function drawPath ( o ) {
+		bez1 = params.bezier ? ( o.xStart + ( o.xEnd - o.xStart ) / 2 ) : o.xStart;
+		bez2 = params.bezier ? ( o.xEnd - ( o.xEnd - o.xStart ) / 2 ) : o.xEnd;
+
+		var s = 'M' + o.xStart + ',' + o.yStart + ' C' +
+			bez1 + ',' + o.yStart + ' ' +
+			bez2 + ',' + o.yEnd + ' ' +
+			o.xEnd + ',' + o.yEnd;
+
+		var p = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+		stylePath( p );
+		svg.appendChild( p );
+		p.setAttribute( 'd', s );
+
+		var a = o.content.split('\n');
+		a.forEach( function( v, i ) {
+			var t = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+			styleText( t );
+			svg.appendChild( t );
+			t.innerHTML = v;
+			var tWidth = v.length * 20;
+			t.setAttribute( 'x', o.xEnd - tWidth / 2  + o.contentX );
+			t.setAttribute( 'y', o.yEnd + ( self.fontSize + 5 ) * ( i + 1 ) + 10 + o.contentY );
+		});
+	}
+
+	function traverse ( o, cb ) {
+		cb( o );
+		if ( typeof o === 'object' && o.hasOwnProperty( 'children' ) )
+			o.children.forEach( function ( v ) { traverse( v, cb ); } );
+	}
+
+	function onMouseDown ( e ) {
+		if ( e.target !== thumb && e.target.tagName !== 'path' ) return false;
+		e.preventDefault();
+		if ( ! e.touches ) {
+			window.addEventListener( 'mouseup', onMouseUp, false );
+			window.addEventListener( 'mousemove', onMouseMove, false );	
+		} else {
+			window.addEventListener( 'touchend', onMouseUp, false );
+			window.addEventListener( 'touchmove', onMouseMove, false );	
+		}
+		return false;
+	}
+
+	function onMouseMove ( e ) {
+		e.preventDefault();
+		update( e );
+		return false;
+	}
+
+	function onClick ( e ) {
+		if ( e.target.tagName !== 'path' ) return false;
+		e.preventDefault();
+		update( e );
+		return false;
+	}
+
+	function onMouseUp () {
+		window.removeEventListener( 'mouseup', onMouseUp, false );
+		window.removeEventListener( 'mousemove', onMouseMove, false );
+		window.removeEventListener( 'touchup', onMouseUp, false );
+		window.removeEventListener( 'touchmove', onMouseMove, false );
+	}
+
+	var result, posX, posY;
+
+	function update ( e ) {
+		posX = !! e.touches ? e.touches[ 0 ].clientX : e.clientX;
+		posY = !! e.touches ? e.touches[ 0 ].clientY : e.clientY;
+		result = getResult( posX - container.offsetLeft, posY - container.offsetTop );
+		thumb.style.left = result.x + 'px';
+		thumb.style.top = ( result.y - 8 ) + 'px';
+		self.callback( result.tween );
+	}
+	
+	var x, y, a, b, p;
+	var diff, index, w;
+	var yValues = [];
+
+	function getResult ( xCoord, yCoord ) {
+		yValues = [];
+		diff = undefined;
+		x = Math.min( Math.max( self.tree.xStart, xCoord - 8 ), maxX );
+
+		traverse( self.tree, function ( o ) {
+			if ( o.xStart <= x && o.xEnd >= x ) {
+				p = ( x - o.xStart ) / ( o.xEnd - o.xStart );
+				if ( params.bezier ) {
+					yValues.push( getBezierImage( 
+						p,
+						{ x : o.xStart, y : o.yStart},
+						{ x : o.xEnd, y : o.yEnd },
+						getTween( p, o.tweenFrom, o.tween )
+					));
+				} else {
+					a = ( o.yEnd - o.yStart ) / ( o.xEnd - o.xStart );
+					b = o.yStart - a * o.xStart;
+					yValues.push( { x : x, y : a * x + b, tween : getTween( p, o.tweenFrom, o.tween ) } );
+				}
+			}
+		});
+
+		yValues.forEach( function( v, i ) {
+			if ( typeof diff === 'undefined' || Math.abs( v.y - yCoord + 8 ) < diff ) diff = Math.abs( v.y - yCoord + 8 ), index = i;
+		});
+
+		return { x : yValues[ index ].x, y : yValues[ index ].y, tween : yValues[ index ].tween };
+	}
+
+	var l2 = { x : 0, y : 0 },
+		l3 = { x : 0, y : 0 },
+		r2 = { x : 0, y : 0 },
+		r3 = { x : 0, y : 0 },
+		h = { x : 0, y : 0 };
+
+	function getBezierImage ( t, start, end, tween ) {
+		//Following maths only fit the particular case of Bezier curves where
+		//p0.y = p1.y, p2.y = p3.y and 
+		//p1.x = p2.x = ( p0.x + p3.x ) / 2;
+
+		h.y = start.y + t * ( end.y - start.y );
+		l3.y = start.y + t * ( h.y - start.y );		
+		r2.y = h.y + t * ( end.y - h.y );
+
+		h.x = ( end.x + start.x ) / 2;
+		l2.x = start.x + t * ( h.x - start.x );
+		r3.x = h.x + t * ( end.x - h.x );
+		l3.x = l2.x + t * ( h.x - l2.x );
+		r2.x = h.x + t * ( r3.x - h.x );
+
+		return {
+			x : l3.x + t * ( r2.x - l3.x ),
+			y : l3.y + t * ( r2.y - l3.y ),
+			tween : tween
+		};
+	}
+
+
+	function getTween ( t, tweenFrom, tweenTo ) {
+		var tweenObj = {};
+
+		for ( var k in tweenFrom ) {
+			if ( tweenFrom.hasOwnProperty( k ) && tweenTo.hasOwnProperty( k ) ) {
+				if ( Array.isArray( tweenFrom[ k ] ) && Array.isArray( tweenTo[ k ] ) ) {
+					tweenObj[ k ] = [];
+					tweenFrom[ k ].forEach( function ( v, i ) {
+						tweenObj[ k ][ i ] = v * ( 1 - t ) + tweenTo[ k ][ i ] * t;
+					});
+				} else if ( typeof tweenFrom[ k ] === 'number' && typeof tweenTo[ k ] === 'number' ) {
+					tweenObj[ k ] = tweenFrom[ k ] * ( 1 - t ) + tweenTo[ k ] * t;
+				}
+			}
+		}
+
+		return tweenObj;
+	}
+
+	this.setSlider();
+
+	return this;
+
+};

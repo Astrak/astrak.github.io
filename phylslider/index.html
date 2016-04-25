@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test</title>
+	<meta name='viewport' content='width=device-width, user-scalable=no'/>
+</head>
+<body style='background:#333;text-align:center;'>
+<script src='phylslider.js'></script>
+<script type="text/javascript">
+
+	var tree = {
+			content:'Australopithecus\nrobustus',
+			contentX:25,
+			contentY:-90,
+			xStart:50,
+			yStart:200,
+			xEnd:135,
+			yEnd:200,
+			tween:{
+				tI:[1,0,0,0,0]
+			},
+			children:[
+				{
+					content:'Panini',
+					contentX:70+30,
+					contentY:-30,
+					tween:{
+						tI:[0,1,0,0,0]
+					},
+					xEnd:335,
+					yEnd:100
+				},
+				{
+					content:'Homo habilis',
+					contentX:10,
+					contentY:10,
+					xEnd:235,
+					yEnd:250,
+					tween:{
+						tI:[0,0,1,0,0]
+					},
+					children:[
+						{
+							content:'Homo erectus',
+							contentX:130+30,
+							contentY:-30,
+							tween:{
+								tI:[0,0,0,1,0]
+							},
+							xEnd:335,
+							yEnd:200
+						},
+						{
+							content:'Homo ergaster',
+							contentX:140+30,
+							contentY:-30,
+							tween:{
+								tI:[0,0,0,0,1]
+							},
+							xEnd:335,
+							yEnd:300
+						}
+					]
+				}
+			]
+		};
+
+	var s = new PhylSlider({
+		tree:tree,
+		width:530,
+		height:500,
+		fontSize:20,
+		bezier:true,
+		strokeWidth:8,
+		callback:function ( tween ) {
+
+		}
+	});
+
+	document.body.appendChild( s.slider );
+	s.slider.style.display='inline-block';
+
+</script>
+</body>
+</html>
