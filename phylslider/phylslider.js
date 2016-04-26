@@ -90,14 +90,16 @@ var PhylSlider = function ( params ) {
 			'width:50px;height:50px;'+
 			'border-radius:50%;'+
 			'background:darkslategrey;'+
-			'margin:-25px 0 0 -25px;';
+			'margin:-25px 0 0 -25px;'+
+			'-webkit-tap-highlight-color:rgba(0,0,0,0);';
 
 		wrapper.style.position = 'relative';
 
 		switchButton.innerHTML = 'switch';
 		switchButton.style.cssText  = ''+
 			'position:absolute;'+
-			'top:0;left:0;';
+			'top:0;left:0;'+
+			'-webkit-tap-highlight-color:rgba(0,0,0,0);';
 
 		container.appendChild( wrapper );
 		wrapper.appendChild( svg );
@@ -234,7 +236,14 @@ var PhylSlider = function ( params ) {
 	function update ( e ) {
 		posX = !! e.touches ? e.touches[ 0 ].pageX : e.pageX;
 		posY = !! e.touches ? e.touches[ 0 ].pageY : e.pageY;
-		result = getResult( posX - container.offsetLeft, posY - container.offsetTop );
+		var ref = container.offsetParent,
+			offset = { left : container.offsetLeft, top : container.offsetTop }
+		while ( ref ) {
+			offset.left += ref.offsetLeft;
+			offset.top += ref.offsetTop;
+			ref = ref.offsetParent;
+		}
+		result = getResult( posX - offset.left, posY - offset.top );
 		thumb.style.left = result.x + 'px';
 		thumb.style.top = result.y + 'px';
 		thumb.from = result.from;
@@ -249,8 +258,8 @@ var PhylSlider = function ( params ) {
 
 		traverse( self.tree, function ( o ) {
 			if ( o.xStart <= x && o.xEnd >= x ) {
-				p = ( x - o.xStart ) / ( o.xEnd - o.xStart );
 				if ( self.bezier ) {
+					p = ( x - o.xStart ) / ( o.xEnd - o.xStart );
 					yValues.push( getBezierImage( 
 						p,
 						{ x : o.xStart, y : o.yStart},
