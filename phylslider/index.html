@@ -3,63 +3,127 @@
 <head>
 	<title>test</title>
 	<meta name='viewport' content='width=device-width, user-scalable=no'/>
+	<style>
+		body{
+			margin:0;
+			position:absolute;
+			height:100%;width:100%;
+			background:#333;
+			text-align: center;
+		}
+		span{
+			vertical-align: middle;
+			height: 100%;
+			display: inline-block;
+		}
+	</style>
 </head>
-<body style='background:#333;text-align:center;'>
+<body>
+<span></span>
 <script src='phylslider.js'></script>
 <script type="text/javascript">
 
 	var tree = {
-			content:'Australopithecus\nrobustus',
+			content:'Homo habilis',
 			contentX:25,
 			contentY:-90,
-			xStart:50,
-			yStart:200,
-			xEnd:135,
-			yEnd:200,
+			xStart:10,
+			yStart:85,
+			xEnd:10,
+			yEnd:85,
 			tween:{
-				tI:[1,0,0,0,0]
+				tI:[1,0,0,0,0,0,0,0,0,0]
 			},
 			children:[
 				{
-					content:'Panini',
-					contentX:70+30,
-					contentY:-30,
-					tween:{
-						tI:[0,1,0,0,0]
-					},
-					xEnd:335,
-					yEnd:100
-				},
-				{
-					content:'Homo habilis',
-					contentX:10,
+					content:'Homo ergaster',
+					contentX:-10,
 					contentY:10,
-					xEnd:235,
-					yEnd:250,
+					xEnd:70,
+					yEnd:60,
 					tween:{
-						tI:[0,0,1,0,0]
+						tI:[1,0,0,0,0,0,0,0,0,0]
 					},
 					children:[
 						{
 							content:'Homo erectus',
+							contentX:70+30,
+							contentY:-30,
+							tween:{
+								tI:[1,0,0,0,0,0,0,0,0,0]
+							},
+							xEnd:130,
+							yEnd:35,
+							children:[
+								{
+									content:'Homo floresiensis',
+									contentX:140+30,
+									contentY:-30,
+									tween:{
+										tI:[1,0,0,0,0,0,0,0,0,0]
+									},
+									xEnd:190,
+									yEnd:10
+								}
+							]
+						},
+						{
+							content:'Homo antecessor',
 							contentX:130+30,
 							contentY:-30,
 							tween:{
-								tI:[0,0,0,1,0]
+								tI:[1,0,0,0,0,0,0,0,0,0]
 							},
-							xEnd:335,
-							yEnd:200
+							xEnd:130,
+							yEnd:85,
+							children:[
+								{
+									content:'Homo heidelbergensis',
+									xEnd:190,
+									yEnd:60,
+									tween:{
+										tI:[1,0,0,0,0,0,0,0,0,0]
+									},
+									children:[
+										{
+											content:'Homo Denisova',
+											xEnd:250,
+											yEnd:35,
+											tween:{
+												tI:[1,0,0,0,0,0,0,0,0,0]
+											}
+										},
+										{
+											content:'Homo Neanderthalensis',
+											xEnd:250,
+											yEnd:85,
+											tween:{
+												tI:[1,0,0,0,0,0,0,0,0,0]
+											}
+										}
+									]
+								},
+								{
+									content:'Homo rhodesiensis',
+									xEnd:190,
+									yEnd:110,
+									tween:{
+										tI:[1,0,0,0,0,0,0,0,0,0]
+									},
+									children:[
+										{
+											content:'Homo Sapiens',
+											xEnd:250,
+											yEnd:135,
+											tween:{
+												tI:[1,0,0,0,0,0,0,0,0,0]
+											}
+										}
+									]
+								}
+							]
 						},
-						{
-							content:'Homo ergaster',
-							contentX:140+30,
-							contentY:-30,
-							tween:{
-								tI:[0,0,0,0,1]
-							},
-							xEnd:335,
-							yEnd:300
-						}
+						
 					]
 				}
 			]
@@ -67,8 +131,8 @@
 
 	var s = new PhylSlider({
 		tree:tree,
-		width:530,
-		height:410,
+		width:260,
+		height:140,
 		fontSize:20,
 		bezier:false,
 		strokeWidth:8,
@@ -79,7 +143,8 @@
 	});
 
 	document.body.appendChild( s.slider );
-	s.slider.style.display='inline-block';
+	s.slider.style.display = 'inline-block';
+	s.slider.style.verticalAlign = 'middle';
 
 </script>
 </body>

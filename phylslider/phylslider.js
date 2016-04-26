@@ -182,16 +182,16 @@ var PhylSlider = function ( params ) {
 		svg.appendChild( p );
 		p.setAttribute( 'd', s );
 
-		var a = o.content.split('\n');
-		a.forEach( function( v, i ) {
-			var t = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
-			styleText( t );
-			svg.appendChild( t );
-			t.innerHTML = v;
-			var tWidth = v.length * 20;
-			t.setAttribute( 'x', o.xEnd - tWidth / 2  + o.contentX );
-			t.setAttribute( 'y', o.yEnd + ( self.fontSize + 5 ) * ( i + 1 ) + 10 + o.contentY );
-		});
+		//var a = o.content.split('\n');
+		//a.forEach( function( v, i ) {
+		//	var t = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
+		//	styleText( t );
+		//	svg.appendChild( t );
+		//	t.innerHTML = v;
+		//	var tWidth = v.length * 20;
+		//	t.setAttribute( 'x', o.xEnd - tWidth / 2  + o.contentX );
+		//	t.setAttribute( 'y', o.yEnd + ( self.fontSize + 5 ) * ( i + 1 ) + 10 + o.contentY );
+		//});
 	}
 
 	function traverse ( o, cb ) {
