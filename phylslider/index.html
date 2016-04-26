@@ -4,7 +4,8 @@
 	<title>test</title>
 	<meta name='viewport' content='width=device-width, user-scalable=no'/>
 </head>
-<body style='background:#333;text-align:center;'>
+<body style='background:#333;text-align:center;position:absolute;height:100%;width:100%;margin:0;'>
+<span style='height:100%;vertical-align:middle;display: inline-block'></span>
 <script src='phylslider.js'></script>
 <script type="text/javascript">
 
@@ -68,10 +69,11 @@
 	var s = new PhylSlider({
 		tree:tree,
 		width:530,
-		height:500,
+		height:410,
 		fontSize:20,
-		bezier:true,
+		bezier:false,
 		strokeWidth:8,
+		switchableStyle:true,
 		callback:function ( tween ) {
 
 		}
@@ -79,6 +81,7 @@
 
 	document.body.appendChild( s.slider );
 	s.slider.style.display='inline-block';
+	s.slider.style.verticalAlign='middle';
 
 </script>
 </body>

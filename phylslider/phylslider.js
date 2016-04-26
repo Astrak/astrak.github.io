@@ -2,35 +2,40 @@ var PhylSlider = function ( params ) {
 
 	'use strict';
 
+	if ( ! params.hasOwnProperty( 'tree' ) ) 
+		return console.error( 'PhylSlider needs a tree !' );
+
+	this.tree = params.tree;
+
+	//VAR
+
 	var self = this;
 
-	var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-	svg.setAttribute( 'class', 'phylslider-svg' );
-	if ( params.width ) svg.setAttribute( 'width', params.width );
-	if ( params.height ) svg.setAttribute( 'height', params.height );
+	var result, posX, posY;
+	
+	var x, y, a, b, p;
+	var diff, index, w;
+	var yValues = [];
 
-	var thumb = document.createElement( 'div' );
-	thumb.className = 'phylslider-thumb';
-	thumb.style.cssText = ''+
-		'position:absolute;'+
-		'cursor:pointer;'+
-		'box-shadow:0 0 10px black;'+
-		'width:50px;height:50px;'+
-		'border-radius:50%;'+
-		'background:darkslategrey;'+
-		'margin:-25px 0 0 -25px;';
+	var maxX = 0;
 
-	var wrapper = document.createElement( 'div' );
-	wrapper.style.position = 'relative';
-	var container = document.createElement( 'div' );
+	var minAge = 0, maxAge = 0, tweenFrom;
 
-	container.appendChild( wrapper );
-	wrapper.appendChild( svg );
-	wrapper.appendChild( thumb );
+	var bez1, bez2;
 
-	this.slider = container;
+	var l2 = { x : 0, y : 0 },
+		l3 = { x : 0, y : 0 },
+		r2 = { x : 0, y : 0 },
+		r3 = { x : 0, y : 0 },
+		h = { x : 0, y : 0 };
+
+	var svg, thumb, wrapper, container, switchButton;
+
+	//API
 
 	this.fill = params.fill ? params.fill : 'none';
+	this.width = params.width ? params.width : '';
+	this.height = params.height ? params.height : '';
 	this.strokeWidth = params.strokeWidth ? params.strokeWidth : 8;
 	this.strokeLinecap = params.strokeLinecap ? params.strokeLinecap : 'round';
 	this.stroke = params.stroke ? params.stroke : 'chocolate';
@@ -39,14 +44,10 @@ var PhylSlider = function ( params ) {
 	this.bezier = params.hasOwnProperty( 'bezier' ) ? params.bezier : false;
 	this.callback = params.callback ? params.callback : function () {};
 
+	setElements();
+
 	this.svg = svg;
-
-	if ( ! params.hasOwnProperty( 'tree' ) ) 
-		return console.error( 'PhylSlider needs a tree !' );
-
-	this.tree = params.tree;
-
-	var maxX = 0;
+	this.slider = container;
 
 	this.setSlider = function () {
 		while ( svg.firstChild ) {
@@ -68,7 +69,65 @@ var PhylSlider = function ( params ) {
 		svg.addEventListener( 'click', onClick, false );
 	};
 
-	var minAge = 0, maxAge = 0, tweenFrom;
+	//LIB
+
+	function setElements () {
+		svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+		thumb = document.createElement( 'div' );
+		wrapper = document.createElement( 'div' );
+		container = document.createElement( 'div' );
+		switchButton = document.createElement( 'button' );
+
+		svg.setAttribute( 'class', 'phylslider-svg' );
+		if ( self.width ) svg.setAttribute( 'width', self.width );
+		if ( self.height ) svg.setAttribute( 'height', self.height );
+
+		thumb.className = 'phylslider-thumb';
+		thumb.style.cssText = ''+
+			'position:absolute;'+
+			'cursor:pointer;'+
+			'box-shadow:0 0 10px black;'+
+			'width:50px;height:50px;'+
+			'border-radius:50%;'+
+			'background:darkslategrey;'+
+			'margin:-25px 0 0 -25px;';
+
+		wrapper.style.position = 'relative';
+
+		switchButton.innerHTML = 'switch';
+		switchButton.style.cssText  = ''+
+			'position:absolute;'+
+			'top:0;left:0;';
+
+		container.appendChild( wrapper );
+		wrapper.appendChild( svg );
+		wrapper.appendChild( thumb );
+		if ( params.switchableStyle !== false ) {
+			switchButton.addEventListener( 'click', switchStyle, false );
+			wrapper.appendChild( switchButton );
+		}
+	}
+
+	function switchStyle () {
+		self.bezier = ! self.bezier;
+		self.setSlider();
+		if ( !! posX && !! x && !! thumb.from && !! thumb.to ) {
+			if ( self.bezier ) {
+				result = getBezierImage(
+					( x - thumb.from.x ) / ( thumb.to.x - thumb.from.x ),
+					{ x : thumb.from.x, y : thumb.from.y },
+					{ x : thumb.to.x, y : thumb.to.y }
+				);
+				thumb.style.left = result.x + 'px';
+				thumb.style.top = result.y + 'px';
+			} else {
+				a = ( thumb.to.y - thumb.from.y ) / ( thumb.to.x - thumb.from.x );
+				b = thumb.from.y - a * thumb.from.x;
+				thumb.style.left = x + 'px';
+				thumb.style.top = ( a * x + b ) + 'px';
+			}
+		}
+	}
 
 	function checkTree ( o, newMax, fatherTween ) {
 		if ( o.hasOwnProperty( 'age' ) ) {
@@ -107,11 +166,9 @@ var PhylSlider = function ( params ) {
 		t.setAttribute( 'font-family', self.fontFamily );
 	}
 
-	var bez1, bez2;
-
 	function drawPath ( o ) {
-		bez1 = params.bezier ? ( o.xStart + ( o.xEnd - o.xStart ) / 2 ) : o.xStart;
-		bez2 = params.bezier ? ( o.xEnd - ( o.xEnd - o.xStart ) / 2 ) : o.xEnd;
+		bez1 = self.bezier ? ( o.xStart + ( o.xEnd - o.xStart ) / 2 ) : o.xStart;
+		bez2 = self.bezier ? ( o.xEnd - ( o.xEnd - o.xStart ) / 2 ) : o.xEnd;
 
 		var s = 'M' + o.xStart + ',' + o.yStart + ' C' +
 			bez1 + ',' + o.yStart + ' ' +
@@ -174,30 +231,26 @@ var PhylSlider = function ( params ) {
 		window.removeEventListener( 'touchmove', onMouseMove, false );
 	}
 
-	var result, posX, posY;
-
 	function update ( e ) {
-		posX = !! e.touches ? e.touches[ 0 ].clientX : e.clientX;
-		posY = !! e.touches ? e.touches[ 0 ].clientY : e.clientY;
+		posX = !! e.touches ? e.touches[ 0 ].pageX : e.pageX;
+		posY = !! e.touches ? e.touches[ 0 ].pageY : e.pageY;
 		result = getResult( posX - container.offsetLeft, posY - container.offsetTop );
 		thumb.style.left = result.x + 'px';
 		thumb.style.top = result.y + 'px';
+		thumb.from = result.from;
+		thumb.to = result.to;
 		self.callback( result.tween );
 	}
-	
-	var x, y, a, b, p;
-	var diff, index, w;
-	var yValues = [];
 
 	function getResult ( xCoord, yCoord ) {
 		yValues = [];
 		diff = undefined;
-		x = Math.min( Math.max( self.tree.xStart, xCoord - 8 ), maxX );
+		x = Math.min( Math.max( self.tree.xStart, xCoord ), maxX );
 
 		traverse( self.tree, function ( o ) {
 			if ( o.xStart <= x && o.xEnd >= x ) {
 				p = ( x - o.xStart ) / ( o.xEnd - o.xStart );
-				if ( params.bezier ) {
+				if ( self.bezier ) {
 					yValues.push( getBezierImage( 
 						p,
 						{ x : o.xStart, y : o.yStart},
@@ -207,23 +260,17 @@ var PhylSlider = function ( params ) {
 				} else {
 					a = ( o.yEnd - o.yStart ) / ( o.xEnd - o.xStart );
 					b = o.yStart - a * o.xStart;
-					yValues.push( { x : x, y : a * x + b, tween : getTween( p, o.tweenFrom, o.tween ) } );
+					yValues.push( { x : x, y : a * x + b, tween : getTween( p, o.tweenFrom, o.tween ), from : { x : o.xStart, y : o.yStart }, to : { x : o.xEnd, y : o.yEnd } } );
 				}
 			}
 		});
 
 		yValues.forEach( function( v, i ) {
-			if ( typeof diff === 'undefined' || Math.abs( v.y - yCoord + 8 ) < diff ) diff = Math.abs( v.y - yCoord + 8 ), index = i;
+			if ( typeof diff === 'undefined' || Math.abs( v.y - yCoord ) < diff ) diff = Math.abs( v.y - yCoord ), index = i;
 		});
 
-		return { x : yValues[ index ].x, y : yValues[ index ].y, tween : yValues[ index ].tween };
+		return { x : yValues[ index ].x, y : yValues[ index ].y, tween : yValues[ index ].tween, from : yValues[ index ].from, to : yValues[ index ].to };
 	}
-
-	var l2 = { x : 0, y : 0 },
-		l3 = { x : 0, y : 0 },
-		r2 = { x : 0, y : 0 },
-		r3 = { x : 0, y : 0 },
-		h = { x : 0, y : 0 };
 
 	function getBezierImage ( t, start, end, tween ) {
 		//Following maths only fit the particular case of Bezier curves where
@@ -243,10 +290,11 @@ var PhylSlider = function ( params ) {
 		return {
 			x : l3.x + t * ( r2.x - l3.x ),
 			y : l3.y + t * ( r2.y - l3.y ),
-			tween : tween
+			tween : tween,
+			from : start,
+			to : end
 		};
 	}
-
 
 	function getTween ( t, tweenFrom, tweenTo ) {
 		var tweenObj = {};
