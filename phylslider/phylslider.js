@@ -25,6 +25,8 @@ var PhylSlider = function ( params ) {
 
 	var ref, offset;
 
+	var maxWidth = 0, minWidth = 0;
+
 	var l2 = { x : 0, y : 0 },
 		l3 = { x : 0, y : 0 },
 		r2 = { x : 0, y : 0 },
@@ -63,8 +65,10 @@ var PhylSlider = function ( params ) {
 
 		traverse( self.tree, function ( o ) {
 			maxX = Math.max( o.xEnd, maxX );
-			drawPath( o );
+			draw( o );
 		});
+
+		self.totalWidth = maxWidth - minWidth;
 
 		container.addEventListener( 'mousedown', onMouseDown, false );
 		container.addEventListener( 'touchstart', onMouseDown, false );
@@ -165,12 +169,43 @@ var PhylSlider = function ( params ) {
 		p.style.cursor = 'pointer';
 	}
 
-	function styleText ( t ) {
-		t.setAttribute( 'font-size', self.fontSize );
-		t.setAttribute( 'font-family', self.fontFamily );
+	function styleText ( t, o ) {
+		t.style.position = 'absolute';
+		t.style.visibility = 'hidden';
+		t.style.display = 'table';
+		t.style.margin = 0;
+		t.style.fontSize = self.fontSize;
+		t.style.fontFamily = self.fontFamily;
+		t.style.fontFamily = self.fontFamily;
+		t.style.fontWeight = 'bold';
+		t.style.fontStyle = 'italic';
+
+		//1.get the rendered size
+		document.body.appendChild( t );
+		var size = { 
+			width : Math.ceil( t.getBoundingClientRect().width ), 
+			height : Math.ceil( t.getBoundingClientRect().height ) 
+		};
+		document.body.removeChild( t );
+
+		//2.position text accordingly
+		t.style.visibility = 'visible';
+		var contentX = o.hasOwnProperty( 'contentX' ) ? o.contentX : 0;
+		var contentY = o.hasOwnProperty( 'contentY' ) ? o.contentY : 0;
+		if ( !! o.children ) {
+			minWidth = Math.min( o.xEnd - size.width - 30 + contentX, minWidth )
+			t.style.left = ( o.xEnd - size.width - 30 + contentX ) + 'px';
+		} else {
+			t.style.left = ( o.xEnd + 30 + contentX ) + 'px';
+			maxWidth = Math.max( o.xEnd + contentX + 30 + size.width, maxWidth )
+		}
+		t.style.top = !! o.children ? 
+							o.yStart > o.yEnd ? ( o.yEnd - size.height + contentY ) + 'px' : 
+								o.yStart === o.yEnd ? ( o.yStart - size.height / 2 + contentY ) + 'px' : 
+									( o.yEnd + size.height + contentY ) + 'px' : ( o.yEnd - size.height / 2 + contentY ) + 'px';
 	}
 
-	function drawPath ( o ) {
+	function draw ( o ) {
 		bez1 = self.bezier ? ( o.xStart + ( o.xEnd - o.xStart ) / 2 ) : o.xStart;
 		bez2 = self.bezier ? ( o.xEnd - ( o.xEnd - o.xStart ) / 2 ) : o.xEnd;
 
@@ -193,30 +228,7 @@ var PhylSlider = function ( params ) {
 
 		var t = document.createElement( 'p' );
 		t.innerHTML = o.content;
-		t.style.position = 'absolute';
-		t.style.visibility = 'hidden';
-		t.style.display = 'table';
-		t.style.margin = 0;
-		t.style.fontSize = self.fontSize;
-		t.style.fontFamily = self.fontFamily;
-
-		//1.get the rendered size
-		document.body.appendChild( t );
-		var size = { 
-			width : Math.ceil( t.getBoundingClientRect().width ), 
-			height : Math.ceil( t.getBoundingClientRect().height ) 
-		};
-		document.body.removeChild( t );
-
-		//2.position text accordingly
-		t.style.visibility = 'visible';
-		var contentX = o.hasOwnProperty( 'contentX' ) ? o.contentX : 0;
-		var contentY = o.hasOwnProperty( 'contentY' ) ? o.contentY : 0;
-		t.style.top = !! o.children ? 
-							o.yStart > o.yEnd ? ( o.yEnd - size.height + contentY ) + 'px' : 
-								o.yStart === o.yEnd ? ( o.yStart - size.height / 2 + contentY ) + 'px' : 
-									( o.yEnd + size.height + contentY ) + 'px' : ( o.yEnd - size.height / 2 + contentY ) + 'px';
-		t.style.left = !! o.children ? ( o.xEnd - size.width - 30 + contentX ) + 'px' : ( o.xEnd + 30 + contentX ) + 'px';
+		styleText( t, o );
 		wrapper.appendChild( t );
 	}
 
