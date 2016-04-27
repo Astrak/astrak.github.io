@@ -68,6 +68,9 @@ var PhylSlider = function ( params ) {
 			draw( o );
 		});
 
+		wrapper.style.marginLeft = - minWidth + 'px';
+		wrapper.style.marginRight = ( maxWidth - self.width ) + 'px';
+
 		self.totalWidth = maxWidth - minWidth;
 
 		container.addEventListener( 'mousedown', onMouseDown, false );
@@ -285,7 +288,7 @@ var PhylSlider = function ( params ) {
 	function update ( e ) {
 		posX = !! e.touches ? e.touches[ 0 ].pageX : e.pageX;
 		posY = !! e.touches ? e.touches[ 0 ].pageY : e.pageY;
-		result = getResult( posX - offset.left, posY - offset.top );
+		result = getResult( posX - offset.left + minWidth, posY - offset.top );
 		thumb.style.left = result.x + 'px';
 		thumb.style.top = result.y + 'px';
 		thumb.from = result.from;
