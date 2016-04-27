@@ -23,6 +23,8 @@ var PhylSlider = function ( params ) {
 
 	var bez1, bez2;
 
+	var ref, offset;
+
 	var l2 = { x : 0, y : 0 },
 		l3 = { x : 0, y : 0 },
 		r2 = { x : 0, y : 0 },
@@ -189,16 +191,33 @@ var PhylSlider = function ( params ) {
 		svg.appendChild( p );
 		p.setAttribute( 'd', s );
 
-		//var a = o.content.split('\n');
-		//a.forEach( function( v, i ) {
-		//	var t = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
-		//	styleText( t );
-		//	svg.appendChild( t );
-		//	t.innerHTML = v;
-		//	var tWidth = v.length * 20;
-		//	t.setAttribute( 'x', o.xEnd - tWidth / 2  + o.contentX );
-		//	t.setAttribute( 'y', o.yEnd + ( self.fontSize + 5 ) * ( i + 1 ) + 10 + o.contentY );
-		//});
+		var t = document.createElement( 'p' );
+		t.innerHTML = o.content;
+		t.style.position = 'absolute';
+		t.style.visibility = 'hidden';
+		t.style.display = 'table';
+		t.style.margin = 0;
+		t.style.fontSize = self.fontSize;
+		t.style.fontFamily = self.fontFamily;
+
+		//1.get the rendered size
+		document.body.appendChild( t );
+		var size = { 
+			width : Math.ceil( t.getBoundingClientRect().width ), 
+			height : Math.ceil( t.getBoundingClientRect().height ) 
+		};
+		document.body.removeChild( t );
+
+		//2.position text accordingly
+		t.style.visibility = 'visible';
+		var contentX = o.hasOwnProperty( 'contentX' ) ? o.contentX : 0;
+		var contentY = o.hasOwnProperty( 'contentY' ) ? o.contentY : 0;
+		t.style.top = !! o.children ? 
+							o.yStart > o.yEnd ? ( o.yEnd - size.height + contentY ) + 'px' : 
+								o.yStart === o.yEnd ? ( o.yStart - size.height / 2 + contentY ) + 'px' : 
+									( o.yEnd + size.height + contentY ) + 'px' : ( o.yEnd - size.height / 2 + contentY ) + 'px';
+		t.style.left = !! o.children ? ( o.xEnd - size.width - 30 + contentX ) + 'px' : ( o.xEnd + 30 + contentX ) + 'px';
+		wrapper.appendChild( t );
 	}
 
 	function traverse ( o, cb ) {
@@ -209,7 +228,17 @@ var PhylSlider = function ( params ) {
 
 	function onMouseDown ( e ) {
 		if ( e.target !== thumb && e.target.tagName !== 'path' ) return false;
+
 		e.preventDefault();
+
+		ref = container.offsetParent;
+		offset = { left : container.offsetLeft, top : container.offsetTop };
+		while ( ref ) {
+			offset.left += ref.offsetLeft;
+			offset.top += ref.offsetTop;
+			ref = ref.offsetParent;
+		}
+
 		if ( ! e.touches ) {
 			window.addEventListener( 'mouseup', onMouseUp, false );
 			window.addEventListener( 'mousemove', onMouseMove, false );	
@@ -217,6 +246,7 @@ var PhylSlider = function ( params ) {
 			window.addEventListener( 'touchend', onMouseUp, false );
 			window.addEventListener( 'touchmove', onMouseMove, false );	
 		}
+
 		return false;
 	}
 
@@ -243,13 +273,6 @@ var PhylSlider = function ( params ) {
 	function update ( e ) {
 		posX = !! e.touches ? e.touches[ 0 ].pageX : e.pageX;
 		posY = !! e.touches ? e.touches[ 0 ].pageY : e.pageY;
-		var ref = container.offsetParent,
-			offset = { left : container.offsetLeft, top : container.offsetTop }
-		while ( ref ) {
-			offset.left += ref.offsetLeft;
-			offset.top += ref.offsetTop;
-			ref = ref.offsetParent;
-		}
 		result = getResult( posX - offset.left, posY - offset.top );
 		thumb.style.left = result.x + 'px';
 		thumb.style.top = result.y + 'px';

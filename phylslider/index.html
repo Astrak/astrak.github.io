@@ -25,8 +25,8 @@
 
 	var tree = {
 			content:'Homo habilis',
-			contentX:25,
-			contentY:-90,
+					contentX:10,
+					contentY:-25,
 			xStart:10,
 			yStart:85,
 			xEnd:10,
@@ -37,8 +37,8 @@
 			children:[
 				{
 					content:'Homo ergaster',
-					contentX:-10,
-					contentY:10,
+					contentX:10,
+					contentY:-20,
 					xEnd:70,
 					yEnd:60,
 					tween:{
@@ -47,8 +47,8 @@
 					children:[
 						{
 							content:'Homo erectus',
-							contentX:70+30,
-							contentY:-30,
+							contentX:10,
+							contentY:-20,
 							tween:{
 								tI:[1,0,0,0,0,0,0,0,0,0]
 							},
@@ -57,8 +57,7 @@
 							children:[
 								{
 									content:'Homo floresiensis',
-									contentX:140+30,
-									contentY:-30,
+									contentY:-10,
 									tween:{
 										tI:[1,0,0,0,0,0,0,0,0,0]
 									},
@@ -68,9 +67,7 @@
 							]
 						},
 						{
-							content:'Homo antecessor',
-							contentX:130+30,
-							contentY:-30,
+							content:'',
 							tween:{
 								tI:[1,0,0,0,0,0,0,0,0,0]
 							},
@@ -78,7 +75,7 @@
 							yEnd:85,
 							children:[
 								{
-									content:'Homo heidelbergensis',
+									content:'',
 									xEnd:190,
 									yEnd:60,
 									tween:{
@@ -104,7 +101,7 @@
 									]
 								},
 								{
-									content:'Homo rhodesiensis',
+									content:'',
 									xEnd:190,
 									yEnd:110,
 									tween:{
@@ -134,9 +131,10 @@
 		width:260,
 		height:145,
 		fontSize:20,
+		fontFamily:'Arial',
 		bezier:false,
 		strokeWidth:8,
-		switchableStyle:true,
+		switchableStyle:false,
 		callback:function ( tween ) {
 
 		}
