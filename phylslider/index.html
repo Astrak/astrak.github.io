@@ -145,12 +145,20 @@
 	s.slider.style.verticalAlign = 'middle';
 
 	//update viewport width to optimize display on mobile
-	var meta = document.querySelector( "meta[name='viewport']" );
-	var prop = meta.getAttribute( 'content' ).split( ',' );
-	var cacheI;
-	for ( var i = 0 ; i < prop.length ; i++ )
-		if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( s.totalWidth + 30 );
-	meta.setAttribute( 'content', prop.join( ',' ) );
+	function resize ( r ) {
+		var meta = document.querySelector( "meta[name='viewport']" );
+		var prop = meta.getAttribute( 'content' ).split( ',' );
+		var cacheI;
+		r = r ? r : 1;
+		for ( var i = 0 ; i < prop.length ; i++ )
+			if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * s.totalWidth + 30 );
+		meta.setAttribute( 'content', prop.join( ',' ) );
+	}
+	resize()
+
+	window.addEventListener('resize',function(){
+		if ( innerHeight < innerWidth ) resize( 2 );
+	},false)
 
 </script>
 </body>
