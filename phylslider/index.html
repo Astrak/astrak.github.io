@@ -6,20 +6,11 @@
 	<style>
 		body{
 			margin:0;
-			position:absolute;
-			height:100%;width:100%;
 			background:#333;
-			text-align: center;
-		}
-		span{
-			vertical-align: middle;
-			height: 100%;
-			display: inline-block;
 		}
 	</style>
 </head>
 <body>
-<span></span>
 <script src='phylslider.js'></script>
 <script type="text/javascript">
 
@@ -141,30 +132,19 @@
 	});
 
 	document.body.appendChild( s.slider );
-	s.slider.style.display = 'inline-block';
-	s.slider.style.verticalAlign = 'middle';
+	s.slider.style.position = 'absolute';
+	s.slider.style.left = s.slider.style.top = '50%';
+	s.slider.style.marginTop = -s.height / 2 + 'px';
+	s.slider.style.marginLeft = -s.totalWidth / 2 + 'px';
 
 	//update viewport width to optimize display on mobile
-	function resize ( r ) {
-		var meta = document.querySelector( "meta[name='viewport']" );
-		var prop = meta.getAttribute( 'content' ).split( ',' );
-		var cacheI;
-		r = typeof r === 'undefined' ? 1 : r;
-		for ( var i = 0 ; i < prop.length ; i++ )
-			if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * s.totalWidth + 30 );
-		meta.setAttribute( 'content', prop.join( ',' ) );
-	}
-	resize();
-
-	window.addEventListener('orientationchange',function(){
-		if ( screen.orientation.angle !== 0 && innerWidth > innerHeight ) {
-			resize( 2 );
-			document.body.style.textAlign = 'right';
-		} else {
-			resize();
-			document.body.style.textAlign = 'center';
-		}
-	},false)
+	var meta = document.querySelector( "meta[name='viewport']" );
+	var prop = meta.getAttribute( 'content' ).split( ',' );
+	var cacheI;
+	r = typeof r === 'undefined' ? 1 : r;
+	for ( var i = 0 ; i < prop.length ; i++ )
+		if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * s.totalWidth + 30 );
+	meta.setAttribute( 'content', prop.join( ',' ) );
 
 </script>
 </body>
