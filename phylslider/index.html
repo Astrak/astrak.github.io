@@ -149,11 +149,12 @@
 		var meta = document.querySelector( "meta[name='viewport']" );
 		var prop = meta.getAttribute( 'content' ).split( ',' );
 		var cacheI;
-		r = r ? r : 1;
+		r = typeof r === 'undefined' ? 1 : r;
 		for ( var i = 0 ; i < prop.length ; i++ )
 			if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * s.totalWidth + 30 );
 		meta.setAttribute( 'content', prop.join( ',' ) );
 	}
+	resize();
 
 	window.addEventListener('orientationchange',function(){
 		if ( screen.orientation.angle !== 0 && innerWidth > innerHeight ) {
