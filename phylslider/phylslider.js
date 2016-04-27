@@ -236,7 +236,7 @@ var PhylSlider = function ( params ) {
 	function onMouseUp () {
 		window.removeEventListener( 'mouseup', onMouseUp, false );
 		window.removeEventListener( 'mousemove', onMouseMove, false );
-		window.removeEventListener( 'touchup', onMouseUp, false );
+		window.removeEventListener( 'touchend', onMouseUp, false );
 		window.removeEventListener( 'touchmove', onMouseMove, false );
 	}
 
