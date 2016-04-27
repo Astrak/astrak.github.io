@@ -154,11 +154,16 @@
 			if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * s.totalWidth + 30 );
 		meta.setAttribute( 'content', prop.join( ',' ) );
 	}
-	resize()
+		if ( window.screen.orientation.type.indexOf( 'landscape' ) > -1 ) {
+			resize( 2 );
+			document.body.style.textAlign = 'right';
+		} else {
+			resize();
+			document.body.style.textAlign = 'center';
+		}
 
 	window.addEventListener('orientationchange',function(){
-		if ( window.screen.orientation.indexOf( 'landscape' ) > -1 ) {
-			alert('here :D')
+		if ( window.screen.orientation.type.indexOf( 'landscape' ) > -1 ) {
 			resize( 2 );
 			document.body.style.textAlign = 'right';
 		} else {
