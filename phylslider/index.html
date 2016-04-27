@@ -156,7 +156,7 @@
 	}
 
 	window.addEventListener('orientationchange',function(){
-		if ( screen.orientation.angle !== 0 && innerWidth > innerHeight ) {
+		if ( screen.orientation.angle === 0 && innerWidth > innerHeight ) {
 			resize( 2 );
 			document.body.style.textAlign = 'right';
 		} else {
