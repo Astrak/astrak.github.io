@@ -177,6 +177,13 @@ var PhylSlider = function ( params ) {
 			bez2 + ',' + o.yEnd + ' ' +
 			o.xEnd + ',' + o.yEnd;
 
+		var c = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+		stylePath( c );
+		svg.appendChild( c );
+		c.setAttribute( 'cx', o.xEnd );
+		c.setAttribute( 'cy', o.yEnd );
+		c.setAttribute( 'r', self.strokeWidth / 2 );
+
 		var p = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
 		stylePath( p );
 		svg.appendChild( p );
