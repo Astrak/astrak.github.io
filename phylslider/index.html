@@ -156,8 +156,14 @@
 	}
 	resize()
 
-	window.addEventListener('resize',function(){
-		if ( innerHeight < innerWidth ) resize( 2 );
+	window.addEventListener('orientationchange',function(){
+		if ( window.screen.orientation.indexOf( 'landscape' ) > -1 ) {
+			resize( 2 );
+			document.body.style.textAlign = 'right';
+		} else {
+			resize();
+			document.body.style.textAlign = 'center';
+		}
 	},false)
 
 </script>
