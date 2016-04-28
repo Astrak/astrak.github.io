@@ -145,7 +145,9 @@ var PhylSlider = function ( params ) {
 			minAge = minAge < o.age ? minAge : o.age;
 			maxAge = maxAge > o.age ? maxAge : o.age;
 		} else {
-			o.age = typeof newMax === 'undefined' ? 0 : newMax;
+			newMax = typeof newMax === 'undefined' ? 0 : newMax;
+			o.age = newMax;
+			maxAge = maxAge > o.age ? maxAge : o.age;
 		}
 
 		//forces creation of a tween property
@@ -159,7 +161,7 @@ var PhylSlider = function ( params ) {
 			var fatherY = o.hasOwnProperty( 'yEnd' ) ? o.yEnd : svg.height / 2;
 			o.children.forEach( function ( v ) {
 				v.xStart = fatherX, v.yStart = fatherY;
-				checkTree( v, maxAge + 1, o.tween );
+				checkTree( v, newMax + 1, o.tween );
 			});
 		}
 	}
@@ -195,17 +197,46 @@ var PhylSlider = function ( params ) {
 		t.style.visibility = 'visible';
 		var contentX = o.hasOwnProperty( 'contentX' ) ? o.contentX : 0;
 		var contentY = o.hasOwnProperty( 'contentY' ) ? o.contentY : 0;
-		if ( !! o.children ) {
-			minWidth = Math.min( o.xEnd - size.width - 30 + contentX, minWidth )
-			t.style.left = ( o.xEnd - size.width - 30 + contentX ) + 'px';
+		if ( ! contentX && ! contentY ) {
+			if ( !! o.children || ( ! o.children && o.age !== maxAge ) ) {
+				minWidth = Math.min( o.xEnd - size.width - 30, minWidth )
+				t.style.left = ( o.xEnd - size.width - 20 ) + 'px';
+				var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+				l.setAttribute( 'stroke', 'black' );
+				l.setAttribute( 'stroke-width', 1 );
+				var d = 'M'+o.xEnd+','+o.yEnd+' '+(o.xEnd - 20 )+',';
+				if ( o.yStart >= o.yEnd ) {
+					t.style.top = ( o.yEnd - size.height - 20 ) + 'px';
+					d+=( o.yEnd - size.height / 2 - 10 );
+				} else {
+					t.style.top = ( o.yEnd + size.height + 7 ) + 'px';
+					d+=( o.yEnd + size.height / 2 + 10 ) ;
+				}
+				l.setAttribute( 'd', d );
+				//svg.appendChild( l );
+			} else {
+				t.style.left = ( o.xEnd + 30 + contentX ) + 'px';
+				t.style.top = ( o.yEnd - size.height / 2 + contentY ) + 'px';
+				maxWidth = Math.max( o.xEnd + contentX + 30 + size.width, maxWidth );
+				var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+				l.setAttribute( 'stroke', 'black' );
+				l.setAttribute( 'stroke-width', 1 );
+				var d = 'M'+o.xEnd+','+o.yEnd+' '+(o.xEnd + 20 )+','+ o.yEnd ;
+				l.setAttribute( 'd', d );
+				//svg.appendChild( l );
+			}
 		} else {
-			t.style.left = ( o.xEnd + 30 + contentX ) + 'px';
-			maxWidth = Math.max( o.xEnd + contentX + 30 + size.width, maxWidth )
+			t.style.left = ( o.xEnd + contentX - size.width / 2 ) + 'px';
+			t.style.top = ( o.yEnd + contentY - size.height / 2 ) + 'px';
+			maxWidth = Math.max( maxWidth, o.xEnd + size.width / 2 + contentX );
+			minWidth = Math.min( minWidth, o.xEnd - size.width / 2 + contentX );
+			var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+			l.setAttribute( 'stroke', 'black' );
+			l.setAttribute( 'stroke-width', 1 );
+			var d = 'M'+o.xEnd+','+o.yEnd+' '+(o.xEnd+contentX-size.width/2)+','+( o.yEnd + contentY + size.height );
+			l.setAttribute( 'd', d );
+			svg.appendChild( l );
 		}
-		t.style.top = !! o.children ? 
-							o.yStart > o.yEnd ? ( o.yEnd - size.height + contentY ) + 'px' : 
-								o.yStart === o.yEnd ? ( o.yStart - size.height / 2 + contentY ) + 'px' : 
-									( o.yEnd + size.height + contentY ) + 'px' : ( o.yEnd - size.height / 2 + contentY ) + 'px';
 	}
 
 	function draw ( o ) {
@@ -216,6 +247,11 @@ var PhylSlider = function ( params ) {
 			bez1 + ',' + o.yStart + ' ' +
 			bez2 + ',' + o.yEnd + ' ' +
 			o.xEnd + ',' + o.yEnd;
+
+		var t = document.createElement( 'p' );
+		t.innerHTML = o.content;
+		styleText( t, o );
+		wrapper.appendChild( t );
 
 		var c = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
 		stylePath( c );
@@ -228,11 +264,6 @@ var PhylSlider = function ( params ) {
 		stylePath( p );
 		svg.appendChild( p );
 		p.setAttribute( 'd', s );
-
-		var t = document.createElement( 'p' );
-		t.innerHTML = o.content;
-		styleText( t, o );
-		wrapper.appendChild( t );
 	}
 
 	function traverse ( o, cb ) {

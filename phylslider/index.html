@@ -16,8 +16,6 @@
 
 	var tree = {
 			content:'H. habilis',
-					contentX:10,
-					contentY:-25,
 			xStart:10,
 			yStart:85,
 			xEnd:10,
@@ -28,8 +26,6 @@
 			children:[
 				{
 					content:'H. ergaster',
-					contentX:10,
-					contentY:-20,
 					xEnd:70,
 					yEnd:60,
 					tween:{
@@ -38,8 +34,6 @@
 					children:[
 						{
 							content:'H. erectus',
-							contentX:10,
-							contentY:-20,
 							tween:{
 								tI:[1,0,0,0,0,0,0,0,0,0]
 							},
@@ -48,7 +42,6 @@
 							children:[
 								{
 									content:'H. floresiensis',
-									contentY:-10,
 									tween:{
 										tI:[1,0,0,0,0,0,0,0,0,0]
 									},
@@ -58,7 +51,7 @@
 							]
 						},
 						{
-							content:'',
+							content:'H. antecessor',
 							tween:{
 								tI:[1,0,0,0,0,0,0,0,0,0]
 							},
@@ -66,7 +59,9 @@
 							yEnd:85,
 							children:[
 								{
-									content:'',
+									content:'H. heidelbergensis',
+									contentX:100,
+									contentY:-60,
 									xEnd:190,
 									yEnd:60,
 									tween:{
@@ -74,7 +69,7 @@
 									},
 									children:[
 										{
-											content:'H. Denisova',
+											content:'H. denisova',
 											xEnd:250,
 											yEnd:35,
 											tween:{
@@ -82,7 +77,7 @@
 											}
 										},
 										{
-											content:'H. Neanderthalensis',
+											content:'H. neanderthalensis',
 											xEnd:250,
 											yEnd:85,
 											tween:{
@@ -92,7 +87,7 @@
 									]
 								},
 								{
-									content:'',
+									content:'H. rhodesiensis',
 									xEnd:190,
 									yEnd:110,
 									tween:{
@@ -100,7 +95,7 @@
 									},
 									children:[
 										{
-											content:'H. Sapiens',
+											content:'H. sapiens',
 											xEnd:250,
 											yEnd:135,
 											tween:{
@@ -119,7 +114,7 @@
 
 	var s = new PhylSlider({
 		tree:tree,
-		width:260,
+		width:280,
 		height:145,
 		fontSize:20,
 		fontFamily:'Arial',
