@@ -334,8 +334,8 @@ var PhylSlider = function ( params ) {
 
 		traverse( self.tree, function ( o ) {
 			if ( o.xStart <= x && o.xEnd >= x ) {
+				p = ( x - o.xStart ) / ( o.xEnd - o.xStart );
 				if ( self.bezier ) {
-					p = ( x - o.xStart ) / ( o.xEnd - o.xStart );
 					yValues.push( getBezierImage( 
 						p,
 						{ x : o.xStart, y : o.yStart},
@@ -352,6 +352,18 @@ var PhylSlider = function ( params ) {
 
 		yValues.forEach( function( v, i ) {
 			if ( typeof diff === 'undefined' || Math.abs( v.y - yCoord ) < diff ) diff = Math.abs( v.y - yCoord ), index = i;
+		});
+
+		traverse ( self.tree, function ( o ) {
+			var distanceTo = Math.sqrt( ( Math.pow( xCoord - o.xEnd, 2 ) + Math.pow( yCoord - o.yEnd, 2 ) ) );
+			if ( ! o.children && o.xEnd < maxX && distanceTo < diff ) {
+				yValues[ index ] = {
+					x : o.xEnd, y : o.yEnd,
+					from : { x : o.xStart, y : o.yStart },
+					to : { x : o.xEnd, y : o.yEnd },
+					tween : getTween( 1, o.tweenFrom, o.tween )
+				};
+			}
 		});
 
 		return { x : yValues[ index ].x, y : yValues[ index ].y, tween : yValues[ index ].tween, from : yValues[ index ].from, to : yValues[ index ].to };
@@ -396,6 +408,7 @@ var PhylSlider = function ( params ) {
 				}
 			}
 		}
+
 
 		return tweenObj;
 	}
