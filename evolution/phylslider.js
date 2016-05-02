@@ -38,6 +38,7 @@ var PhylSlider = function ( params ) {
 	//API
 
 	this.fill = params.fill ? params.fill : 'none';
+	this.color = params.hasOwnProperty( 'color' ) ? params.color : '#000';
 	this.width = params.width ? params.width : '';
 	this.height = params.height ? params.height : '';
 	this.strokeWidth = params.strokeWidth ? params.strokeWidth : 8;
@@ -184,6 +185,7 @@ var PhylSlider = function ( params ) {
 		t.style.fontFamily = self.fontFamily;
 		t.style.fontWeight = 'bold';
 		t.style.fontStyle = 'italic';
+		t.style.color = self.color;
 
 		//1.get the rendered size
 		document.body.appendChild( t );
@@ -219,7 +221,7 @@ var PhylSlider = function ( params ) {
 				t.style.top = ( o.yEnd - size.height / 2 + contentY ) + 'px';
 				maxWidth = Math.max( o.xEnd + contentX + 30 + size.width, maxWidth );
 				var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-				l.setAttribute( 'stroke', 'black' );
+				l.setAttribute( 'stroke', self.color );
 				l.setAttribute( 'stroke-width', 1 );
 				var d = 'M'+o.xEnd+','+o.yEnd+' '+(o.xEnd + 20 )+','+ o.yEnd ;
 				l.setAttribute( 'd', d );
@@ -231,7 +233,7 @@ var PhylSlider = function ( params ) {
 			maxWidth = Math.max( maxWidth, o.xEnd + size.width / 2 + contentX );
 			minWidth = Math.min( minWidth, o.xEnd - size.width / 2 + contentX );
 			var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-			l.setAttribute( 'stroke', 'black' );
+			l.setAttribute( 'stroke', self.color );
 			l.setAttribute( 'stroke-width', 1 );
 			var d = 'M'+o.xEnd+','+o.yEnd+' '+(o.xEnd+contentX-size.width/2)+','+( o.yEnd + contentY + size.height );
 			l.setAttribute( 'd', d );
@@ -335,6 +337,7 @@ var PhylSlider = function ( params ) {
 		traverse( self.tree, function ( o ) {
 			if ( o.xStart <= x && o.xEnd >= x ) {
 				p = ( x - o.xStart ) / ( o.xEnd - o.xStart );
+				if ( isNaN( p ) ) p = 0;
 				if ( self.bezier ) {
 					yValues.push( getBezierImage( 
 						p,

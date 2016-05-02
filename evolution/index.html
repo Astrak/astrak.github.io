@@ -1,280 +1,259 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Evolution</title>
-		<style>
-			body{
-			    margin:0;
-			    overflow:hidden;
-			}
-			canvas{
-				cursor:grab;
-				cursor:-webkit-grab;
-				cursor:-moz-grab;
-			}
-			canvas:active{
-				cursor:grabbing;
-				cursor:-webkit-grabbing;
-				cursor:-moz-grabbing;
-			}
-			/*SPEED SLIDER*/
-				div.slider-container{
-					position:absolute;
-					left:50%;
-					margin-left:-100px;
-					width:200px;
-					height:60px;
-					bottom:2px;
-				}
-				span.slider-range{
-					position:absolute;
-					left:50%;top:50%;
-					margin-left:-50%;
-					margin-top:-4px;
-					width:100%;
-					height:8px;
-					border-radius:2px;
-					background:chocolate;
-				}
-				span.slider-thumb{
-					left:50px;
-				    background:darkslategrey;
-				    box-shadow:0px 0px 10px black;
-					margin-bottom:7px;
-					width:50px;height:50px;
-					border-radius:50%;
-					margin-left:-50px;
-					position:absolute;
-					margin-top:-21px;/*25-4 of slider-range margin-top*/
-				}
-				input{
-				    position:absolute;
-				    bottom:-2px;
-				    opacity:0;
-				    cursor:pointer;
-				 	-webkit-appearance: none; 
-				    width:200px;
-				    height:60px;
-				    left:50%;
-				    margin-left:-100px;
-					background:none;
-					border:none;
-				}
+<head>
+	<title>test</title>
+	<meta name='viewport' content='width=device-width, user-scalable=no'/>
+	<style>
+		body{
+		    margin:0;
+		    overflow:hidden;
+		}
+		canvas{
+			cursor:grab;
+			cursor:-webkit-grab;
+			cursor:-moz-grab;
+		}
+		canvas:active{
+			cursor:grabbing;
+			cursor:-webkit-grabbing;
+			cursor:-moz-grabbing;
+		}
+	</style>
+</head>
+<body>
+<script src='../libs/threer76.js'></script>
+<script src='../libs/controls/OrbitControlsr76.js'></script>
+<script src='phylslider.js'></script>
+<script type="text/javascript">
 
-			/**********************************/
-			/** SLIDER STYLE FROM CSS TRICKS **/
-			/**********************************/
+	'use strict';
 
-			/* the real slider is hidden on top of 
-			the visible range and thumb that let 
-			display the value inside the latter */
+	var camera, scene, renderer, controls, mesh;
+	var gLoader = new THREE.JSONLoader(),
+		tLoader = new THREE.TextureLoader();
 
-			/** 1. REMOVE AUTOMATIC STYLES **/
-				input[type=range]::-webkit-slider-thumb {
-				  -webkit-appearance: none;
-				}
-				input[type=range]:focus {
-				  outline: none;
-				}
-				input[type=range]::-ms-track {
-				  cursor: pointer;
-				  background: transparent; /* Hides the slider so custom styles can be added */
-				  border-color: transparent;
-				  color: transparent;
-				}
 
-			/** 2. THE THUMB **/
-				input[type=range]::-webkit-slider-thumb {
-				  -webkit-appearance: none;
-				  height: 50px;
-				  width: 50px;
-				  border-radius: 50%;
-				  background: darkslategrey;
-				  margin-top: -21px; /* needed in Chrome, not in Firefox and IE */
-				  box-shadow:0px 0px 10px #000;
+	var tree = {
+			content:'H. habilis',
+			xStart:10,
+			yStart:85,
+			xEnd:10,
+			yEnd:85,
+			tween:{
+				tI:[1,0,0,0,0,0,0,0,0,0]
+			},
+			children:[
+				{
+					content:'H. ergaster',
+					xEnd:70,
+					yEnd:60,
+					tween:{
+						tI:[0,1,0,0,0,0,0,0,0,0]
+					},
+					children:[
+						{
+							content:'H. erectus',
+							tween:{
+								tI:[0,0,1,0,0,0,0,0,0,0]
+							},
+							xEnd:130,
+							yEnd:35,
+							children:[
+								{
+									content:'H. floresiensis',
+									tween:{
+										tI:[0,0,0,1,0,0,0,0,0,0]
+									},
+									xEnd:190,
+									yEnd:10
+								}
+							]
+						},
+						{
+							content:'H. antecessor',
+							tween:{
+								tI:[0,0,0,0,1,0,0,0,0,0]
+							},
+							xEnd:130,
+							yEnd:85,
+							children:[
+								{
+									content:'H. heidelbergensis',
+									contentX:100,
+									contentY:-60,
+									xEnd:190,
+									yEnd:60,
+									tween:{
+										tI:[0,0,0,0,0,1,0,0,0,0]
+									},
+									children:[
+										{
+											content:'H. denisova',
+											xEnd:250,
+											yEnd:35,
+											tween:{
+												tI:[0,0,0,0,0,0,1,0,0,0]
+											}
+										},
+										{
+											content:'H. neanderthalensis',
+											xEnd:250,
+											yEnd:85,
+											tween:{
+												tI:[0,0,0,0,0,0,0,1,0,0]
+											}
+										}
+									]
+								},
+								{
+									content:'H. rhodesiensis',
+									xEnd:190,
+									yEnd:110,
+									tween:{
+										tI:[0,0,0,0,0,0,0,0,1,0]
+									},
+									children:[
+										{
+											content:'H. sapiens',
+											xEnd:250,
+											yEnd:135,
+											tween:{
+												tI:[0,0,0,0,0,0,0,0,0,1]
+											}
+										}
+									]
+								}
+							]
+						},
+						
+					]
 				}
-				input[type=range]::-moz-range-thumb {
-				  height: 50px;
-				  width: 50px;
-				  border-radius: 50%;
-				  background: darkslategrey;
-				  box-shadow:0px 0px 10px #000;
-				  border:none;
-				}
-				input[type=range]::-ms-thumb {
-				  height: 50px;
-				  width: 50px;
-				  border-radius: 50%;
-				  background: darkslategrey;
-				  box-shadow:0px 0px 10px #000;
-				  border:none;
-				}
+			]
+		};
 
-			/** 3. THE TRACK **/
-				input[type=range]::-webkit-slider-runnable-track {
-				  width: 100%;
-				  height: 8.4px;
-				  background: chocolate;
-				  border-radius: 1.3px;
-				}
-				input[type=range]:focus::-webkit-slider-runnable-track {
-				  background: chocolate;
-				}
-				input[type=range]::-moz-range-track {
-				  width: 100%;
-				  height: 8.4px;
-				  background: chocolate;
-				  border-radius: 1.3px;
-				}
-				input[type=range]::-ms-track {
-				  width: 100%;
-				  height: 8.4px;
-				  background: transparent;
-				  border-color: transparent;
-				  border-width: 16px 0;
-				  color: transparent;
-				}
-				input[type=range]::-ms-fill-lower {
-				  background: chocolate;
-				  border-radius: 2.6px;
-				}
-				input[type=range]:focus::-ms-fill-lower {
-				  background: chocolate;
-				}
-				input[type=range]::-ms-fill-upper {
-				  background: chocolate;
-				  border-radius: 2.6px;
-				}
-				input[type=range]:focus::-ms-fill-upper {
-				  background: chocolate;
-				}
-		</style>
-	</head>
-	<body>
+	setScene();
 
-		<script src='../libs/threer75.js'></script>
-		<script src='../libs/controls/OrbitControlsr75.js'></script>
+	function setScene () {
+		renderer = new THREE.WebGLRenderer();
+		renderer.setSize( innerWidth, innerHeight );
+		document.body.appendChild( renderer.domElement );
 
-		<script>
-			'use strict';
-			
-			var scene, renderer, camera, controls, mesh;
+		scene = new THREE.Scene();
 
-			var loader = new THREE.JSONLoader();
-			
-			setScene();
+		setView();
+
+		setLighting();
+
+		setPhylSlider();
+
+		makeSkulls();
+	}
+
+	function setView () {
+		camera = new THREE.PerspectiveCamera( 30, innerWidth / innerHeight, 1, 100 );
+		camera.position.z = 35;
+		camera.update = false;
+
+		controls = new THREE.OrbitControls( camera, renderer.domElement );
+		controls.addEventListener( 'change', update, false );
+		controls.enableDamping = true;
+		controls.dampingFactor = .05;
+		controls.rotateSpeed = .07;
+		controls.target.set( 0, -3, 0 );
+
+		window.addEventListener( 'resize', function () {
+			renderer.setSize( innerWidth, innerHeight );
+			camera.aspect = innerWidth / innerHeight;
+			camera.updateProjectionMatrix();
+			camera.update = true;
+		}, false );
+	}
+
+	function makeSkulls () {
+		gLoader.load( 'evol.js', function ( g ) {
+			g.computeVertexNormals();
+			g.computeMorphNormals();
+
+			var t = tLoader.load( 'normals.png', update );
+			var t2 = tLoader.load( 'noise.jpg', update );
+
+			mesh = new THREE.Mesh( g, new THREE.MeshPhongMaterial({
+				color : 0xffcc99,
+				normalMap : t,
+				specularMap : t2,
+				map : t2,
+				morphTargets : true,
+				morphNormals : true,
+				shininess : 50,
+				specular : 0x444444
+			}));
+			mesh.receiveShadow = mesh.castShadow = true;
+			scene.add( mesh );
+			camera.update = true;
+			renderer.shadowMap.needsUpdate = true;
 			animate();
+		});
+	}
 
-			function setScene(){
-				renderer = new THREE.WebGLRenderer();
-				renderer.setSize( innerWidth, innerHeight );
-				document.body.appendChild( renderer.domElement );
-				scene = new THREE.Scene();
-				camera = new THREE.PerspectiveCamera( 30, innerWidth / innerHeight, 1, 100 );
-				camera.position.z = 35;
-				camera.update = false;
-				controls = new THREE.OrbitControls( camera, renderer.domElement );
-				controls.addEventListener( 'change', function () { camera.update = true; }, false );
-				controls.enableDamping = true;
-				controls.dampingFactor = .05;
-				controls.rotateSpeed = .07;
+	function update () { camera.update = true; }
 
-				setLighting();
+	function setLighting () {
+		var light1 = new THREE.PointLight( 0xffffff, 1, 20 );
+		light1.position.set(5,5,10);
+		var light4 = new THREE.PointLight( 0xffffff, 1, 30 );
+		light4.position.set( 0, -8, -15 );
+		var ambient = new THREE.AmbientLight( 0x444444 );
+		scene.add( light1, light4, ambient );
 
-				setSlider();
+		light1.castShadow = light4.castShadow = renderer.shadowMap.enabled = true;
+		renderer.shadowMapWidth = renderer.shadowMapHeight = 2048;
+		renderer.shadowMap.autoUpdate = false;
+	}
 
-				makeSkulls();
-
-				window.addEventListener('resize',function(){
-					camera.aspect=innerWidth/innerHeight;
-					camera.updateProjectionMatrix();
-					renderer.setSize(innerWidth,innerHeight);
-					camera.update = true;
-				},false);
+	function setPhylSlider () {
+		var s = new PhylSlider({
+			tree:tree,
+			width:280,
+			height:145,
+			fontSize:20,
+			fontFamily:'Arial',
+			bezier:false,
+			color:'#333',
+			strokeWidth:8,
+			switchableStyle:false,
+			callback:function ( tween ) {
+				if ( mesh ) mesh.morphTargetInfluences = tween.tI;
+				camera.update = renderer.shadowMap.needsUpdate = true;
 			}
+		});
 
-			function setLighting () {
-				var light1 = new THREE.PointLight( 0xffffff, 1, 20 );
-				light1.position.set(5,5,10);
-				var light4 = new THREE.PointLight( 0xffffff, 1, 30 );
-				light4.position.set( 0, -8, -15 );
-				var ambient = new THREE.AmbientLight( 0x444444 );
-				scene.add( light1, light4, ambient );
+		document.body.appendChild( s.slider );
+		s.slider.style.position = 'absolute';
+		s.slider.style.left = '50%';
+		s.slider.style.top = '95%';
+		s.slider.style.marginTop = -s.height + 'px';
+		s.slider.style.marginLeft = -s.totalWidth / 2 + 'px';
 
-				light1.castShadow = light4.castShadow = renderer.shadowMap.enabled = true;
-				renderer.shadowMapWidth = renderer.shadowMapHeight = 2048;
-				renderer.shadowMap.autoUpdate = false;
-			}
+		//update viewport width to optimize display on mobile
+		var meta = document.querySelector( "meta[name='viewport']" );
+		var prop = meta.getAttribute( 'content' ).split( ',' );
+		var cacheI;
+		var r = typeof r === 'undefined' ? 1 : r;
+		for ( var i = 0 ; i < prop.length ; i++ )
+			if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * s.totalWidth + 30 );
+		meta.setAttribute( 'content', prop.join( ',' ) );
+	}
 
-			function makeSkulls () {
-				loader.load( 'evol.js', function ( g ) {
-					g.computeVertexNormals();
-					g.computeMorphNormals();
+	function animate () {
+		requestAnimationFrame( animate );
+		controls.update();
 
-					var t = new THREE.TextureLoader().load( 'normals.png', function () { camera.update = true; });
-					var t2 = new THREE.TextureLoader().load( 'noise.jpg', function () { camera.update = true; });
+		if ( camera.update ) {
+			renderer.render( scene, camera );
+			camera.update = false;
+		}
+	}
 
-					mesh = new THREE.Mesh( g, new THREE.MeshPhongMaterial({
-						color : 0xffcc99,
-						normalMap : t,
-						specularMap : t2,
-						map : t2,
-						morphTargets : true,
-						morphNormals : true,
-						shininess : 50,
-						specular : 0x444444
-					}));
-					mesh.receiveShadow = mesh.castShadow = true;
-					scene.add( mesh );
-					camera.update = true;
-					renderer.shadowMap.needsUpdate = true;
-				});
-			}
-
-			function setSlider(){
-				//1. Appearance
-
-				//container
-				var sliderContainer=document.createElement('div');
-				sliderContainer.className='slider-container';
-				document.body.appendChild(sliderContainer);
-
-				//fake slider
-				var sliderRange=document.createElement('span');
-				sliderRange.className='slider-range';
-				sliderContainer.appendChild(sliderRange);
-
-				var sliderThumb=document.createElement('span');
-				sliderThumb.className='slider-thumb';
-				sliderRange.appendChild(sliderThumb);
-
-				//real slider
-				var slider=document.createElement('input');
-			    slider.type='range';
-			    slider.min=0;slider.max=1;slider.step=0.001;
-			    slider.value=0;
-			    sliderContainer.appendChild(slider);
-
-			    //2. Event listener
-
-			    var range=slider.max-slider.min;
-
-			    slider.addEventListener('input',function(){
-					if ( mesh ) mesh.morphTargetInfluences = [ 1 - this.value, this.value ];
-					sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
-					camera.update = renderer.shadowMap.needsUpdate = true;
-			    },false);
-			}
-
-			function animate () {
-				requestAnimationFrame(animate);
-				controls.update();
-
-				if ( camera.update ) {
-					renderer.render( scene, camera );
-					camera.update = false;
-				}
-			}
-		</script>
-	</body>
+</script>
+</body>
 </html>
