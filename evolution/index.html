@@ -151,12 +151,14 @@
 
 	function setView () {
 		camera = new THREE.PerspectiveCamera( 30, innerWidth / innerHeight, 1, 100 );
-		camera.position.z = 35;
+		camera.position.x = 45;
 		camera.update = false;
 
 		controls = new THREE.OrbitControls( camera, renderer.domElement );
 		controls.addEventListener( 'change', update, false );
 		controls.enableDamping = true;
+		controls.enablePan = false;
+		controls.enableZoom = false;
 		controls.dampingFactor = .05;
 		controls.rotateSpeed = .07;
 		controls.target.set( 0, -3, 0 );
