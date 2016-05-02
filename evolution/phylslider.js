@@ -275,7 +275,7 @@ var PhylSlider = function ( params ) {
 	}
 
 	function onMouseDown ( e ) {
-		if ( e.target !== thumb && e.target.tagName !== 'path' ) return false;
+		if ( e.target !== thumb && e.target.tagName !== 'path' && e.target.tagName !== 'circle' ) return false;
 
 		e.preventDefault();
 
@@ -305,7 +305,7 @@ var PhylSlider = function ( params ) {
 	}
 
 	function onClick ( e ) {
-		if ( e.target.tagName !== 'path' ) return false;
+		if ( e.target.tagName !== 'path' && e.target.tagName !== 'circle' ) return false;
 		e.preventDefault();
 		update( e );
 		return false;
@@ -347,6 +347,7 @@ var PhylSlider = function ( params ) {
 					));
 				} else {
 					a = ( o.yEnd - o.yStart ) / ( o.xEnd - o.xStart );
+					if ( isNaN( a ) ) a = 0;
 					b = o.yStart - a * o.xStart;
 					yValues.push( { x : x, y : a * x + b, tween : getTween( p, o.tweenFrom, o.tween ), from : { x : o.xStart, y : o.yStart }, to : { x : o.xEnd, y : o.yEnd } } );
 				}
