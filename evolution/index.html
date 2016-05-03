@@ -260,7 +260,7 @@
 				prop[ cacheI ] = 'width=' + ( slider.totalWidth + 30 );
 				meta.setAttribute( 'content', prop.join( ',' ) );
 			}
-			window.addEventListener( 'resize', updateWidth, false );
+			setTimeout( function () { window.addEventListener( 'resize', updateWidth, false ); }, 0 );
 		};
 
 		updateWidth();

@@ -235,7 +235,6 @@ var PhylSlider = function ( params ) {
 			el.style.WebkitTapHighlightColor = 'rgba(0,0,0,0)';
 			el.onmouseover = function () { el.style.color = self.stroke; };
 			el.onmouseout = function () { el.style.color = self.color; };
-			el.onblur = function () { el.style.color = self.color; };
 			el.onclick = function () { self.setThumb( el.innerHTML ); };
 		};
 
