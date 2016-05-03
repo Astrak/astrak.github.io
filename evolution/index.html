@@ -244,24 +244,21 @@
 		for ( var i = 0 ; i < prop.length ; i++ ) if ( prop[ i ].indexOf( 'width' ) > -1 ) cacheI = i;
 
 		var updateWidth = function () {
-			var r;
-
 			if ( innerWidth > innerHeight && innerHeight < slider.height * 3 ) {
-				r = 2;
 				slider.slider.style.left = '95%';
 				slider.slider.style.top = '50%';
 				slider.slider.style.marginTop = -slider.height / 2 + 'px';
 				slider.slider.style.marginLeft = -slider.totalWidth + 'px';
+				prop[ cacheI ] = 'width=' + ( 2 * slider.totalWidth + 30 );
+				meta.setAttribute( 'content', prop.join( ',' ) );
 			} else {
-				r = 1;
 				slider.slider.style.left = '50%';
 				slider.slider.style.top = '95%';
 				slider.slider.style.marginTop = -slider.height + 'px';
 				slider.slider.style.marginLeft = -slider.totalWidth / 2 + 'px';
+				prop[ cacheI ] = 'width=' + ( slider.totalWidth + 30 );
+				meta.setAttribute( 'content', prop.join( ',' ) );
 			}
-
-			prop[ cacheI ] = 'width=' + ( r * slider.totalWidth + 30 );
-			meta.setAttribute( 'content', prop.join( ',' ) );
 		};
 
 		updateWidth();
