@@ -17,7 +17,7 @@ var PhylSlider = function ( params ) {
 	var diff, index, w;
 	var yValues = [];
 
-	var maxX = 0;
+	var maxX = 0, minX = 100;//100 is a bit not serious at all... better algorithm to find someday
 
 	var minAge = 0, maxAge = 0, tweenFrom;
 
@@ -39,6 +39,7 @@ var PhylSlider = function ( params ) {
 
 	this.fill = params.fill ? params.fill : 'none';
 	this.color = params.hasOwnProperty( 'color' ) ? params.color : '#000';
+	this.colorOff = params.hasOwnProperty( 'colorOff' ) ? params.colorOff : '#000';
 	this.width = params.width ? params.width : '';
 	this.height = params.height ? params.height : '';
 	this.strokeWidth = params.strokeWidth ? params.strokeWidth : 8;
@@ -61,13 +62,18 @@ var PhylSlider = function ( params ) {
 
 		checkTree( self.tree );
 
-		thumb.style.top = self.tree.yStart + 'px';
-		thumb.style.left = self.tree.xStart + 'px';
-
 		traverse( self.tree, function ( o ) {
 			maxX = Math.max( o.xEnd, maxX );
+			if ( ! o.hasOwnProperty( 'mode' ) || o.mode !== 'off' ) minX = Math.min( o.xStart, minX );
 			draw( o );
 		});
+
+		//put the off mode paths before so they are overlayed by the others, not the opposite
+		var modeOff = svg.querySelectorAll( "*[stroke='" + self.colorOff + "']" );
+		for ( var i = 0 ; i < modeOff.length ; i++ ) {
+			svg.removeChild( modeOff[ i ] );
+			svg.insertBefore( modeOff[ i ], svg.firstChild );
+		}
 
 		wrapper.style.marginLeft = - minWidth + 'px';
 		wrapper.style.marginRight = ( maxWidth - self.width ) + 'px';
@@ -77,6 +83,11 @@ var PhylSlider = function ( params ) {
 		container.addEventListener( 'mousedown', onMouseDown, false );
 		container.addEventListener( 'touchstart', onMouseDown, false );
 		svg.addEventListener( 'click', onClick, false );
+
+		thumb.style.left = minX + 'px';
+		traverse( self.tree, function ( o ) {
+			if ( o.xStart === minX ) thumb.style.top = o.yStart + 'px';
+		});
 	};
 
 	//LIB
@@ -167,12 +178,14 @@ var PhylSlider = function ( params ) {
 		}
 	}
 
-	function stylePath ( p ) {
+	function stylePath ( p, o ) {
 		p.setAttribute( 'fill', self.fill );
 		p.setAttribute( 'stroke-width', self.strokeWidth );
 		p.setAttribute( 'stroke-linecap', self.strokeLinecap );
-		p.setAttribute( 'stroke', self.stroke );
+		var c = ( o.mode !== 'off' || ( o.hasOwnProperty( 'children' ) && o.children[ 0 ].mode !== 'off' && p.localName === 'circle' && p.getAttribute( 'cx' ) != o.xStart ) ) ? self.stroke : self.colorOff;
+		p.setAttribute( 'stroke', c );
 		p.style.cursor = 'pointer';
+		p.style.WebkitTapHighlightColor = 'rgba(0,0,0,0)';
 	}
 
 	function styleText ( t, o ) {
@@ -185,7 +198,13 @@ var PhylSlider = function ( params ) {
 		t.style.fontFamily = self.fontFamily;
 		t.style.fontWeight = 'bold';
 		t.style.fontStyle = 'italic';
-		t.style.color = self.color;
+		if ( o.hasOwnProperty( 'mode' ) && o.mode === 'off' ) {
+			if ( o.hasOwnProperty( 'content0' ) && t.innerHTML === o.content0 ) t.style.color = self.colorOff;
+			else if ( o.hasOwnProperty( 'children' ) && ! ( o.children[ 0 ].hasOwnProperty( 'mode' ) && o.children[ 0 ].mode === 'off' ) ) t.style.color = self.color;
+			else t.style.color = self.colorOff;
+		} else {
+			t.style.color = self.color;
+		}
 
 		//1.get the rendered size
 		document.body.appendChild( t );
@@ -199,43 +218,48 @@ var PhylSlider = function ( params ) {
 		t.style.visibility = 'visible';
 		var contentX = o.hasOwnProperty( 'contentX' ) ? o.contentX : 0;
 		var contentY = o.hasOwnProperty( 'contentY' ) ? o.contentY : 0;
+		var textX = o.hasOwnProperty( 'content0' ) && o.content0 === t.innerHTML ? o.xStart : o.xEnd;
+		var textY = o.hasOwnProperty( 'content0' ) && o.content0 === t.innerHTML ? o.yStart : o.yEnd;
 		if ( ! contentX && ! contentY ) {
 			if ( !! o.children || ( ! o.children && o.age !== maxAge ) ) {
-				minWidth = Math.min( o.xEnd - size.width - 30, minWidth )
-				t.style.left = ( o.xEnd - size.width - 20 ) + 'px';
+				minWidth = Math.min( textX - size.width - 30, minWidth );
+				t.style.left = ( textX - size.width - 20 ) + 'px';
 				var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-				l.setAttribute( 'stroke', 'black' );
+				var c = o.mode === 'off' ? self.colorOff : self.color;
+				l.setAttribute( 'stroke', c );
 				l.setAttribute( 'stroke-width', 1 );
-				var d = 'M'+o.xEnd+','+o.yEnd+' '+(o.xEnd - 20 )+',';
-				if ( o.yStart >= o.yEnd ) {
-					t.style.top = ( o.yEnd - size.height - 20 ) + 'px';
-					d+=( o.yEnd - size.height / 2 - 10 );
+				var d = 'M' + textX + ',' + textY + ' ' + ( textX - 20 ) + ',';
+				if ( o.yStart >= textY ) {
+					t.style.top = ( textY - size.height - 20 ) + 'px';
+					d += ( textY - size.height / 2 - 10 );
 				} else {
-					t.style.top = ( o.yEnd + size.height + 7 ) + 'px';
-					d+=( o.yEnd + size.height / 2 + 10 ) ;
+					t.style.top = ( textY + size.height + 7 ) + 'px';
+					d += ( textY + size.height / 2 + 10 ) ;
 				}
 				l.setAttribute( 'd', d );
 				//svg.appendChild( l );
 			} else {
-				t.style.left = ( o.xEnd + 30 + contentX ) + 'px';
-				t.style.top = ( o.yEnd - size.height / 2 + contentY ) + 'px';
-				maxWidth = Math.max( o.xEnd + contentX + 30 + size.width, maxWidth );
+				t.style.left = ( textX + 30 + contentX ) + 'px';
+				t.style.top = ( textY - size.height / 2 + contentY ) + 'px';
+				maxWidth = Math.max( textX + contentX + 30 + size.width, maxWidth );
 				var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-				l.setAttribute( 'stroke', self.color );
+				var c = o.mode === 'off' ? self.colorOff : self.color;
+				l.setAttribute( 'stroke', c );
 				l.setAttribute( 'stroke-width', 1 );
-				var d = 'M'+o.xEnd+','+o.yEnd+' '+(o.xEnd + 20 )+','+ o.yEnd ;
+				var d = 'M'+textX+','+textY+' '+(textX + 20 )+','+ textY ;
 				l.setAttribute( 'd', d );
 				//svg.appendChild( l );
 			}
 		} else {
-			t.style.left = ( o.xEnd + contentX - size.width / 2 ) + 'px';
-			t.style.top = ( o.yEnd + contentY - size.height / 2 ) + 'px';
-			maxWidth = Math.max( maxWidth, o.xEnd + size.width / 2 + contentX );
-			minWidth = Math.min( minWidth, o.xEnd - size.width / 2 + contentX );
+			t.style.left = ( textX + contentX - size.width / 2 ) + 'px';
+			t.style.top = ( textY + contentY - size.height / 2 ) + 'px';
+			maxWidth = Math.max( maxWidth, textX + size.width / 2 + contentX );
+			minWidth = Math.min( minWidth, textX - size.width / 2 + contentX );
 			var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-			l.setAttribute( 'stroke', self.color );
+			var c = o.mode === 'off' ? self.colorOff : self.color;
+			l.setAttribute( 'stroke', c );
 			l.setAttribute( 'stroke-width', 1 );
-			var d = 'M'+o.xEnd+','+o.yEnd+' '+(o.xEnd+contentX-size.width/2)+','+( o.yEnd + contentY + size.height );
+			var d = 'M'+textX+','+textY+' '+(textX+contentX-size.width/2)+','+( textY + contentY + size.height );
 			l.setAttribute( 'd', d );
 			svg.appendChild( l );
 		}
@@ -245,10 +269,19 @@ var PhylSlider = function ( params ) {
 		bez1 = self.bezier ? ( o.xStart + ( o.xEnd - o.xStart ) / 2 ) : o.xStart;
 		bez2 = self.bezier ? ( o.xEnd - ( o.xEnd - o.xStart ) / 2 ) : o.xEnd;
 
-		var s = 'M' + o.xStart + ',' + o.yStart + ' C' +
-			bez1 + ',' + o.yStart + ' ' +
-			bez2 + ',' + o.yEnd + ' ' +
-			o.xEnd + ',' + o.yEnd;
+		if ( o.hasOwnProperty( 'content0' ) ) {
+			var t = document.createElement( 'p' );
+			t.innerHTML = o.content0;
+			styleText( t, o );
+			wrapper.appendChild( t );
+
+			var c = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
+			c.setAttribute( 'cx', o.xStart );
+			c.setAttribute( 'cy', o.yStart );
+			c.setAttribute( 'r', self.strokeWidth / 2 );
+			stylePath( c, o );
+			svg.appendChild( c );
+		}
 
 		var t = document.createElement( 'p' );
 		t.innerHTML = o.content;
@@ -256,14 +289,18 @@ var PhylSlider = function ( params ) {
 		wrapper.appendChild( t );
 
 		var c = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
-		stylePath( c );
-		svg.appendChild( c );
 		c.setAttribute( 'cx', o.xEnd );
 		c.setAttribute( 'cy', o.yEnd );
 		c.setAttribute( 'r', self.strokeWidth / 2 );
+		stylePath( c, o );
+		svg.appendChild( c );
 
+		var s = 'M' + o.xStart + ',' + o.yStart + ' C' +
+			bez1 + ',' + o.yStart + ' ' +
+			bez2 + ',' + o.yEnd + ' ' +
+			o.xEnd + ',' + o.yEnd;
 		var p = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-		stylePath( p );
+		stylePath( p, o );
 		svg.appendChild( p );
 		p.setAttribute( 'd', s );
 	}
@@ -331,11 +368,12 @@ var PhylSlider = function ( params ) {
 
 	function getResult ( xCoord, yCoord ) {
 		yValues = [];
-		diff = undefined;
-		x = Math.min( Math.max( self.tree.xStart, xCoord ), maxX );
+		diff = undefined, index = undefined;
+
+		x = Math.min( Math.max( minX, xCoord ), maxX );
 
 		traverse( self.tree, function ( o ) {
-			if ( o.xStart <= x && o.xEnd >= x ) {
+			if ( o.xStart <= x && o.xEnd >= x && ! ( o.hasOwnProperty( 'mode' ) && o.mode === 'off' ) ) {
 				p = ( x - o.xStart ) / ( o.xEnd - o.xStart );
 				if ( isNaN( p ) ) p = 0;
 				if ( self.bezier ) {

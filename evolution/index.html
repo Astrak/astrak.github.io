@@ -28,16 +28,18 @@
 
 	'use strict';
 
-	var camera, scene, renderer, controls, mesh;
+	var camera, scene, renderer, controls, mesh, slider;
 	var gLoader = new THREE.JSONLoader(),
 		tLoader = new THREE.TextureLoader();
 
 
 	var tree = {
 			content:'H. habilis',
+			content0:'Australopithecus',
+			mode:'off',
 			xStart:10,
-			yStart:85,
-			xEnd:10,
+			yStart:110,
+			xEnd:70,
 			yEnd:85,
 			tween:{
 				tI:[1,0,0,0,0,0,0,0,0,0]
@@ -45,7 +47,7 @@
 			children:[
 				{
 					content:'H. ergaster',
-					xEnd:70,
+					xEnd:130,
 					yEnd:60,
 					tween:{
 						tI:[0,1,0,0,0,0,0,0,0,0]
@@ -56,7 +58,7 @@
 							tween:{
 								tI:[0,0,1,0,0,0,0,0,0,0]
 							},
-							xEnd:130,
+							xEnd:190,
 							yEnd:35,
 							children:[
 								{
@@ -64,7 +66,7 @@
 									tween:{
 										tI:[0,0,0,1,0,0,0,0,0,0]
 									},
-									xEnd:190,
+									xEnd:250,
 									yEnd:10
 								}
 							]
@@ -74,30 +76,31 @@
 							tween:{
 								tI:[0,0,0,0,1,0,0,0,0,0]
 							},
-							xEnd:130,
+							xEnd:190,
 							yEnd:85,
 							children:[
 								{
 									content:'H. heidelbergensis',
 									contentX:100,
 									contentY:-60,
-									xEnd:190,
+									xEnd:250,
 									yEnd:60,
 									tween:{
 										tI:[0,0,0,0,0,1,0,0,0,0]
 									},
 									children:[
 										{
-											content:'H. denisova',
-											xEnd:250,
+											content:'Denisova',
+											xEnd:310,
 											yEnd:35,
+											mode:'off',
 											tween:{
 												tI:[0,0,0,0,0,0,1,0,0,0]
 											}
 										},
 										{
-											content:'H. neanderthalensis',
-											xEnd:250,
+											content:'Neandertal',
+											xEnd:310,
 											yEnd:85,
 											tween:{
 												tI:[0,0,0,0,0,0,0,1,0,0]
@@ -107,15 +110,15 @@
 								},
 								{
 									content:'H. rhodesiensis',
-									xEnd:190,
+									xEnd:250,
 									yEnd:110,
 									tween:{
 										tI:[0,0,0,0,0,0,0,0,1,0]
 									},
 									children:[
 										{
-											content:'H. sapiens',
-											xEnd:250,
+											content:'Sapiens',
+											xEnd:310,
 											yEnd:135,
 											tween:{
 												tI:[0,0,0,0,0,0,0,0,0,1]
@@ -213,14 +216,15 @@
 	}
 
 	function setPhylSlider () {
-		var s = new PhylSlider({
+		slider = new PhylSlider({
 			tree:tree,
-			width:280,
+			width:340,
 			height:145,
 			fontSize:20,
 			fontFamily:'Arial',
 			bezier:false,
 			color:'#333',
+			colorOff:'#222',
 			strokeWidth:8,
 			switchableStyle:false,
 			callback:function ( tween ) {
@@ -229,12 +233,12 @@
 			}
 		});
 
-		document.body.appendChild( s.slider );
-		s.slider.style.position = 'absolute';
-		s.slider.style.left = '50%';
-		s.slider.style.top = '95%';
-		s.slider.style.marginTop = -s.height + 'px';
-		s.slider.style.marginLeft = -s.totalWidth / 2 + 'px';
+		document.body.appendChild( slider.slider );
+		slider.slider.style.position = 'absolute';
+		slider.slider.style.left = '50%';
+		slider.slider.style.top = '95%';
+		slider.slider.style.marginTop = -slider.height + 'px';
+		slider.slider.style.marginLeft = -slider.totalWidth / 2 + 'px';
 
 		//update viewport width to optimize display on mobile
 		var meta = document.querySelector( "meta[name='viewport']" );
@@ -242,7 +246,7 @@
 		var cacheI;
 		var r = typeof r === 'undefined' ? 1 : r;
 		for ( var i = 0 ; i < prop.length ; i++ )
-			if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * s.totalWidth + 30 );
+			if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * slider.totalWidth + 30 );
 		meta.setAttribute( 'content', prop.join( ',' ) );
 	}
 
