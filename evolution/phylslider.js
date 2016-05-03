@@ -274,16 +274,17 @@ var PhylSlider = function ( params ) {
 		if ( ! contentX && ! contentY ) {
 			if ( !! o.children || ( ! o.children && o.age !== maxAge ) ) {
 				minWidth = Math.min( textX - size.width - 30, minWidth );
-				t.style.left = ( textX - size.width - 20 ) + 'px';
 				var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
 				var c = o.mode === 'off' ? self.colorOff : self.color;
 				l.setAttribute( 'stroke', c );
 				l.setAttribute( 'stroke-width', 1 );
 				var d = 'M' + textX + ',' + textY + ' ' + ( textX - 20 ) + ',';
 				if ( o.yStart >= textY ) {
+					t.style.left = ( textX - size.width - 20 ) + 'px';
 					t.style.top = ( textY - size.height - 20 ) + 'px';
 					d += ( textY - size.height / 2 - 10 );
 				} else {
+					t.style.left = ( textX - size.width ) + 'px';
 					t.style.top = ( textY + size.height + 7 ) + 'px';
 					d += ( textY + size.height / 2 + 10 ) ;
 				}
@@ -313,6 +314,11 @@ var PhylSlider = function ( params ) {
 			var d = 'M'+textX+','+textY+' '+(textX+contentX-size.width/2)+','+( textY + contentY + size.height );
 			l.setAttribute( 'd', d );
 			svg.appendChild( l );
+		}
+		//fuck
+		if ( t.innerHTML === o.content0 && ( !! o.content0X || !! o.content0Y ) ) {
+			t.style.top = o.content0Y + 'px';
+			t.style.left = o.content0X + 'px';
 		}
 	}
 
