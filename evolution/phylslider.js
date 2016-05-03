@@ -271,54 +271,57 @@ var PhylSlider = function ( params ) {
 		var contentY = o.hasOwnProperty( 'contentY' ) ? o.contentY : 0;
 		var textX = o.hasOwnProperty( 'content0' ) && o.content0 === t.innerHTML ? o.xStart : o.xEnd;
 		var textY = o.hasOwnProperty( 'content0' ) && o.content0 === t.innerHTML ? o.yStart : o.yEnd;
-		if ( ! contentX && ! contentY ) {
-			if ( !! o.children || ( ! o.children && o.age !== maxAge ) ) {
-				minWidth = Math.min( textX - size.width - 30, minWidth );
-				var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-				var c = o.mode === 'off' ? self.colorOff : self.color;
-				l.setAttribute( 'stroke', c );
-				l.setAttribute( 'stroke-width', 1 );
-				var d = 'M' + textX + ',' + textY + ' ' + ( textX - 20 ) + ',';
-				if ( o.yStart >= textY ) {
-					t.style.left = ( textX - size.width - 20 ) + 'px';
-					t.style.top = ( textY - size.height - 20 ) + 'px';
-					d += ( textY - size.height / 2 - 10 );
+
+		if ( t.innerHTML !== o.content0 ) {
+			if ( ! contentX && ! contentY ) {
+				if ( !! o.children || ( ! o.children && o.age !== maxAge ) ) {
+					minWidth = Math.min( textX - size.width - 30, minWidth );
+					var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+					var c = o.mode === 'off' ? self.colorOff : self.color;
+					l.setAttribute( 'stroke', c );
+					l.setAttribute( 'stroke-width', 1 );
+					var d = 'M' + textX + ',' + textY + ' ' + ( textX - 20 ) + ',';
+					if ( o.yStart >= textY ) {
+						t.style.left = ( textX - size.width - 20 ) + 'px';
+						t.style.top = ( textY - size.height - 20 ) + 'px';
+						d += ( textY - size.height / 2 - 10 );
+					} else {
+						t.style.left = ( textX - size.width ) + 'px';
+						t.style.top = ( textY + size.height + 7 ) + 'px';
+						d += ( textY + size.height / 2 + 10 ) ;
+					}
+					l.setAttribute( 'd', d );
+					//svg.appendChild( l );
 				} else {
-					t.style.left = ( textX - size.width ) + 'px';
-					t.style.top = ( textY + size.height + 7 ) + 'px';
-					d += ( textY + size.height / 2 + 10 ) ;
+					t.style.left = ( textX + 30 + contentX ) + 'px';
+					t.style.top = ( textY - size.height / 2 + contentY ) + 'px';
+					maxWidth = Math.max( textX + contentX + 30 + size.width, maxWidth );
+					var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+					var c = o.mode === 'off' ? self.colorOff : self.color;
+					l.setAttribute( 'stroke', c );
+					l.setAttribute( 'stroke-width', 1 );
+					var d = 'M'+textX+','+textY+' '+(textX + 20 )+','+ textY ;
+					l.setAttribute( 'd', d );
+					//svg.appendChild( l );
 				}
-				l.setAttribute( 'd', d );
-				//svg.appendChild( l );
 			} else {
-				t.style.left = ( textX + 30 + contentX ) + 'px';
-				t.style.top = ( textY - size.height / 2 + contentY ) + 'px';
-				maxWidth = Math.max( textX + contentX + 30 + size.width, maxWidth );
+				t.style.left = ( textX + contentX - size.width / 2 ) + 'px';
+				t.style.top = ( textY + contentY - size.height / 2 ) + 'px';
+				maxWidth = Math.max( maxWidth, textX + size.width / 2 + contentX );
+				minWidth = Math.min( minWidth, textX - size.width / 2 + contentX );
 				var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
 				var c = o.mode === 'off' ? self.colorOff : self.color;
 				l.setAttribute( 'stroke', c );
 				l.setAttribute( 'stroke-width', 1 );
-				var d = 'M'+textX+','+textY+' '+(textX + 20 )+','+ textY ;
+				var d = 'M'+textX+','+textY+' '+(textX+contentX-size.width/2)+','+( textY + contentY + size.height );
 				l.setAttribute( 'd', d );
-				//svg.appendChild( l );
+				svg.appendChild( l );
 			}
-		} else {
-			t.style.left = ( textX + contentX - size.width / 2 ) + 'px';
-			t.style.top = ( textY + contentY - size.height / 2 ) + 'px';
-			maxWidth = Math.max( maxWidth, textX + size.width / 2 + contentX );
-			minWidth = Math.min( minWidth, textX - size.width / 2 + contentX );
-			var l = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-			var c = o.mode === 'off' ? self.colorOff : self.color;
-			l.setAttribute( 'stroke', c );
-			l.setAttribute( 'stroke-width', 1 );
-			var d = 'M'+textX+','+textY+' '+(textX+contentX-size.width/2)+','+( textY + contentY + size.height );
-			l.setAttribute( 'd', d );
-			svg.appendChild( l );
-		}
-		//fuck
-		if ( t.innerHTML === o.content0 && ( !! o.content0X || !! o.content0Y ) ) {
+		} else if ( !! o.content0X || !! o.content0Y ) {
 			t.style.top = o.content0Y + 'px';
 			t.style.left = o.content0X + 'px';
+			maxWidth = Math.max( maxWidth, textX + size.width + o.content0X );
+			minWidth = Math.min( minWidth, textX + o.content0X );
 		}
 	}
 
