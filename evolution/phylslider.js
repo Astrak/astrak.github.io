@@ -84,10 +84,48 @@ var PhylSlider = function ( params ) {
 		container.addEventListener( 'touchstart', onMouseDown, false );
 		svg.addEventListener( 'click', onClick, false );
 
-		thumb.style.left = minX + 'px';
 		traverse( self.tree, function ( o ) {
-			if ( o.xStart === minX ) thumb.style.top = o.yStart + 'px';
+			if ( o.xStart === minX ) return self.setThumb( minX, o.yStart );
 		});
+	};
+
+	this.setThumb = function () {
+		if ( arguments.length === 1 ) {
+			if ( typeof arguments[ 0 ] === 'string' ) {
+				var cache = arguments[ 0 ];
+				traverse( self.tree, function ( o ) {
+					if ( o.hasOwnProperty( 'content0' ) && o.content0 === cache ) {
+						thumb.style.left = o.xStart + 'px';
+						thumb.style.top = o.yStart + 'px';
+						thumb.from = o.tweenFrom;
+						thumb.to = o.tweenTo;
+						self.callback( o.tweenFrom );
+					} else if ( o.content === cache ) {
+						thumb.style.left = o.xEnd + 'px';
+						thumb.style.top = o.yEnd + 'px';
+						thumb.from = o.tweenFrom;
+						thumb.to = o.tween;
+						self.callback( o.tween );					
+					}
+				});
+			} else if ( typeof arguments[ 0 ] === 'object' ) {
+				var cache = arguments[ 0 ];
+				thumb.style.left = cache.x + 'px';
+				thumb.style.top = cache.y + 'px';
+				thumb.from = cache.from;
+				thumb.to = cache.to;
+				self.callback( cache.tween );
+			}
+		}
+		if ( arguments.length > 1 ) {
+			thumb.style.left = arguments[ 0 ] + 'px';
+			thumb.style.top = arguments[ 1 ] + 'px';	
+		}
+		if ( arguments.length > 2 ) {
+			thumb.from = arguments[ 2 ];
+			thumb.to = arguments[ 3 ];
+		}
+		if ( arguments.length > 4 ) self.callback( arguments[ 4 ] );
 	};
 
 	//LIB
@@ -189,6 +227,17 @@ var PhylSlider = function ( params ) {
 	}
 
 	function styleText ( t, o ) {
+
+		var makeClickable = function ( el, ob ) {
+			el.style.color = self.color;
+			el.style.cursor = 'pointer';
+			el.style.transition = 'all 200ms ease';
+			el.style.WebkitTapHighlightColor = 'rgba(0,0,0,0)';
+			el.onmouseover = function () { el.style.color = self.stroke; };
+			el.onmouseout = function () { el.style.color = self.color; };
+			el.onclick = function () { self.setThumb( el.innerHTML ); };
+		};
+
 		t.style.position = 'absolute';
 		t.style.visibility = 'hidden';
 		t.style.display = 'table';
@@ -200,10 +249,12 @@ var PhylSlider = function ( params ) {
 		t.style.fontStyle = 'italic';
 		if ( o.hasOwnProperty( 'mode' ) && o.mode === 'off' ) {
 			if ( o.hasOwnProperty( 'content0' ) && t.innerHTML === o.content0 ) t.style.color = self.colorOff;
-			else if ( o.hasOwnProperty( 'children' ) && ! ( o.children[ 0 ].hasOwnProperty( 'mode' ) && o.children[ 0 ].mode === 'off' ) ) t.style.color = self.color;
+			else if ( o.hasOwnProperty( 'children' ) && ! ( o.children[ 0 ].hasOwnProperty( 'mode' ) && o.children[ 0 ].mode === 'off' ) ) {
+				makeClickable( t, o );
+			}
 			else t.style.color = self.colorOff;
 		} else {
-			t.style.color = self.color;
+			makeClickable( t, o );
 		}
 
 		//1.get the rendered size
@@ -358,12 +409,7 @@ var PhylSlider = function ( params ) {
 	function update ( e ) {
 		posX = !! e.touches ? e.touches[ 0 ].pageX : e.pageX;
 		posY = !! e.touches ? e.touches[ 0 ].pageY : e.pageY;
-		result = getResult( posX - offset.left + minWidth, posY - offset.top );
-		thumb.style.left = result.x + 'px';
-		thumb.style.top = result.y + 'px';
-		thumb.from = result.from;
-		thumb.to = result.to;
-		self.callback( result.tween );
+		self.setThumb( getResult( posX - offset.left + minWidth, posY - offset.top ) );
 	}
 
 	function getResult ( xCoord, yCoord ) {

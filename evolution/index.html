@@ -81,8 +81,8 @@
 							children:[
 								{
 									content:'H. heidelbergensis',
-									contentX:100,
-									contentY:-60,
+									contentX:110,
+									contentY:-70,
 									xEnd:250,
 									yEnd:60,
 									tween:{
@@ -90,7 +90,7 @@
 									},
 									children:[
 										{
-											content:'Denisova',
+											content:'Denisova<br>(no skull <br>discovered yet)',
 											xEnd:310,
 											yEnd:35,
 											mode:'off',
@@ -138,6 +138,7 @@
 
 	function setScene () {
 		renderer = new THREE.WebGLRenderer();
+		//renderer.setClearAlpha(0);
 		renderer.setSize( innerWidth, innerHeight );
 		document.body.appendChild( renderer.domElement );
 
@@ -235,19 +236,38 @@
 
 		document.body.appendChild( slider.slider );
 		slider.slider.style.position = 'absolute';
-		slider.slider.style.left = '50%';
-		slider.slider.style.top = '95%';
-		slider.slider.style.marginTop = -slider.height + 'px';
-		slider.slider.style.marginLeft = -slider.totalWidth / 2 + 'px';
 
-		//update viewport width to optimize display on mobile
-		var meta = document.querySelector( "meta[name='viewport']" );
-		var prop = meta.getAttribute( 'content' ).split( ',' );
-		var cacheI;
-		var r = typeof r === 'undefined' ? 1 : r;
-		for ( var i = 0 ; i < prop.length ; i++ )
-			if ( prop[ i ].indexOf( 'width' ) > -1 ) prop[ i ] = 'width=' + ( r * slider.totalWidth + 30 );
-		meta.setAttribute( 'content', prop.join( ',' ) );
+		var meta = document.querySelector( "meta[name='viewport']" ),
+			prop = meta.getAttribute( 'content' ).split( ',' ),
+			cacheI;
+
+		for ( var i = 0 ; i < prop.length ; i++ ) if ( prop[ i ].indexOf( 'width' ) > -1 ) cacheI = i;
+
+		var updateWidth = function () {
+			var r;
+
+			if ( innerWidth > innerHeight && innerHeight < slider.height * 3 ) {
+				r = 2;
+				slider.slider.style.left = '95%';
+				slider.slider.style.top = '50%';
+				slider.slider.style.marginTop = -slider.height / 2 + 'px';
+				slider.slider.style.marginLeft = -slider.totalWidth + 'px';
+			} else {
+				r = 1;
+				slider.slider.style.left = '50%';
+				slider.slider.style.top = '95%';
+				slider.slider.style.marginTop = -slider.height + 'px';
+				slider.slider.style.marginLeft = -slider.totalWidth / 2 + 'px';
+			}
+
+			prop[ cacheI ] = 'width=' + ( r * slider.totalWidth + 30 );
+			meta.setAttribute( 'content', prop.join( ',' ) );
+		};
+
+		updateWidth();
+
+		window.addEventListener( 'resize', updateWidth, false );
+		//window.addEventListener( 'orientationchange', updateWidth, false );
 	}
 
 	function animate () {
