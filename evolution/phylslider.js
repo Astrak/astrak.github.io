@@ -100,12 +100,24 @@ var PhylSlider = function ( params ) {
 						thumb.from = o.tweenFrom;
 						thumb.to = o.tweenTo;
 						self.callback( o.tweenFrom );
+						var ps = wrapper.getElementsByTagName( 'p' );
+						for ( var i = 0 ; i < ps.length ; i++ ) {
+							if ( ps[ i ].innerHTML === cache ) {
+								ps[ i ].style.color = self.stroke;
+							}
+						}
 					} else if ( o.content === cache ) {
 						thumb.style.left = o.xEnd + 'px';
 						thumb.style.top = o.yEnd + 'px';
 						thumb.from = o.tweenFrom;
 						thumb.to = o.tween;
-						self.callback( o.tween );					
+						self.callback( o.tween );	
+						var ps = wrapper.getElementsByTagName( 'p' );
+						for ( var i = 0 ; i < ps.length ; i++ ) {
+							if ( ps[ i ].innerHTML === cache ) {
+								ps[ i ].style.color = self.stroke;
+							}
+						}				
 					}
 				});
 			} else if ( typeof arguments[ 0 ] === 'object' ) {

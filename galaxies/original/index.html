@@ -293,6 +293,7 @@
 		  }
 		}
 	</style>
+	<meta name='viewport' content='width=600, user-scalable=no'/>
 	<script src='../../libs/threer72.js'></script>
 	<script src='../../libs/controls/TrackballControls.js'></script>
 	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TweenMax.min.js'></script>
@@ -446,6 +447,12 @@
 			renderer.setClearColor(0x0000000);
 			document.body.appendChild(renderer.domElement);
 			renderer.domElement.style.cursor='move';
+
+			window.addEventListener( 'resize', function () {
+				camera.aspect = innerWidth / innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( innerWidth, innerHeight );
+			}, false );
 
 			controls=new THREE.TrackballControls(camera,renderer.domElement);
 			controls.noPan=true;
