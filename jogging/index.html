@@ -24,11 +24,6 @@
 					cursor:-moz-grabbing;
 				}
 			/*BUTTON*/
-				button{
-				    position:absolute;
-				    bottom:0;
-				    cursor:pointer;
-				}
 				button span{
 					position:absolute;
 					width:30px;
@@ -39,6 +34,10 @@
 					border-radius:2px;
 				}
 				button{
+				    position:absolute;
+				    bottom:0;
+				    cursor:pointer;
+				    -webkit-tap-highlight-color:rgba(0,0,0,0);
 				    outline:0;
 				    background:darkslategrey;
 					border:none;
@@ -268,19 +267,9 @@
 				animate();
 
 				window.addEventListener('resize',function(){
-					//cams
-					camera.aspect=(1-tween.width)*innerWidth/innerHeight;
+					camera.aspect=innerWidth >= innerHeight ? (1-tween.width)*innerWidth/(innerHeight) : innerWidth/((1-tween.width)*innerHeight);
 					camera.updateProjectionMatrix();
-					orthoCam1.left=-tween.width*innerWidth/innerHeight;
-					orthoCam1.right=tween.width*innerWidth/innerHeight;
-					orthoCam1.updateProjectionMatrix();
-					orthoCam2.left=-tween.width*innerWidth/innerHeight*.8;
-					orthoCam2.right=tween.width*innerWidth/innerHeight*.8;
-					orthoCam2.updateProjectionMatrix();
-					//canvas and scissors
 					renderer.setSize(innerWidth,innerHeight);
-					renderer.setViewport(0,0,innerWidth,innerHeight);
-					renderer.setScissor(0,0,innerWidth,innerHeight);
 				},false)
 			}
 			
@@ -400,19 +389,35 @@
 				document.body.appendChild(button);
 
 				var update=function(){
-					button.style.left=(100*(1-tween.width)).toString()+'%';
-					sliderContainer.style.left=(100*(1-tween.width)/2).toString()+'%';
-					spanVert.style.transform='rotateZ('+(90+tween.width*300).toString()+'deg)';
-					cycle.material.opacity=tween.opacity;
-					controls.target.set(0,tween.target,0);
-					camera.aspect=(1-tween.width)*innerWidth/innerHeight;
-					camera.updateProjectionMatrix();
-					orthoCam1.left=-tween.width*innerWidth/innerHeight;
-					orthoCam1.right=tween.width*innerWidth/innerHeight;
-					orthoCam1.updateProjectionMatrix();
-					orthoCam2.left=-tween.width*innerWidth/innerHeight*.8;
-					orthoCam2.right=tween.width*innerWidth/innerHeight*.8;
-					orthoCam2.updateProjectionMatrix();
+					if ( innerWidth >= innerHeight ) {
+						button.style.left=(100*(1-tween.width)).toString()+'%';
+						sliderContainer.style.left=(100*(1-tween.width)/2).toString()+'%';
+						spanVert.style.transform='rotateZ('+(90+tween.width*300).toString()+'deg)';
+						cycle.material.opacity=tween.opacity;
+						controls.target.set(0,tween.target,0);
+						camera.aspect=(1-tween.width)*innerWidth/(innerHeight);
+						camera.updateProjectionMatrix();
+						orthoCam1.left=-tween.width*innerWidth/innerHeight;
+						orthoCam1.right=tween.width*innerWidth/innerHeight;
+						orthoCam1.updateProjectionMatrix();
+						orthoCam2.left=-tween.width*innerWidth/innerHeight*.8;
+						orthoCam2.right=tween.width*innerWidth/innerHeight*.8;
+						orthoCam2.updateProjectionMatrix();
+					} else {
+						button.style.left=(100*(1-tween.width)).toString()+'%';
+						sliderContainer.style.left=(100*(1-tween.width)/2).toString()+'%';
+						spanVert.style.transform='rotateZ('+(90+tween.width*300).toString()+'deg)';
+						cycle.material.opacity=tween.opacity;
+						controls.target.set(0,tween.target,0);
+						camera.aspect=innerWidth/((1-tween.width)*innerHeight);
+						camera.updateProjectionMatrix();
+						orthoCam1.left=-innerWidth/(4*tween.width*innerHeight);
+						orthoCam1.right=innerWidth/(4*tween.width*innerHeight);
+						orthoCam1.updateProjectionMatrix();
+						orthoCam2.left=-innerWidth/(6*tween.width*innerHeight);
+						orthoCam2.right=innerWidth/(6*tween.width*innerHeight);
+						orthoCam2.updateProjectionMatrix();				
+					}
 				}
 
 				tl.to(tween,1,{
@@ -507,24 +512,46 @@
 				if(typeof jogger !== 'undefined' )jogger.material.emissive.set(0x000000);
 				plane.material.emissive.set(0x000000);
 				spot.shadowDarkness=.8;
-				//main view
-				renderer.setViewport(0,0,(1-tween.width)*innerWidth,innerHeight);
-				renderer.setScissor(0,0,(1-tween.width)*innerWidth,innerHeight);
-				renderer.setClearColor(0x000000);
-				renderer.render(scene,camera);
-				if(tween.width>0){
-					//side view
-					renderer.setViewport((1-tween.width)*innerWidth,.5*innerHeight,tween.width*innerWidth,.5*innerHeight);
-					renderer.setScissor((1-tween.width)*innerWidth,.5*innerHeight,tween.width*innerWidth,.5*innerHeight);
-					renderer.setClearColor(0x333333);
-					renderer.render(scene,orthoCam1);
-					//bottom view
-					if(typeof jogger !== 'undefined' )jogger.material.emissive.set(0xd2691e);
-					spot.shadowDarkness=0;
-					plane.material.emissive.set(0x222222);
-					renderer.setViewport((1-tween.width)*innerWidth,0,tween.width*innerWidth,.5*innerHeight);
-					renderer.setScissor((1-tween.width)*innerWidth,0,tween.width*innerWidth,.5*innerHeight);
-					renderer.render(scene,orthoCam2);
+				if ( innerWidth >= innerHeight ) {
+					//main view
+					renderer.setViewport(0,0,(1-tween.width)*innerWidth,innerHeight);
+					renderer.setScissor(0,0,(1-tween.width)*innerWidth,innerHeight);
+					renderer.setClearColor(0x000000);
+					renderer.render(scene,camera);
+					if(tween.width>0){
+						//side view
+						renderer.setViewport((1-tween.width)*innerWidth,.5*innerHeight,tween.width*innerWidth,.5*innerHeight);
+						renderer.setScissor((1-tween.width)*innerWidth,.5*innerHeight,tween.width*innerWidth,.5*innerHeight);
+						renderer.setClearColor(0x333333);
+						renderer.render(scene,orthoCam1);
+						//bottom view
+						if(typeof jogger !== 'undefined' )jogger.material.emissive.set(0xd2691e);
+						spot.shadowDarkness=0;
+						plane.material.emissive.set(0x222222);
+						renderer.setViewport((1-tween.width)*innerWidth,0,tween.width*innerWidth,.5*innerHeight);
+						renderer.setScissor((1-tween.width)*innerWidth,0,tween.width*innerWidth,.5*innerHeight);
+						renderer.render(scene,orthoCam2);
+					}
+				} else {
+					//main view
+					renderer.setViewport(0,tween.width*innerHeight,innerWidth,(1-tween.width)*innerHeight);
+					renderer.setScissor(0,tween.width*innerHeight,innerWidth,(1-tween.width)*innerHeight);
+					renderer.setClearColor(0x000000);
+					renderer.render(scene,camera);
+					if(tween.width>0){
+						//side view
+						renderer.setViewport(0,0,.5*innerWidth,tween.width*innerHeight);
+						renderer.setScissor(0,0,.5*innerWidth,tween.width*innerHeight);
+						renderer.setClearColor(0x333333);
+						renderer.render(scene,orthoCam1);
+						//bottom view
+						if(typeof jogger !== 'undefined' )jogger.material.emissive.set(0xd2691e);
+						spot.shadowDarkness=0;
+						plane.material.emissive.set(0x222222);
+						renderer.setViewport(.5*innerWidth,0,.5*innerWidth,tween.width*innerHeight);
+						renderer.setScissor(.5*innerWidth,0,.5*innerWidth,tween.width*innerHeight);
+						renderer.render(scene,orthoCam2);
+					}
 				}
 			}
 		</script>
