@@ -35,7 +35,7 @@
 				}
 				button{
 				    position:absolute;
-				    bottom:0;
+				    top:100%;
 				    cursor:pointer;
 				    -webkit-tap-highlight-color:rgba(0,0,0,0);
 				    outline:0;
@@ -43,8 +43,7 @@
 					border:none;
 				    box-shadow:0px 0px 10px black;
 					left:100%;
-					margin-left:-70px;
-					margin-bottom:7px;
+					margin:-56px 0 0 -70px;
 					border-radius:50%;
 					width:50px;height:50px;
 				}
@@ -52,10 +51,10 @@
 				div.slider-container{
 					position:absolute;
 					left:50%;
-					margin-left:-100px;
+					margin:-62px 0 0 -100px;
 					width:200px;
 					height:60px;
-					bottom:2px;
+					top:100%;
 				}
 				span.slider-range{
 					position:absolute;
@@ -253,7 +252,7 @@
 				controls.enablePan=false;
 				controls.enableDamping=true;
 				controls.dampingFactor=.05;
-				controls.rotateSpeed=.07;
+				controls.rotateSpeed=.05;
 				controls.maxPolarAngle=1.74;
 				//controls.enableZoom=false;
 				controls.minDistance=2;controls.maxDistance=4;
@@ -267,7 +266,19 @@
 				animate();
 
 				window.addEventListener('resize',function(){
-					camera.aspect=innerWidth >= innerHeight ? (1-tween.width)*innerWidth/(innerHeight) : innerWidth/((1-tween.width)*innerHeight);
+					if ( innerWidth >= innerHeight ) {
+						camera.aspect=(1-tween.width)*innerWidth/(innerHeight);
+						button.style.left=(100*(1-tween.width)).toString()+'%';
+						button.style.top='100%';
+						sliderContainer.style.top='100%';
+						sliderContainer.style.left=(100*(1-tween.width)/2).toString()+'%';
+					} else {
+						camera.aspect=innerWidth/((1-tween.width)*innerHeight);
+						button.style.top = (100*(1-tween.width))+'%';
+						button.style.left='100%';
+						sliderContainer.style.left='50%';
+						sliderContainer.style.top=(100*(1-tween.width))+'%';
+					}
 					camera.updateProjectionMatrix();
 					renderer.setSize(innerWidth,innerHeight);
 				},false)
@@ -404,8 +415,10 @@
 						orthoCam2.right=tween.width*innerWidth/innerHeight*.8;
 						orthoCam2.updateProjectionMatrix();
 					} else {
-						button.style.left=(100*(1-tween.width)).toString()+'%';
-						sliderContainer.style.left=(100*(1-tween.width)/2).toString()+'%';
+						button.style.top = (100*(1-tween.width))+'%';
+						button.style.left='100%';
+						sliderContainer.style.left='50%';
+						sliderContainer.style.top=(100*(1-tween.width))+'%';
 						spanVert.style.transform='rotateZ('+(90+tween.width*300).toString()+'deg)';
 						cycle.material.opacity=tween.opacity;
 						controls.target.set(0,tween.target,0);
