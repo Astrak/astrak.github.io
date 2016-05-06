@@ -452,6 +452,7 @@
 				camera.aspect = innerWidth / innerHeight;
 				camera.updateProjectionMatrix();
 				renderer.setSize( innerWidth, innerHeight );
+				galaxy.material.uniforms.pixelRatio.value = innerHeight;
 			}, false );
 
 			controls=new THREE.TrackballControls(camera,renderer.domElement);
