@@ -1,5 +1,5 @@
 var linearFilteredSmoothLambertMaterial=new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true});
-var nearestFilteredFlatLambertMaterial=new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading});
+var nearestFilteredFlatLambertMaterial=new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading});
 var resources = {
     textures:[
         // 18 textures = madness

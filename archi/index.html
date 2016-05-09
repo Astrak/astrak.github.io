@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<title>TITLE</title>
+		<meta name='viewport' content='width=device-width, user-scalable=no'/>
 		<style>
 			body{
 			    margin:0;
@@ -186,7 +187,8 @@
 				var mesh = new THREE.Mesh(
 					new THREE.BoxGeometry( 1, 1, 1 ),
 					new THREE.MeshLambertMaterial({
-						color:0xff0000
+						color:0xff0000,
+						shading:THREE.FlatShading
 					})
 					);
 
