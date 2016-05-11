@@ -578,13 +578,13 @@ function setSky () {
 function animate () {
 	requestAnimationFrame( animate );
 
-	lastPosition.copy( camera.position );
+	//lastPosition.copy( camera.position );
 	controls.update();
-	actualPosition.copy( camera.position );
-	distance.subVectors( actualPosition, lastPosition );
+	//actualPosition.copy( camera.position );
+	//distance.subVectors( actualPosition, lastPosition );
 
-	if ( distance.length() > .001 || camera.update ) {
+	//if ( distance.length() > .001 || camera.update ) {
 		renderer.render( scene, camera );
-		camera.update = false;
-	}
+	//	camera.update = false;
+	//}
 }
