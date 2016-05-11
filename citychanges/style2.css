@@ -3,6 +3,7 @@ body{
     overflow:hidden;
 }
 canvas{
+	-webkit-tap-hightlight-color:rgba(0,0,0,0);
 	cursor:grab;
 	cursor:-webkit-grab;
 	cursor:-moz-grab;
@@ -11,4 +12,107 @@ canvas:active{
 	cursor:grabbing;
 	cursor:-webkit-grabbing;
 	cursor:-moz-grabbing;
+}
+button{
+	cursor:pointer;
+	outline:none;
+	-webkit-tap-hightlight-color:rgba(0,0,0,0);
+}
+button:active{
+	outline:none;
+}
+
+/*slider*/
+	#UI-slider-container{
+		overflow:hidden;
+		padding:5px 0;
+		bottom:0;
+		background:#111;
+		width:55%;
+		position: absolute;
+		left:22%;
+		text-align: center;
+	}
+	#UI-slider{
+		height:100%;
+		vertical-align:middle;
+		width:300%;
+		display:inline-block;
+		margin-left:0px;
+		transition:margin-left 800ms ease;
+	}
+	.UI-slider-valign{
+		height:100%;display:inline-block;
+		vertical-align:middle;
+	}
+	.UI-slider-buttons{
+		position:absolute;
+		background:#111;
+		top:50%;
+		height:100px;
+		width:43px;
+		margin-top:-50px;
+		border:none;
+	}
+	#UI-button-before{
+		left:0;
+	}
+	#UI-button-after{
+		right:0;
+	}
+	#UI-button-before::after,#UI-button-after::after{
+		content:' ';
+		border-top:solid 16px transparent;
+		border-bottom:solid 16px transparent;
+		border-right:solid 32px #FFB300;
+		position:absolute;
+		margin-left:-16px;
+		margin-top:-16px;
+	}
+	#UI-button-after::after{
+		border-right:none;
+		border-left:solid 33px #FFB300;
+	}
+	#UI-button-after.UI-button-inactive::after{
+		border-left:solid 33px #FFB300;
+	}
+	.slider-step{
+		padding:0 10px;
+		width:calc(100%/3 - 20px);
+		margin:0px;
+		display:inline-block;
+		vertical-align:middle;
+		color:#FFB300;
+	}
+	.slider-stepDate{
+		width:20%;
+		display:inline-block;
+		vertical-align:middle;
+		font:normal 20px Arial;
+	}
+	.slider-stepMain{
+		width:60%;
+		max-width:60%;
+		min-width:60%;
+		display:inline-block;
+		vertical-align:middle;
+		overflow:hidden;
+	}
+	.slider-stepTitle{
+		margin:0;
+		padding:3px;
+		font:normal 15px Arial;
+		text-transform: uppercase;
+	}
+	.slider-stepDescription{
+		font:normal 13px Arial;
+		margin:3px 0;
+	}
+
+
+@media ( max-width : 1035px ) {
+	#UI-slider-container {
+		width:100%;
+		left:0;
+	}
 }

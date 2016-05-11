@@ -170,13 +170,7 @@ function loadScreen () {
 				}
 				resources.textures[ 8 ].minFilter = THREE.NearestFilter;
 				treesMesh.high.material.map = resources.textures[ 8 ];
-
-				scene.remove( treesMesh.high );
-				scene.add( treesMesh.low );
-				renderer.shadowMap.needsUpdate = true;
-				renderer.render( scene, camera );
-				scene.add( treesMesh.high );
-				scene.remove( treesMesh.low );
+				updateShadows();
 			}
 		}
 	}
@@ -194,7 +188,144 @@ function setScene () {
 
 	prepareScene();
 
+	setUI();
+
 	animate();
+}
+
+function setUI () {
+	setSteps();
+}
+
+function setSteps () {
+	var currentStep = 0;
+
+	var valign = document.createElement( 'span' ),
+		slC = document.createElement( 'div' ),
+		sl = document.createElement( 'div' ),
+		bB = document.createElement( 'button' ),
+		bA = document.createElement( 'button' );
+
+	slC.id = 'UI-slider-container';
+	sl.id = 'UI-slider';
+	valign.className = 'UI-slider-valign';
+	bB.className = bA.className = 'UI-slider-buttons';
+	bB.id = 'UI-button-before';
+	bA.id = 'UI-button-after';
+
+	sl.appendChild( valign ); 
+	slC.appendChild( sl );
+	document.body.appendChild( slC );
+	document.body.appendChild( bA );
+	document.body.appendChild( bB );
+
+
+	bB.addEventListener( 'click', oneStepBefore, false );
+	bA.addEventListener( 'click', oneStepBeyond, false );
+
+	bB.style.display = 'none';
+
+	for ( var i = 0 ; i < steps.length ; i++ ) {
+        var from = document.createElement( 'p' ); 
+        from.innerHTML = steps[ i ].from;
+        var to = document.createElement( 'p' );
+        to.innerHTML = steps[ i ].to;
+        from.className = to.className = 'slider-stepDate';
+        var title = document.createElement( 'p' );
+        title.innerHTML = steps[ i ].title;
+        title.className = 'slider-stepTitle';
+        var description = document.createElement( 'p' );
+        description.innerHTML = steps[ i ].description;
+        description.className = 'slider-stepDescription';
+        var step = document.createElement( 'div' );
+        step.className = 'slider-step';
+        var infos = document.createElement( 'div' );
+        infos.className = 'slider-stepMain';
+        infos.appendChild( title );
+        infos.appendChild( description );
+        step.appendChild( from );
+        step.appendChild( infos );
+        step.appendChild( to );
+        sl.appendChild( step );
+    }
+
+    /*window.addEventListener( 'resize', function () {
+    	if ( )
+    }, false );*/
+
+    function oneStepBeyond ( e ) {
+        e.stopPropagation();
+
+        if ( currentStep < ( steps.length - 1 ) ) {
+            currentStep++;
+            sl.style.marginLeft = - 100 * currentStep + '%';
+            bA.style.display = currentStep === ( steps.length - 1 ) ? 'none' : 'block';
+            bB.style.display = currentStep === 0 ? 'none' : 'block';
+            for ( var i = 0 ; i < resources.meshes.length ; i++ ) {
+                var m = resources.meshes[ i ];
+                if ( m.userData.hasOwnProperty( 'steps' ) && m.userData.steps[ currentStep ] === true && m.userData.steps[ currentStep - 1 ] === false ) addMesh( m );
+                if ( m.userData.hasOwnProperty( 'steps' ) && m.userData.steps[ currentStep ] === false && m.userData.steps[ currentStep - 1 ] === true ) removeMesh( m );
+            }
+        }
+    }
+
+    function oneStepBefore ( e ) {
+        e.stopPropagation();
+
+        if ( currentStep > 0){
+            currentStep--;
+            sl.style.marginLeft = - 100 * currentStep + '%';
+            bB.style.display = currentStep === 0 ? 'none' : 'block';
+            bA.style.display = currentStep === ( steps.length - 1 ) ? 'none' : 'block';
+            for ( var i = 0 ; i < resources.meshes.length ; i++ ) {
+                var m = resources.meshes[ i ];
+                if ( m.userData.hasOwnProperty( 'steps' ) && m.userData.steps[ currentStep ] === true && m.userData.steps[ currentStep + 1 ] === false ) addMesh( m );
+                if ( m.userData.hasOwnProperty( 'steps' ) && m.userData.steps[ currentStep ] === false && m.userData.steps[ currentStep + 1 ] === true ) removeMesh( m );
+            }
+        }
+    }
+
+    function addMesh ( mesh ) {
+        if ( mesh.material.depthTest == false ) return;//dont add commercesdepth now
+        scene.add( mesh );
+        if ( mesh.name !== 'chantier' ) {
+            mesh.material.transparent = true;
+            mesh.material.opacity = 0;
+            TweenLite.to( mesh.material, .7, {
+            	opacity : 1,
+                onUpdate : function () { camera.update = true; },
+            	onComplete : function () { 
+            		mesh.material.transparent = false;
+            		updateShadows();
+            	}
+            });
+        }
+    }
+
+    function removeMesh ( mesh ) {
+    	if ( mesh.name !== 'chantier' ){
+            mesh.material.transparent = true;
+            TweenLite.to( mesh.material, .7, {
+            	opacity : 0,
+                onUpdate : function () { camera.update = true; },
+            	onComplete : function () {
+                    scene.remove( mesh );
+                    if ( mesh.name === 'commerces' ) {
+                    	var m = resources.meshes;
+                    	for ( var  i = 0 ; i < m.length ; i++ ) {
+                    		if ( m[ i ].name === 'RPA' || m[ i ].name === 'residences' || m[ i ].name === 'nouveau_sol' ) scene.remove( m[ i ] );
+                    	}
+                    }
+    				updateShadows();
+                }
+            });
+    	} else {
+    		setTimeout( function () {
+    			scene.remove( mesh );
+    			updateShadows();
+    		}, 700 );
+    	}
+    }
 }
 
 function createTrees () {
@@ -232,7 +363,7 @@ function createTrees () {
         });
     
     var tree = new THREE.Mesh( g, m );
-    var ftree = new THREE.Mesh( fg, new THREE.MeshLambertMaterial() );
+    var ftree = new THREE.Mesh( fg, new THREE.MeshLambertMaterial({ color : 0x516702 }) );
     
     //clone to each coordinates and scale
     var geometry = new THREE.Geometry();
@@ -363,11 +494,12 @@ function createCars () {
 }
 
 function prepareScene () {
-	for ( var i = 8 ; i < resources.meshes.length ; i++ )
+	for ( var i = 8 ; i < resources.meshes.length ; i++ ) {
 		if ( ! resources.meshes[ i ].userData.hasOwnProperty( 'steps' ) || resources.meshes[ i ].userData.steps[ 0 ] === true ) {
 			scene.add( resources.meshes[ i ] );
-			resources.meshes[ i ].castShadow = resources.meshes[ i ].receiveShadow = true;
 		}
+		resources.meshes[ i ].castShadow = resources.meshes[ i ].receiveShadow = true;
+	}
 
 	scene.add( treesMesh.low, parkedCarsMesh );
 
@@ -419,6 +551,16 @@ function setLighting () {
 	renderer.shadowMap.needsUpdate = true;
 }
 
+function updateShadows () {
+	scene.remove( treesMesh.high );
+	scene.add( treesMesh.low );
+	renderer.shadowMap.needsUpdate = true;
+	renderer.render( scene, camera );
+	scene.add( treesMesh.high );
+	scene.remove( treesMesh.low );
+	camera.update = true;
+}
+
 function setSky () {
     var sky = new THREE.Mesh(
         new THREE.CylinderGeometry( 32, 32, 25, 60, 1, true ),
@@ -436,13 +578,13 @@ function setSky () {
 function animate () {
 	requestAnimationFrame( animate );
 
-	// lastPosition.copy( camera.position );
+	lastPosition.copy( camera.position );
 	controls.update();
-	// actualPosition.copy( camera.position );
-	// distance.subVectors( actualPosition, lastPosition );
-// 
-	// if ( distance.length() > .001 || camera.update ) {
-		 renderer.render( scene, camera );
-		// camera.update = false;
-	//}
+	actualPosition.copy( camera.position );
+	distance.subVectors( actualPosition, lastPosition );
+
+	if ( distance.length() > .001 || camera.update ) {
+		renderer.render( scene, camera );
+		camera.update = false;
+	}
 }
