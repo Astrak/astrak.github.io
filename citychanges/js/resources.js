@@ -1,5 +1,5 @@
-var linearFilteredSmoothLambertMaterial=new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading,transparent:true});
-var nearestFilteredFlatLambertMaterial=new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.FlatShading});
+var linearFilteredSmoothLambertMaterial=new THREE.MeshLambertMaterial({transparent:true});
+var unique = new THREE.MeshLambertMaterial();
 var resources = {
     textures:[
         // 18 textures = madness
@@ -13,14 +13,11 @@ var resources = {
         'nouveauxbat048',       // 7  minfilter : 
         'platane10',            // 8  minfilter : linearfilter
         'gridtest047',          // 9  minfilter : linearfilter
-        'lensflare1_uncache',   //10  minfilter : 
-        'lensflare2',           //11  minfilter : 
-        'lensflare3',           //12  minfilter : 
-        'routestest090',        //13  minfilter : linearfilter
-        'trottoirstest042',     //14  minfilter : linearfilter
-        'carstest041',          //15  minfilter : 
-        'gardenstest033',       //16  minfilter : linearfilter
-        'gambettacitytest299'   //17  minfilter : 
+        'routestest090',        //10  minfilter : linearfilter
+        'trottoirstest042',     //11  minfilter : linearfilter
+        'carstest041',          //12  minfilter : 
+        'gardenstest033',       //13  minfilter : linearfilter
+        'gambettacitytest299'   //14  minfilter : 
         ],
     geometries:[
         'hospital',//0
@@ -50,139 +47,149 @@ var resources = {
         ],
     meshes:[//! dont change cars indices
         /*CARS*/
-        {//0
-            geometry:16,
-            map:15,
-            material:linearFilteredSmoothLambertMaterial,
-            name:'4x4'
-        },
-        {//1
-            geometry:17,
-            map:15,
-            material:linearFilteredSmoothLambertMaterial,
-            name:'citadine'
-        },
-        {//2
-            geometry:18,
-            map:15,
-            material:linearFilteredSmoothLambertMaterial,
-            name:'break'
-        },
-        {//3
-            geometry:19,
-            map:15,
-            material:linearFilteredSmoothLambertMaterial,
-            name:'berline'
-        },
-        {//4
-            geometry:20,
-            map:15,
-            material:linearFilteredSmoothLambertMaterial,
-            name:'kangoo'
-        },
-        {//5
-            geometry:21,
-            map:15,
-            material:linearFilteredSmoothLambertMaterial,
-            name:'sportive'
-        },
-        {//6
-            geometry:22,
-            map:15,
-            material:linearFilteredSmoothLambertMaterial,
-            name:'camionette'
-        },
-        {//7
-            geometry:23,
-            map:15,
-            material:linearFilteredSmoothLambertMaterial,
-            name:'familiale'
-        },//cars
+            {//0
+                geometry:16,
+                map:12,
+                material:linearFilteredSmoothLambertMaterial,
+                name:'cars_4x4'
+            },
+            {//1
+                geometry:17,
+                map:12,
+                material:linearFilteredSmoothLambertMaterial,
+                name:'cars_citadine'
+            },
+            {//2
+                geometry:18,
+                map:12,
+                material:linearFilteredSmoothLambertMaterial,
+                name:'cars_break'
+            },
+            {//3
+                geometry:19,
+                map:12,
+                material:linearFilteredSmoothLambertMaterial,
+                name:'cars_berline'
+            },
+            {//4
+                geometry:20,
+                map:12,
+                material:linearFilteredSmoothLambertMaterial,
+                name:'cars_kangoo'
+            },
+            {//5
+                geometry:21,
+                map:12,
+                material:linearFilteredSmoothLambertMaterial,
+                name:'cars_sportive'
+            },
+            {//6
+                geometry:22,
+                map:12,
+                material:linearFilteredSmoothLambertMaterial,
+                name:'cars_camionette'
+            },
+            {//7
+                geometry:23,
+                map:12,
+                material:linearFilteredSmoothLambertMaterial,
+                name:'cars_familiale'
+            },
         {//8
             geometry:13,
-            map:16,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            map:13,
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'gardens'
         },
         {//9
             geometry:14,
-            map:13,//minFilter set to Linear in loadTextures
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            map:10,
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'routes'
         },
         {//10
             geometry:15,
-            map:14,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            map:11,
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'trottoirs'
         },
         {//11
             geometry:12,
             map:7,
-            material:nearestFilteredFlatLambertMaterial,
+            material:unique,
+            flatShaded:true,
             name:'RPA',
             steps:[false,false,true]
         },
         {//12
             geometry:11,
             map:7,
-            material:nearestFilteredFlatLambertMaterial,
+            material:unique,
+            flatShaded:true,
             name:'residences',
             steps:[false,false,true]
         },
         {//13
             geometry:10,
             map:7,
-            material:nearestFilteredFlatLambertMaterial,
+            material:unique,
+            flatShaded:true,
             name:'nouveau_sol',
             steps:[false,false,true]
         },
         {//14
             geometry:9,
             map:7,
-            material:nearestFilteredFlatLambertMaterial,
+            material:unique,
+            flatShaded:true,
             name:'escalier',
             steps:[false,false,true]
         },
         {//15
             geometry:8,
             map:undefined,
-            material:new THREE.MeshPhongMaterial({
+            material:new THREE.MeshLambertMaterial({
 				color:0xaaaaff,
-				shading:THREE.FlatShading,
 				depthTest:false,depthWrite:true,
 				transparent:true,
 				opacity:.5,
 				side:THREE.FrontSide
             }),
+            flatShaded:true,
             name:'commercesdepth',
             steps:[false,false,true]
         },
         {//16
             geometry:7,
             map:6,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'commerces',
             steps:[false,false,true]
         },
         {//17
             geometry:5,
             map:5,
-            material:new THREE.MeshLambertMaterial({color:0xffffff,shading:THREE.SmoothShading}),
+            material:new THREE.MeshLambertMaterial(),
             name:'chantier',
             steps:[false,true,false]
         },
         {//18
             geometry:6,
             map:4,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'chantier1',
             steps:[false,true,false]
         },
         {//19
             geometry:0,
             map:0,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading,side:THREE.DoubleSide}),
+            material:new THREE.MeshLambertMaterial({side:THREE.DoubleSide}),
+            flatShaded:true,
             name:'hospital',
             infos:{title:"Informations sur le bâtiment principal de l'hôpital",description:"Il a été bâti en 1982"},
             steps:[true,false,false]
@@ -190,25 +197,29 @@ var resources = {
         {//20
             geometry:3,
             map:2,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'gambetta'
         },
         {//21
             geometry:4,
             map:1,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'gambetta2'
         },
         {//22
             geometry:1,
             map:3,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'hugo'
         },
         {//23
             geometry:2,
-            map:17,
-            material:new THREE.MeshPhongMaterial({color:0xffffff,shading:THREE.FlatShading}),
+            map:14,
+            material:new THREE.MeshLambertMaterial(),
+            flatShaded:true,
             name:'gambettacity'
         }
         ]

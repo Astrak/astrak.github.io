@@ -2,39 +2,22 @@
 <html>
 <head>
 	<title>CASTRES</title>
-	<link href='style.css' rel=stylesheet>
-	<meta name="viewport" content="user-scalable=no, minimal-ui">
-	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link href='style2.css' rel=stylesheet>
+	<meta name='viewport' content='width=device-width, user-scalable=no'/>
+	<meta name='theme-color' content='#444'>
+	<meta name='apple-mobile-web-app-capable' content='yes'>
 </head>
-<body style='position:relative;background:#666'>
+<body>
 	<!-- libs -->
 	<script src='../libs/threer76.js'></script>
-	<script src='../libs/CanvasRenderer.js'></script>
-	<script src='../libs/Projector.js'></script>
+	<script src='../libs/FlatShadedGeometry.js'></script>
 	<script src='../libs/controls/OrbitControls.js'></script>
-	<script src='../libs/controls/TrackballControls_modified.js'></script>
-	<!--<script src='../../three/examples/js/controls/FlyControls.js'></script>-->
-	<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.17.0/TweenMax.min.js'></script>
+	<script src='../libs/TweenMax.js'></script>
 	<!-- resources -->
-	<script src='scripts/resources.js'></script>
-	<script src='scripts/steps.js'></script>
-	<script src='scripts/trees.js'></script>
-	<script src='scripts/cars.js'></script>
-	<script src='scripts/landscape.js'></script>
-	<script>
-		'use strict';
-
-		window.landscape = new Landscape( resources, {
-			firstTexturesLoadLimit:8,//not included
-			envMeshes:['gardens','routes','trottoirs','gambettacity'],//name or meshRef of env meshes to remove/ merge at untextured level.
-			skyTexture:9,
-			steps:steps,
-			//views:['massPlan','compass'],//+default aerial view
-			//informations:['infos','PLU'],
-			fullscreen:true,
-			cars:cars,
-			trees:trees
-		});
-	</script>
+	<script src='js/resources.js'></script>
+	<script src='js/steps.js'></script>
+	<script src='js/trees.js'></script>
+	<script src='js/cars.js'></script>
+	<script src='js/main.js'></script>
 </body>
 </html>

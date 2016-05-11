@@ -1,0 +1,14 @@
+body{
+    margin:0;
+    overflow:hidden;
+}
+canvas{
+	cursor:grab;
+	cursor:-webkit-grab;
+	cursor:-moz-grab;
+}
+canvas:active{
+	cursor:grabbing;
+	cursor:-webkit-grabbing;
+	cursor:-moz-grabbing;
+}
