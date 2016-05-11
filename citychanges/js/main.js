@@ -306,19 +306,17 @@ function createCars () {
 
 		//tweens
 		var t = car.tweens,
-			tA = car.tweensArray,
 			tL = t.length;
 
 		var position = { l : car.begin };
 	    var mesh = pickRandomCar().clone();
 	    carsMeshes.push( mesh );
 
-	    var tl = new TimelineLite();
+	    var tl = new TimelineMax( { repeat : -1 } );
 
         var createAnimatedPath = function ( k ) {
         	var complete = function () {
 				if ( t[ k ].ending ) position.l = 0;
-				if ( i === tL - 1 ) tl.restart();
 			};
 			tl.add(
 				new TweenLite(
@@ -340,43 +338,6 @@ function createCars () {
         };
 
 		for ( var k = 0 ; k < tL ; k++ ) createAnimatedPath( k );
-
-		/* OLD KEPT PART THAT MAY SOLVE THE ISSUE
-
-		for(var l=0;l<tL;l++){
-			if(!t[l].ending){
-				if(l<(tL-1)){
-					(function(l){	
-						tA[l].onComplete(function(){
-							tA[l+1].start();
-						});
-					})(l);
-				}else{
-					(function(l){
-						tA[l].onComplete(function(){
-							position.l=streetCarsData[i].begin;
-							tA[0].start();
-						});
-					})(l);
-				}
-			}else{
-				if(l<(tL-1)){
-					(function(l){
-						tA[l].onComplete(function(){
-							position.l=0;
-							tA[l+1].start();
-						});
-					})(l);
-				}else{
-					(function(l){
-						tA[l].onComplete(function(){
-							position.l=0;
-							tA[0].start();
-						});
-					})(l);
-				}
-			}
-		} END OF THE OLD KEPT PART*/
 
 		var beginPos = car.curve.spline.getPoint( car.begin )
 		mesh.position.set( beginPos.x, beginPos.y, beginPos.z );

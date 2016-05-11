@@ -1,5 +1,4 @@
 var cars = {
-	texture:15,
 	meshes:[
 		{mesh:0,name:'4x4',proba:7},
 		{mesh:1,name:'citadine',proba:20},
