@@ -44,7 +44,7 @@ var PhylSlider = function ( params ) {
 	this.height = params.height ? params.height : '';
 	this.strokeWidth = params.strokeWidth ? params.strokeWidth : 8;
 	this.strokeLinecap = params.strokeLinecap ? params.strokeLinecap : 'round';
-	this.stroke = params.stroke ? params.stroke : 'chocolate';
+	this.stroke = params.stroke ? params.stroke : '#FFB300';
 	this.fontFamily = params.fontFamily ? params.fontFamily : 'Verdana';
 	this.fontSize = params.fontSize ? params.fontSize : 30;
 	this.bezier = params.hasOwnProperty( 'bezier' ) ? params.bezier : false;
@@ -160,7 +160,7 @@ var PhylSlider = function ( params ) {
 			'box-shadow:0 0 10px black;'+
 			'width:50px;height:50px;'+
 			'border-radius:50%;'+
-			'background:darkslategrey;'+
+			'background:#444;'+
 			'margin:-25px 0 0 -25px;'+
 			'-webkit-tap-highlight-color:rgba(0,0,0,0);';
 
