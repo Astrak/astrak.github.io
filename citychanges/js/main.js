@@ -170,6 +170,13 @@ function loadScreen () {
 				}
 				resources.textures[ 8 ].minFilter = THREE.NearestFilter;
 				treesMesh.high.material.map = resources.textures[ 8 ];
+
+				scene.remove( treesMesh.high );
+				scene.add( treesMesh.low );
+				renderer.shadowMap.needsUpdate = true;
+				renderer.render( scene, camera );
+				scene.add( treesMesh.high );
+				scene.remove( treesMesh.low );
 			}
 		}
 	}
@@ -396,8 +403,10 @@ function createCars () {
 
 function prepareScene () {
 	for ( var i = 8 ; i < resources.meshes.length ; i++ )
-		if ( ! resources.meshes[ i ].userData.hasOwnProperty( 'steps' ) || resources.meshes[ i ].userData.steps[ 0 ] === true )
+		if ( ! resources.meshes[ i ].userData.hasOwnProperty( 'steps' ) || resources.meshes[ i ].userData.steps[ 0 ] === true ) {
 			scene.add( resources.meshes[ i ] );
+			resources.meshes[ i ].castShadow = resources.meshes[ i ].receiveShadow = true;
+		}
 
 	scene.add( treesMesh.low, parkedCarsMesh );
 
@@ -436,6 +445,7 @@ function setLighting () {
     var light = new THREE.DirectionalLight( 0xffffff, 1.3 );
     light.position.set( 0, 35, 20 );
 	light.castShadow = true;
+	light.shadow.bias = - 0.002;
 	light.shadow.camera.far = 60;
 	light.shadow.camera.top = 25;
 	light.shadow.camera.near = light.shadow.camera.right = 25;
@@ -445,6 +455,7 @@ function setLighting () {
     scene.add( light, ambient );
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.autoUpdate = false;
+	renderer.shadowMap.needsUpdate = true;
 }
 
 function setSky () {
