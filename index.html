@@ -27,15 +27,19 @@
 			height:200px;
 			text-decoration: none;
 			display:inline-block;
+			visibility: hidden;
 			position: relative;
 			overflow: hidden;
-			transform: scale(1);
+			transform: scale3d(1,1,1);
+		}
+		.appeared {
+			visibility: visible;
 			animation:appear .5s 1;
 		}
 
 		@keyframes appear {
-			0% { transform: scale(0); }
-			100% { transform: scale(1); }
+			0% { transform: scale3d(0,0,0); }
+			100% { transform: scale3d(1,1,1); }
 		}
 
 		li:hover a p {
@@ -161,7 +165,10 @@
 				'<li>You may lack a graphic card (old / basic computers) : try on a real pc / tablet / smartphone !</li></ul>'+
 				'Until this(those) problems get solved you will not be able to display the following examples';
 			}
-		}	
+		}
+		var lis = document.querySelectorAll( '.portfolio li' ),
+			display = function ( v ) { setTimeout( function () { lis[ v ].className = 'appeared'; }, v * 70 ); };
+		for ( var i = 0 ; i < lis.length ; i++ ) display( i );
 	</script>
 	<!-- WebGL Stats -->
 	<script src="//cdn.webglstats.com/stat.js" defer="defer" async="async"></script>
