@@ -51,8 +51,8 @@ function loadScreen () {
 			loadLayer = document.createElement( 'div' );
 			loadLayer.style.cssText = ''+
 				'background:hsl(345,12%,94%);'+
-				'height:' + innerHeight + 'px;width:'+ innerWidth + 'px;'+
-				'margin-top:-'+innerHeight+'px;'+
+				'height:100%;width:100%;'+
+				'top:0;'+
 				'z-index:2;'+
 				'position:absolute;';
 			document.body.appendChild( loadLayer );
@@ -122,9 +122,9 @@ function loadScreen () {
 			counter ++;
 			progress.style.width = ( counter / nFiles * 98 ).toString() + 'px';
 			if ( counter === nFiles ) {
-				makeObjects();
-				setScene();
-				document.body.removeChild( loadLayer );
+				//makeObjects();
+				////setScene();
+				//document.body.removeChild( loadLayer );
 			}
 		}
 
