@@ -122,9 +122,9 @@ function loadScreen () {
 			counter ++;
 			progress.style.width = ( counter / nFiles * 98 ).toString() + 'px';
 			if ( counter === nFiles ) {
-				//makeObjects();
-				////setScene();
-				//document.body.removeChild( loadLayer );
+				makeObjects();
+				setScene();
+				document.body.removeChild( loadLayer );
 			}
 		}
 
