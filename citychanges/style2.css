@@ -1,6 +1,7 @@
 body{
     margin:0;
     overflow:hidden;
+    font-size:0;
 }
 canvas{
 	-webkit-tap-hightlight-color:rgba(0,0,0,0);
@@ -16,10 +17,10 @@ canvas:active{
 button{
 	cursor:pointer;
 	outline:none;
-	-webkit-tap-hightlight-color:rgba(0,0,0,0);
 }
 button:active{
 	outline:none;
+	-webkit-tap-hightlight-color:rgba(0,0,0,0);
 }
 
 /*slider*/

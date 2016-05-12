@@ -54,7 +54,7 @@ function loadScreen () {
 				'height:' + innerHeight + 'px;width:'+ innerWidth + 'px;'+
 				'margin-top:-'+innerHeight+'px;'+
 				'z-index:2;'+
-				'position:relative;';
+				'position:absolute;';
 			document.body.appendChild( loadLayer );
 
 			//create progress indicator
@@ -71,14 +71,14 @@ function loadScreen () {
 				'background:hsl(345,12%,70%);'+
 				'width:100px;height:6px;'+
 				'top:50%;left:50%;'+
-				'margin-top:-3px;'+
 				'margin-left:-50px;'+
 				'position:relative;';
 
 			//infos
 			var infos = document.createElement( 'p' );
 			infos.style.cssText = ''+
-				'top:40%;'+
+				'top:50%;'+
+				'margin-top:-20px;'+
 				'text-align:center;'+
 				'position:relative;'+
 				'font-family:Arial;'+
