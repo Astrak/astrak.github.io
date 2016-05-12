@@ -7,12 +7,10 @@
 	<style>
 		body{
 			text-align:center;
-			width:50%;
-			min-width:600px;
 			margin:auto;
-			background:#222;
+			background:#444;
 			font-family:Arial;
-			color:chocolate;
+			color:#FFB300;
 		}
 		hr{
 			margin:30px 0 30px 0;
@@ -21,18 +19,47 @@
 		ul.portfolio{
 			list-style-type:none;
 			padding:0;
-			width:70%;
 			margin:auto;
 		}
 		li{
-			padding:10px 0 10px 0;
+			margin:5px;
+			width:409px;
+			height:200px;
+			text-decoration: none;
+			display:inline-block;
+			position: relative;
+			overflow: hidden;
+			transform: scale(1);
+			animation:appear .5s 1;
 		}
-		p.img{
+
+		@keyframes appear {
+			0% { transform: scale(0); }
+			100% { transform: scale(1); }
+		}
+
+		li:hover a p {
+			margin-top:-200px;
+		}
+		p.legend{
 			margin:0;
 			font-size:15px;
+			text-align: justify;
+			position:absolute;
+			top:100%;
+			height:100%;
+			box-sizing: border-box;
+			width:409px;
+			padding:15px;
+			background:rgba(20,20,20,.8);
+			transition: margin 200ms ease;
+		}
+		p.legend strong {
+			text-transform: uppercase;
+			display: block;
 		}
 		a,p{
-			color:chocolate;
+			color:#FFB300;
 		}
 		#log{
 			padding:10px;
@@ -58,47 +85,47 @@
 	<hr/>
 	<ul class='portfolio'>
 
-		<li><a href='evolution/index.html'><img alt='Evolution' title='Evolution' height=200 src='img/12.jpg'/>
-		<p class='img legend'>Homo skulls' evolution</p><p class='img comment'>Total work : some weeks of reading, one week for the controller, days of checking skulls'features :) Release : may 2016</p></a></li>
+		<li><img alt='Evolution' title='Evolution' height=200 src='img/12.jpg'/>
+		<a href='evolution/index.html'><p class='legend'><strong>Homo skulls' evolution</strong>Total work : some weeks of reading, one week for the controller, days of checking skulls'features :) Release : may 2016</p></a></li>
 
-		<li><a href='derive/index.html'><img alt='Continental drift' title='Continental drift' height=200 src='img/14.jpg'/>
-		<p class='img legend'>Video-based texturing : continental drift</p><p class='img comment'>Total work : 1/2 day. Release : avril 2016</p></a></li>
+		<li><img alt='Continental drift' title='Continental drift' height=200 src='img/14.jpg'/>
+		<a href='derive/index.html'><p class='legend'><strong>Video-based texturing : continental drift</strong>Total work : 1/2 day. Release : april 2016</p></a></li>
 
-		<li><a href='archi/index.html'><img alt='archi' title='archi' height=200 src='img/13.jpg'/>
-		<p class='img legend'>Short demo of customizable sky and shadows for architectural models</p><p class='img comment'>Total work : 1h. Release : avril 2016</p></a></li>
+		<li><img alt='archi' title='archi' height=200 src='img/13.jpg'/>
+		<a href='archi/index.html'><p class='legend'><strong>Short demo of customizable sky and shadows for architectural models</strong>Total work : 1h. Release : april 2016</p></a></li>
 
-		<li><a href='photogrammetry/index.html'><img alt='Photogrammetry' title='Agoût tide' height=200 src='img/11.jpg'/>
-		<p class='img legend'>First attempt at photogrammetry. No loading progressbar and the file is 50Mo so depending on your connexion you can wait from 10s to 1min before something shows up.</p><p class='img comment'>Total work : 1 day. Release : march 2016</p></a></li>
+		<li><img alt='Photogrammetry' title='Agoût tide' height=200 src='img/11.jpg'/>
+		<a href='photogrammetry/index.html'><p class='legend'><strong>First attempt at photogrammetry. </strong>No loading progressbar and the file is 50Mo so depending on your connexion you can wait from 10s to 1min before something shows up.Total work : 1 day. Release : march 2016</p></a></li>
 
-		<li><a href='arobase/index.html'><img alt='Site visualization (french)' title='Site visualization (french)' height=200 src='img/6.jpg'/>
-		<p class='img legend'>New test of visualization for landscape sites</p><p class='img comment'>Total work : 1 month. Release : march 2016</p></a></li>
+		<li><img alt='Site visualization (french)' title='Site visualization (french)' height=200 src='img/6.jpg'/>
+		<a href='arobase/index.html'><p class='legend'><strong>New test of visualization for landscape sites</strong>Total work : 1 month. Release : march 2016</p></a></li>
 
-		<li><a href='planet/index.html'><img alt='Grass experiment' title='Planet shader attempt' height=200 src='img/10.jpg'/>
-		<p class='img legend'>First draft of a long-imagined cloud shader</p><p class='img comment'>February 2016</p></a></li>
+		<li><img alt='Grass experiment' title='Planet shader attempt' height=200 src='img/10.jpg'/>
+		<a href='planet/index.html'><p class='legend'><strong>First draft of a long-imagined cloud shader</strong>February 2016</p></a></li>
 
-		<li><a href='gal2/index.html'><img alt='Grass experiment' title='Galaxy experiment' height=200 src='img/9.jpg'/>
-		<p class='img legend'>An attempt to better render nicer galaxies</p><p class='img comment'>February 2016</p></a></li>
+		<li><img alt='Grass experiment' title='Galaxy experiment' height=200 src='img/9.jpg'/>
+		<a href='gal2/index.html'><p class='legend'><strong>An attempt to better render nicer galaxies</strong>February 2016</p></a></li>
 
-		<li><a href='grass/index.html'><img alt='Grass experiment' title='Grass experiment' height=200 src='img/8.jpg'/>
-		<p class='img legend'>Generate various kinds of plants in realtime</p><p class='img comment'>Current work</p></a></li>
+		<li><img alt='Grass experiment' title='Grass experiment' height=200 src='img/8.jpg'/>
+		<a href='grass/index.html'><p class='legend'><strong>Generate various kinds of plants in realtime</strong>Current work</p></a></li>
 
-		<li><a href='valentine/index.html'><img alt='front-end experiment' title='Front-end experiment' height=200 src='img/7.jpg'/>
-		<p class='img legend'>Front-end experiment for Valentines day</p><p class='img comment'>Total work : 2 days. Release : february 2016</p></a></li>
+		<li><img alt='front-end experiment' title='Front-end experiment' height=200 src='img/7.jpg'/>
+		<a href='valentine/index.html'><p class='legend'><strong>Front-end experiment for Valentines day</strong>Total work : 2 days. Release : february 2016</p></a></li>
 
-		<li><a href='citychanges/index.html'><img alt='Construction site visualization (french)' title='Construction site visualization (french)' height=200 src='img/1.jpg'/>
-		<p class='img legend'>Test of visualization for construction sites</p><p class='img comment'>Release : october 2015. </p></a></li>
+		<li><img alt='Construction site visualization (french)' title='Construction site visualization (french)' height=200 src='img/1.jpg'/>
+		<a href='citychanges/index.html'><p class='legend'><strong>Test of visualization for construction sites</strong>Release : october 2015. </p></a></li>
 
-		<li><a href='nbody/index.html'><img alt='N-body galaxy merge' title='N-body galaxy merge' height=200 src='img/3.jpg'/>
-		<p class='img legend'>N-body simulation of the merge of two spiral galaxies. 1024 particles</p><p class='img comment'> Total work : 4 days. Release : october 2015. </p></a></li>
+		<li><img alt='N-body galaxy merge' title='N-body galaxy merge' height=200 src='img/3.jpg'/>
+		<a href='nbody/index.html'><p class='legend'><strong>N-body simulation of the merge of two spiral galaxies. 1024 particles</strong> Total work : 4 days. Release : october 2015. </p></a></li>
 
-		<li><a href='jogging/index.html'><img alt='Sport improving' title='Sport improving' height=200 src='img/5.jpg'/>
-		<p class='img legend'>How do you run ?</p><p class='img comment'></p></a></li>
+		<li><img alt='Sport improving' title='Sport improving' height=200 src='img/5.jpg'/>
+		<a href='jogging/index.html'><p class='legend'><strong>How do you run ?</strong></p></a></li>
 
-		<li><a href='galaxies/dancing/index.html'><img alt='Galaxy experiments' title='Galaxy experiments' height=200 src='img/2.jpg'/>
-		<p class='img legend'>Galaxy : disco shader</p><p class='img comment'>Total work : 1 day. Release : september 2015</p></a></li>
+		<li><img alt='Galaxy experiments' title='Galaxy experiments' height=200 src='img/2.jpg'/>
+		<a href='galaxies/dancing/index.html'><p class='legend'><strong>Galaxy : disco shader</strong>Total work : 1 day. Release : september 2015</p></a></li>
 
-		<li><a href='galaxies/original/index.html'><img alt='Galaxy experiments' title='WebGL Galaxy' height=200 src='img/4.jpg'/>
-		<p class='img legend'>Galaxy</p><p class='img comment'>Total work : 3 days. Release : september 2015</p></a></li>
+		<li><img alt='Galaxy experiments' title='WebGL Galaxy' height=200 src='img/4.jpg'/>
+		<a href='galaxies/original/index.html'><p class='legend'><strong>Galaxy</strong>Total work : 3 days. Release : september 2015</p></a></li>
 
 	</ul>
 
