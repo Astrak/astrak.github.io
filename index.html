@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Atrahasis' portfolio</title>
+	<title>Atrahasis' test gallery</title>
 	<meta name='theme-color' content='#444'>
 	<meta name='viewport' content='width=419, user-scalable=no'/>
 	<style>
@@ -12,13 +12,16 @@
 			font-family:Arial;
 			color:#FFB300;
 		}
+		h1{
+			padding-top:30px;
+		}
 		hr{
 			margin:30px 0 30px 0;
 			padding:0px;
 		}
 		ul.portfolio{
 			list-style-type:none;
-			padding:0;
+			padding:20px 0;
 			margin:auto;
 		}
 		li{
@@ -79,6 +82,9 @@
 		#log li{
 			margin-left:20px;
 		}
+		#sn{
+			padding:40px 0;
+		}
 	</style>
 </head>
 <body>
@@ -86,7 +92,6 @@
 	<h1>Atrahasis' test gallery</h1>
 	<p id='log'></p>
 
-	<hr/>
 	<ul class='portfolio'>
 
 		<li><img alt='Evolution' title='Evolution' height=200 src='img/12.jpg'/>
@@ -130,17 +135,12 @@
 
 		<li><img alt='Galaxy experiments' title='WebGL Galaxy' height=200 src='img/4.jpg'/>
 		<a href='galaxies/original/index.html'><p class='legend'><strong>Galaxy</strong>Total work : 3 days. Release : september 2015</p></a></li>
-
 	</ul>
-
-	<hr/>
-	<br/>
-	<a href="https://codepen.io/Astrak" style='background:#111;padding:20px 44px;margin:30px;color:#ccc;font-family:Arial;'>Codepen albums</a>
-	<br/><br/><br/><br/>
-	<a href="http://stackoverflow.com/users/4236091/atrahasis"><img src="http://stackoverflow.com/users/flair/4236091.png?theme=clean" width="208" height="58" alt="profile for Atrahasis at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for Atrahasis at Stack Overflow, Q&amp;A for professional and enthusiast programmers"></a>
-	<br/><br/>
-	<a href="https://twitter.com/GPUaccelerated" class="twitter-follow-button" data-show-count="false" data-size="large">Follow me on Twitter</a>
-
+	<div id='sn'>
+		<a href="https://codepen.io/Astrak" style='background:#111;padding:20px 44px;margin:30px;color:#ccc;font-family:Arial;'>Codepen albums</a><br/>
+		<a href="http://stackoverflow.com/users/4236091/atrahasis"><img src="http://stackoverflow.com/users/flair/4236091.png?theme=clean" width="208" height="58" style='margin:30px 0 8px 0;' alt="profile for Atrahasis at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for Atrahasis at Stack Overflow, Q&amp;A for professional and enthusiast programmers"></a><br/>
+		<a href="https://twitter.com/GPUaccelerated" class="twitter-follow-button" data-show-count="false" data-size="large">Follow me on Twitter</a>
+	</div>
 	<!-- Check if  the client can get WebGL contexts, or display why it cannot -->
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/detectizr/2.1.0/detectizr.min.js'></script>
