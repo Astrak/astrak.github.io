@@ -12,7 +12,11 @@ var carsMeshes = [],
 //loadscreen
 var loadLayer;
 
+//UI
+var slC;
+
 //rendering
+var height;
 var lastPosition = new THREE.Vector3(),
 	actualPosition = new THREE.Vector3(),
 	distance = new THREE.Vector3();
@@ -201,11 +205,11 @@ function setSteps () {
 	var currentStep = 0;
 
 	var valign = document.createElement( 'span' ),
-		slC = document.createElement( 'div' ),
 		sl = document.createElement( 'div' ),
 		bB = document.createElement( 'button' ),
 		bA = document.createElement( 'button' );
 
+	slC = document.createElement( 'div' );
 	slC.id = 'UI-slider-container';
 	sl.id = 'UI-slider';
 	valign.className = 'UI-slider-valign';
@@ -525,12 +529,20 @@ function setView () {
 	controls.rotateSpeed = .12;
 	controls.dampingFactor = .11;
 
-    window.addEventListener('resize', function () {
-    	renderer.setSize( innerWidth, innerHeight );
-    	camera.aspect = innerWidth / innerHeight;
-    	camera.updateProjectionMatrix();
-    	camera.update = true;
-    }, false)
+    window.addEventListener( 'resize', resize, false );
+}
+
+function resize () {
+	if ( innerWidth <= 1035 ) {
+		height = innerHeight - parseInt( getComputedStyle( slC, null ).height );
+		console.log(innerHeight, height)
+	} else {
+		height = innerHeight;
+	}
+	renderer.setSize( innerWidth, height );
+	camera.aspect = innerWidth / height;
+	camera.updateProjectionMatrix();
+	camera.update = true;
 }
 
 function setLighting () {
