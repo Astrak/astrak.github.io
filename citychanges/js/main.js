@@ -44,6 +44,7 @@ function loadScreen () {
 		//1. insert renderer
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize( innerWidth, innerHeight );
+		renderer.setPixelRatio( window.devicePixelRatio );
 		document.body.appendChild( renderer.domElement );
 
 		//2. add grey layer
@@ -199,6 +200,10 @@ function setScene () {
 
 function setUI () {
 	setSteps();
+
+
+
+	resize();
 }
 
 function setSteps () {
