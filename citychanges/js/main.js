@@ -13,10 +13,12 @@ var carsMeshes = [],
 var loadLayer;
 
 //UI
-var slC;
+var slC, topInterface, closePLU, closeInfos;
 
 //rendering
+var animated = true;
 var height;
+var compass, ref = new THREE.Vector3( 0, 0, -1 ), cam = new THREE.Vector3();
 var lastPosition = new THREE.Vector3(),
 	actualPosition = new THREE.Vector3(),
 	distance = new THREE.Vector3();
@@ -144,6 +146,7 @@ function loadScreen () {
 				mesh.name = m.name;
 				mesh.userData.map = m.map;
 				if ( m.hasOwnProperty( 'steps' ) ) mesh.userData.steps = m.steps;
+				if ( m.hasOwnProperty( 'infos' ) ) mesh.userData.infos = m.infos;
 				resources.meshes[ v ] = mesh;
 			}
 
@@ -201,9 +204,501 @@ function setScene () {
 function setUI () {
 	setSteps();
 
+	topInterface = document.createElement( 'div' );
+	topInterface.id = 'top-interface';
 
+	topInterface.appendChild( compass() );
+	topInterface.appendChild( switchAnimations() );
+	topInterface.appendChild( showPLU() );
+	topInterface.appendChild( showInfos() );
+
+	document.body.appendChild( topInterface );
 
 	resize();
+}
+
+function compass () {
+	var	button = document.createElement( 'button' );
+	compass = document.createElement( 'span' );
+	compass.id = 'compass';
+	button.appendChild( compass );
+
+	button.addEventListener( 'click', function ( e ) {
+        e.stopPropagation();
+		TweenLite.to( camera.position, .7, { x : 0, y : 12, z : 23 } );
+		return false;
+	}, false );
+
+	return button;
+}
+
+function switchAnimations () {
+	var button = document.createElement( 'button' );
+	button.innerHTML = 'ANIM : TURN OFF';
+
+	button.addEventListener( 'click', function ( e ) {
+        e.stopPropagation();
+		if ( animated ) {
+			button.innerHTML = 'ANIM : TURN ON';
+			for ( var i = 0 ; i < carsMeshes.length ; i++ )
+				scene.remove( carsMeshes[ i ] );
+			camera.update = true;
+		} else {
+			button.innerHTML = 'ANIM : TURN OFF';
+			for ( var i = 0 ; i < carsMeshes.length ; i++ )
+				scene.add( carsMeshes[ i ] );
+		}
+		animated = ! animated;
+		return false;
+	}, false );
+
+	return button;
+}
+
+function showPLU () {
+	var infos = {
+    		UA:{
+	            title:"Informations sur la zone UA",
+	            description:"la zone UA recouvre l'écusson"
+    		},
+    		UAa:{
+	            title:"Informations sur la zone UAa",
+	            description:"la zone UAa recouvre la zone de l'ancien hôpital Gabarrou, actual Carré Gambetta"
+			},
+			UB:{
+	            title:"Informations sur la zone UB",
+	            description:"la zone UB ..."
+			}
+		};
+
+	var button = document.createElement( 'button' );
+	button.innerHTML = 'PLU';
+
+	var PLU = createPLU(),
+		showPLU = false,
+		PLU_raycaster= new THREE.Raycaster(),
+		PLU_mouse = new THREE.Vector2(),
+		PLU_INTERSECTED = null,
+		mouseMove = false;
+
+	button.addEventListener( 'click', function ( e ) {
+        e.stopPropagation();
+		if ( ! showPLU ) {
+			PLU.UA.ON();PLU.UAa.ON();PLU.UB.ON();
+	        setTimeout( function(){
+	            window.addEventListener( 'mousemove', PLU_raycast, false );
+	            window.addEventListener( 'click', PLU_displayInfos, false );
+	            //window.addEventListener( 'mousedown', checkMouseMove, true );
+	        }, 200 );
+		} else {
+			PLU.UA.OFF();PLU.UAa.OFF();PLU.UB.OFF();
+	        window.removeEventListener( 'mousemove', PLU_raycast, false );
+	        window.removeEventListener( 'click', PLU_displayInfos, false );
+	        //window.removeEventListener( 'mousedown', checkMouseMove, true );
+	        if ( PLU_INTERSECTED ) PLU_INTERSECTED.material.color.set( 0x555588 );
+	        PLU_INTERSECTED = null;
+	        renderer.domElement.style.cursor = '';
+		}
+		showPLU = ! showPLU;
+		return false;
+	}, false );
+
+	function PLU_raycast ( e ) {
+	    if ( ! mouseMove ) {
+	        PLU_mouse.x = ( e.clientX / innerWidth ) * 2 - 1;
+	        PLU_mouse.y = - ( e.clientY / innerHeight ) * 2 + 1;
+	        PLU_raycaster.setFromCamera( PLU_mouse, camera );
+
+	        var intersects = PLU_raycaster.intersectObjects( scene.children );
+	        var interest = false;
+
+	        for ( var i = 0 ; i < intersects.length ; i++ ) {
+	            if ( intersects[ i ].object.userData != undefined ) {
+	                if ( intersects[ i ].object.userData.PLU != undefined ) {
+	                    interest = i; break;
+	                }
+	            }
+	        }
+
+	        if ( interest !== false ) {
+	            if ( PLU_INTERSECTED ) {
+	                if ( PLU_INTERSECTED === intersects[ interest ].object ) return;
+	                PLU_INTERSECTED.material.color.set( 0x333366 );
+	            }
+	            PLU_INTERSECTED = intersects[ interest ].object;
+	            PLU_INTERSECTED.material.color.set( 0x555588 );
+	            renderer.domElement.style.cursor = 'pointer';
+	        } else {
+	            if ( PLU_INTERSECTED ) PLU_INTERSECTED.material.color.set( 0x333366 );
+	            PLU_INTERSECTED = null;
+	            renderer.domElement.style.cursor = '';
+	        }
+
+            camera.update = true;
+	    }
+	}
+	function PLU_displayInfos(){
+	    if ( PLU_INTERSECTED && ! mouseMove ) {
+	        PLU_INTERSECTED.material.color.set(0x555588);//for mobile devices where there is no mousemove
+	        window.removeEventListener( 'click', PLU_displayInfos, false );
+	        
+	        var div = document.createElement( 'div' );
+	        var greyScreen2 = document.createElement( 'div' );
+	        var close = document.createElement( 'button' );
+	        
+	        greyScreen2.className = 'greyScreen';
+	        div.className = 'display-infos';
+	        close.className = 'display-infos-button';
+	        
+	        div.innerHTML = "<h3 class='display-infos-title'>" + PLU_INTERSECTED.userData.PLU.title + 
+	            "</h3><br/><br/><p class='display-infos-description'>" + PLU_INTERSECTED.userData.PLU.description + "</p>";
+	        close.innerHTML = 'close';
+	        
+	        div.appendChild( close );
+	        greyScreen2.appendChild( div );
+	        document.body.appendChild( greyScreen2 );
+	        
+	        close.addEventListener( 'click', function ( e ) {
+	            e.stopPropagation();
+	            document.body.removeChild( greyScreen2 );
+	            setTimeout( function () { window.addEventListener( 'click', PLU_displayInfos, false ); }, 0 );
+	        });
+	    }
+	}
+	function checkMouseMove(){
+	    mouseMove=false;
+	    window.addEventListener('mousemove',mouseMoveTrue,true);
+	    window.addEventListener('mouseup',checkMouseUp,true);
+	    window.removeEventListener('mousedown',checkMouseMove,true);
+	}
+	function mouseMoveTrue(){
+	    mouseMove=true;
+	    if(renderer.domElement.style.cursor==='pointer')
+	    	renderer.domElement.style.cursor='';
+	}
+	function checkMouseUp(){
+        setTimeout(function(){
+            mouseMove=false;
+            if(PLU_INTERSECTED)renderer.domElement.style.cursor='pointer';
+        },0);
+        window.removeEventListener('mouseup',checkMouseUp,true);
+        window.removeEventListener('mousemove',mouseMoveTrue,true);
+        window.addEventListener('mousedown',checkMouseMove,true);
+	}
+
+	function createPLU () {
+        //UA
+        var UAPoints=[
+                {x:16.2,z:12.1},{x:1.76,z:11.73},{x:0,z:11.1},{x:-11.53,z:18.77},//extfaces
+                {x:-31.2,z:4.88},{x:-28.6,z:-13.6},{x:-16.36,z:-26.88},{x:6.42,z:-30.9},{x:25.36,z:-18.78},{x:30.85,z:4.26},{x:21.52,z:22.8},
+                {x:.34,z:10.29},{x:-13.9,z:.47},{x:-5.29,z:-8.72},{x:6.48,z:-4.26},{x:9.2,z:-2.53}//fromUAa>intfaces
+                ],
+            UAPointsLength=UAPoints.length,
+            UAMaxHeight=2;
+        var UAGeometry=new THREE.Geometry();
+        for(var i=0;i<UAPointsLength;i++){
+            UAGeometry.vertices.push(new THREE.Vector3(UAPoints[i].x,UAMaxHeight,UAPoints[i].z));
+        }
+        for(var i=0;i<UAPointsLength;i++){
+            UAGeometry.vertices.push(new THREE.Vector3(UAPoints[i].x,0,UAPoints[i].z));
+        }
+        UAGeometry.faces.push(
+            new THREE.Face3(0,16,17),new THREE.Face3(0,17,1),new THREE.Face3(1,17,18),new THREE.Face3(1,18,2),
+            new THREE.Face3(2,18,19),new THREE.Face3(2,19,3),
+            new THREE.Face3(11,28,27),new THREE.Face3(11,12,28),new THREE.Face3(12,29,28),new THREE.Face3(12,13,29),
+            new THREE.Face3(13,30,29),new THREE.Face3(13,14,30),new THREE.Face3(14,31,30),new THREE.Face3(14,15,31),
+            new THREE.Face3(15,27,31),new THREE.Face3(15,11,27),
+            new THREE.Face3(0,1,11),new THREE.Face3(1,2,11),new THREE.Face3(2,12,11),new THREE.Face3(2,3,12),
+            new THREE.Face3(3,4,12),new THREE.Face3(4,5,12),new THREE.Face3(5,6,12),new THREE.Face3(6,13,12),
+            new THREE.Face3(6,7,13),new THREE.Face3(7,8,13),new THREE.Face3(13,8,14),new THREE.Face3(8,9,14),
+            new THREE.Face3(9,15,14),new THREE.Face3(9,10,15),new THREE.Face3(0,11 ,15),new THREE.Face3(0,15,10),
+            new THREE.Face3(26,16,10),new THREE.Face3(16,0,10)
+            );
+        UAGeometry.computeFaceNormals();
+        var UAMaterial=new THREE.MeshLambertMaterial({color:0x333366,transparent:true,opacity:0,side:THREE.DoubleSide});
+        var UAMesh=new THREE.Mesh(UAGeometry,UAMaterial);
+        UAMesh.userData={PLU:infos.UA};
+        UAMesh.name="UA";
+        var UASprite=makeTextSprite('UA');
+        UASprite.position.set(2,2.5,-12);
+        UAMesh.add(UASprite);
+        UAMesh.scale.y=.01;
+        var UA={
+            mesh:UAMesh,
+            ON:function(){
+                scene.add(UAMesh);
+                TweenLite.to(UAMesh.scale,.7,{y:1,onUpdate:function(){camera.update=true}});
+                TweenLite.to(UAMesh.material,.7,{opacity:.6,onUpdate:function(){camera.update=true}});
+            },
+            OFF:function(){
+                TweenLite.to(UAMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UAMesh)},onUpdate:function(){camera.update=true}});
+                TweenLite.to(UAMesh.material,.7,{opacity:0,onUpdate:function(){camera.update=true}});
+            }
+        };
+        
+        //UAa
+        var UAaPoints=[{x:.37,z:9.45},{x:-12.9,z:.37},{x:-5.48,z:-7.88},{x:6.34,z:-3.8},{x:8.43,z:-2.5}],
+            UAaPointsLength=UAaPoints.length,
+            UAaMaxHeight=2.54;
+        var UAaGeometry=new THREE.Geometry();
+        for(var i=0;i<UAaPointsLength;i++){
+            UAaGeometry.vertices.push(new THREE.Vector3(UAaPoints[i].x,UAaMaxHeight,UAaPoints[i].z));
+        }
+        for(var i=0;i<UAaPointsLength;i++){
+            UAaGeometry.vertices.push(new THREE.Vector3(UAaPoints[i].x,0,UAaPoints[i].z));
+        }
+        UAaGeometry.faces.push(
+            new THREE.Face3(0,1,2),new THREE.Face3(0,2,3),new THREE.Face3(0,3,4),
+            new THREE.Face3(0,5,6),new THREE.Face3(0,6,1),new THREE.Face3(1,6,7),new THREE.Face3(1,7,2),new THREE.Face3(2,7,8),
+            new THREE.Face3(2,8,3),new THREE.Face3(3,8,9),new THREE.Face3(3,9,4),new THREE.Face3(4,9,5),new THREE.Face3(4,5,0)
+            );
+        UAaGeometry.computeFaceNormals();
+        var UAaMaterial=new THREE.MeshLambertMaterial({color:0x555599,transparent:true,opacity:0,side:THREE.DoubleSide});
+        var UAaMesh=new THREE.Mesh(UAaGeometry,UAaMaterial);
+        UAaMesh.userData={PLU:infos.UAa};
+        UAaMesh.name="UAa";
+        var UAaSprite=makeTextSprite('UAa');
+        UAaSprite.position.set(0,2.5,0);
+        UAaMesh.add(UAaSprite);
+        UAaMesh.scale.y=.01;
+        var UAa={
+            mesh:UAaMesh,
+            ON:function(){
+                scene.add(UAaMesh);
+                TweenLite.to(UAaMesh.scale,.7,{y:1,onUpdate:function(){camera.update=true}});
+                TweenLite.to(UAaMesh.material,.7,{opacity:.6,onUpdate:function(){camera.update=true}});
+            },
+            OFF:function(){
+                TweenLite.to(UAaMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UAaMesh)},onUpdate:function(){camera.update=true}});
+                TweenLite.to(UAaMesh.material,.7,{opacity:0,onUpdate:function(){camera.update=true}});
+            }
+        };
+        
+        //UB
+        var UBPoints=[
+            {x:-31.14,z:3.57},{x:-11.25,z:19.4},{x:-.99,z:13.04},{x:1.03,z:13.43},{x:13.77,z:13.43},
+            {x:20,z:23.7},{x:0,z:31.5},{x:-21.8,z:22.4}
+            ],
+            UBPointsLength=UBPoints.length,
+            UBMaxHeight=1.75;
+        var UBGeometry=new THREE.Geometry();
+        for(var i=0;i<UBPointsLength;i++){
+            UBGeometry.vertices.push(new THREE.Vector3(UBPoints[i].x,UBMaxHeight,UBPoints[i].z));
+        }
+        for(var i=0;i<UBPointsLength;i++){
+            UBGeometry.vertices.push(new THREE.Vector3(UBPoints[i].x,0,UBPoints[i].z));
+        }
+        UBGeometry.faces.push(
+            new THREE.Face3(0,1,8),new THREE.Face3(1,8,9),new THREE.Face3(1,2,10),new THREE.Face3(1,10,9),new THREE.Face3(2,3,10),
+            new THREE.Face3(3,10,11),new THREE.Face3(3,4,11),new THREE.Face3(4,11,12),new THREE.Face3(4,5,12),new THREE.Face3(5,12,13),//sides
+            new THREE.Face3(0,1,7),new THREE.Face3(1,7,6),new THREE.Face3(1,2,6),new THREE.Face3(2,3,6),new THREE.Face3(3,4,6),
+            new THREE.Face3(4,5,6)//top
+            );
+        UBGeometry.computeFaceNormals();
+        var UBMaterial=new THREE.MeshLambertMaterial({color:0x111144,transparent:true,opacity:0,side:THREE.DoubleSide});
+        var UBMesh=new THREE.Mesh(UBGeometry,UBMaterial);
+        UBMesh.userData={PLU:infos.UB};
+        UBMesh.name="UB";
+        var UBSprite=makeTextSprite('UB');
+        UBSprite.position.set(4,2,16);
+        UBMesh.add(UBSprite);
+        UBMesh.scale.y=.01;
+        var UB={
+            mesh:UBMesh,
+            ON:function(){
+                scene.add(UBMesh);
+                TweenLite.to(UBMesh.scale,.7,{y:1,onUpdate:function(){camera.update=true}});
+                TweenLite.to(UBMesh.material,.7,{opacity:.6,onUpdate:function(){camera.update=true}});
+            },
+            OFF:function(){
+                TweenLite.to(UBMesh.scale,.7,{y:.05,onComplete:function(){scene.remove(UBMesh)},onUpdate:function(){camera.update=true}});
+                TweenLite.to(UBMesh.material,.7,{opacity:0,onUpdate:function(){camera.update=true}});
+            }
+        };
+        
+        function makeTextSprite(message){
+            var canvas=document.createElement('canvas');
+            var context=canvas.getContext('2d');
+            
+            context.font="Bold 18px Arial";
+            context.fillStyle="rgba(0,0,0,1)";
+            context.strokeStyle="rgba(255,255,255,1)";
+            context.lineWidth=2;
+            context.fillText('zone '+message,4,22);
+            
+            var padding=5;
+            
+            var texture=new THREE.Texture(canvas);
+            texture.minFilter=THREE.LinearFilter;
+            texture.needsUpdate=true;
+            
+            var sprite=new THREE.Sprite(new THREE.SpriteMaterial({ 
+                    map:texture, 
+                    useScreenCoordinates:false,
+                    depthTest:false
+                    })
+                );
+            sprite.material.map.offset.set(-.5,0);
+            sprite.scale.set(10,5,5);
+            return sprite;
+        }
+        
+        return {UA:UA,UAa:UAa,UB:UB};
+	}
+
+	closePLU = function () {
+        if(showPLU){
+            showPLU=false;
+            PLU.UA.OFF();PLU.UAa.OFF();PLU.UB.OFF();
+        }
+
+        window.removeEventListener('mousemove',PLU_raycast,false);
+        window.removeEventListener('click',PLU_displayInfos,false);
+        window.removeEventListener('mousedown',checkMouseMove,true);
+
+        if(PLU_INTERSECTED)PLU_INTERSECTED.material.color.set(0x333366);
+        PLU_INTERSECTED=null;
+        renderer.domElement.style.cursor='move';
+	};
+
+	return button;
+}
+
+function showInfos () {
+    var button = document.createElement( 'button' );
+    button.innerHTML='i';
+
+    var raycaster= new THREE.Raycaster(),
+    	mouse = new THREE.Vector2(),
+    	INTERSECTED = null,
+    	mouseMove = false,
+    	showInfos = false;
+
+    button.addEventListener( 'click', function ( e ) {
+        e.stopPropagation();
+        showInfos = ! showInfos;
+        if ( showInfos ) {
+            setTimeout( function () {
+                window.addEventListener( 'mousemove', raycast, false );
+                window.addEventListener( 'click', displayInfos, false );
+                window.addEventListener( 'mousedown', checkMouseMove, true );
+            }, 200 );
+        } else {
+            window.removeEventListener( 'mousemove', raycast, false );
+            window.removeEventListener( 'click', displayInfos, false );
+            window.removeEventListener( 'mousedown', checkMouseMove, true );
+            if ( INTERSECTED ) {
+                INTERSECTED.material.color.set( 0xffffff );
+                camera.update = true;
+            }
+            INTERSECTED = null;
+            this.style.cssText = 'font:italic 33px Times New Roman;color:#fff;';
+            renderer.domElement.style.cursor = '';
+        }
+        return false;
+    }, false );
+
+    function raycast ( e ) {
+        if ( ! mouseMove ) {
+            mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+            raycaster.setFromCamera( mouse, camera );
+
+            var interest = false;
+            var intersects = raycaster.intersectObjects( scene.children );
+
+            for ( var i = 0 ; i < intersects.length ; i++ ) {
+                if ( intersects[ i ].object.userData != undefined ) {
+                    if ( intersects[ i ].object.userData.infos != undefined ) {
+                        interest = i; break;
+                    }
+                }
+            }
+
+            if ( interest !== false ) {
+                if ( INTERSECTED ) {
+                    if ( INTERSECTED === intersects[ interest ].object ) return;
+                    INTERSECTED.material.color.set( 0xffffff );
+                }
+                INTERSECTED = intersects[ interest ].object;
+                INTERSECTED.material.color.set( 0xaaaaff );
+                camera.update = true
+                renderer.domElement.style.cursor = 'pointer';
+            } else {
+                if ( INTERSECTED ) {
+                    INTERSECTED.material.color.set( 0xffffff );
+                    camera.update = true
+                }
+                INTERSECTED = null;
+                renderer.domElement.style.cursor = '';
+            }
+        }
+    }
+
+    function displayInfos () {
+        if ( INTERSECTED && INTERSECTED.userData.infos != undefined && ! mouseMove ) {
+            
+            INTERSECTED.material.color.set( 0xaaaaff );//for mobile devices where there is no mousemove
+            window.removeEventListener( 'click', displayInfos, false );
+            
+            var div = document.createElement( 'div' );
+            var greyScreen2 = document.createElement( 'div' );
+            var close = document.createElement( 'button' );
+            
+            greyScreen2.className = 'greyScreen';
+            div.className = 'display-infos';
+            close.className = 'display-infos-button';
+            
+            div.innerHTML = "<h3 class='display-infos-title'>" + INTERSECTED.userData.infos.title +
+                "</h3><br/><br/><p class='display-infos-description'>" + INTERSECTED.userData.infos.description + "</p>";
+            close.innerHTML = 'close';
+            
+            div.appendChild( close );
+            greyScreen2.appendChild( div );
+            document.body.appendChild( greyScreen2 );
+            
+            close.addEventListener( 'click', function ( e ) {
+                e.stopPropagation();
+                document.body.removeChild( greyScreen2 );
+                setTimeout( function () { window.addEventListener( 'click', displayInfos, false ); }, 0 );
+            });
+        }
+    }
+
+    function checkMouseMove () {
+        mouseMove = false;
+        window.addEventListener( 'mousemove', mouseMoveTrue, true );
+        window.addEventListener( 'mouseup', checkMouseUp, true );
+        window.removeEventListener( 'mousedown', checkMouseMove, true );
+    }
+
+    function mouseMoveTrue () {
+        if ( renderer.domElement.style.cursor === 'pointer' )
+            renderer.domElement.style.cursor = '';
+        mouseMove = true;
+    }
+
+    function checkMouseUp () {
+        setTimeout( function () {
+            mouseMove = false;
+            if ( INTERSECTED ) renderer.domElement.style.cursor = 'pointer';
+        }, 0 );
+        window.removeEventListener( 'mouseup', checkMouseUp, true );
+        window.removeEventListener( 'mousemove', mouseMoveTrue, true );
+        window.addEventListener( 'mousedown', checkMouseMove, true );
+    }
+
+    closeInfos = function () {
+        window.removeEventListener( 'mousedown', checkMouseMove, true );
+        window.removeEventListener( 'mousemove', raycast, false )
+        window.removeEventListener( 'click', displayInfos, false )
+        if ( INTERSECTED ) INTERSECTED.material.color.set( 0xffffff );
+        INTERSECTED = null;
+        renderer.domElement.style.cursor = '';
+        showInfos = false;
+    };
+
+	return button;
 }
 
 function setSteps () {
@@ -257,10 +752,6 @@ function setSteps () {
         step.appendChild( to );
         sl.appendChild( step );
     }
-
-    /*window.addEventListener( 'resize', function () {
-    	if ( )
-    }, false );*/
 
     function oneStepBeyond ( e ) {
         e.stopPropagation();
@@ -538,12 +1029,7 @@ function setView () {
 }
 
 function resize () {
-	if ( innerWidth <= 1035 ) {
-		height = innerHeight - parseInt( getComputedStyle( slC, null ).height );
-		console.log(innerHeight, height)
-	} else {
-		height = innerHeight;
-	}
+	height = innerWidth <= 1035 ? innerHeight - parseInt( getComputedStyle( slC, null ).height ) : innerHeight;
 	renderer.setSize( innerWidth, height );
 	camera.aspect = innerWidth / height;
 	camera.updateProjectionMatrix();
@@ -595,13 +1081,23 @@ function setSky () {
 function animate () {
 	requestAnimationFrame( animate );
 
-	//lastPosition.copy( camera.position );
+	lastPosition.copy( camera.position );
 	controls.update();
-	//actualPosition.copy( camera.position );
-	//distance.subVectors( actualPosition, lastPosition );
+	actualPosition.copy( camera.position );
+	distance.subVectors( actualPosition, lastPosition );
 
-	//if ( distance.length() > .001 || camera.update ) {
+	if ( animated || distance.length() > .001 || camera.update ) {
+	
+		if ( typeof compass !== 'undefined' ) {
+			cam.set( camera.position.x, 0, camera.position.z ).normalize();
+			var angle = cam.angleTo( ref ) * 180 / Math.PI;
+			angle = camera.position.x > 0 ? - angle : angle;
+			var s = 'rotateZ(' + angle + 'deg);';
+			compass.style.cssText = 'transform :'+s;
+		}		
+
 		renderer.render( scene, camera );
-	//	camera.update = false;
-	//}
+		camera.update = false;
+
+	}
 }

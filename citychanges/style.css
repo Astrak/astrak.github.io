@@ -196,6 +196,44 @@ canvas:active{
 	  0% {stroke-dashoffset:250.8}
 	  100% {stroke-dashoffset:0}
 	}
+	.greyScreen div.display-infos{
+		width:500px;height:340px;
+		opacity:1;
+		top:calc(50% - 170px);
+		left:calc(50% - 250px);
+		-webkit-animation:display-infos-animation 500ms ease;
+		animation:display-infos-animation 500ms ease;
+		position:relative;
+	}
+	.greyScreen button{
+		border:solid 1px wheat;
+		border-radius:2px;
+		background:none;
+		padding:5px;
+		width:100px;
+		letter-spacing:0px;
+		transition:all 90ms ease;
+		cursor:pointer;
+	}
+	.greyScreen button:hover{
+		letter-spacing:1.5px;
+		background:#222;
+	}
+	.greyScreen button.display-infos-button{
+		position:absolute;
+		width:100px;
+		bottom:30px;left:calc(50% - 50px);
+		display:block;
+		cursor:pointer;
+	}
+	@-webkit-keyframes display-infos-animation{
+		0%{opacity:0;}
+		100%{opacity:1;}
+	}
+	@-webkit-keyframes display-infos-animation{
+		0%{opacity:0;}
+		100%{opacity:1;}
+	}
 
 
 /*
@@ -356,14 +394,6 @@ button.fullscreen{
 	left:0px;
 	transition:left 800ms ease;
 }
-.slider-step{
-	padding-right:50px;
-	padding-left:50px;
-	width:calc(100%/3 - 100px);
-	margin:0px;
-	display:inline-block;
-	vertical-align:middle;
-}
 .slider-buttons{
 	width:0;height:0;
 	position:absolute;
@@ -378,6 +408,14 @@ button.fullscreen{
 	border-right:none;
 	border-left:solid 22px wheat;
 	left:auto;right:30px;
+}
+.slider-step{
+	padding-right:50px;
+	padding-left:50px;
+	width:calc(100%/3 - 100px);
+	margin:0px;
+	display:inline-block;
+	vertical-align:middle;
 }
 .slider-stepDate{
 	width:20%;
@@ -405,44 +443,7 @@ button.fullscreen{
 
 /*INFO DISPLAYER*/
 /*
-.greyScreen div.display-infos{
-	width:500px;height:340px;
-	opacity:1;
-	top:calc(50% - 170px);
-	left:calc(50% - 250px);
-	-webkit-animation:display-infos-animation 500ms ease;
-	animation:display-infos-animation 500ms ease;
-	position:relative;
-}
-.greyScreen button{
-	border:solid 1px wheat;
-	border-radius:2px;
-	background:none;
-	padding:5px;
-	width:100px;
-	letter-spacing:0px;
-	transition:all 90ms ease;
-	cursor:pointer;
-}
-.greyScreen button:hover{
-	letter-spacing:1.5px;
-	background:#222;
-}
-.greyScreen button.display-infos-button{
-	position:absolute;
-	width:100px;
-	bottom:30px;left:calc(50% - 50px);
-	display:block;
-	cursor:pointer;
-}
-@-webkit-keyframes display-infos-animation{
-	0%{opacity:0;}
-	100%{opacity:1;}
-}
-@-webkit-keyframes display-infos-animation{
-	0%{opacity:0;}
-	100%{opacity:1;}
-}
+
 */
 
 /*

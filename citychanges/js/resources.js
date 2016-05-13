@@ -3,7 +3,7 @@ var unique = new THREE.MeshLambertMaterial();
 var resources = {
     textures:[
         // 18 textures = madness
-        'hospitaltest141',      // 0  minfilter : 
+        'hospitaltest142',      // 0  minfilter : 
         'gambetta2test095',     // 1  minfilter : 
         'gambettatest187',      // 2  minfilter : 
         'hugotest181',          // 3  minfilter : 
@@ -188,7 +188,7 @@ var resources = {
         {//19
             geometry:0,
             map:0,
-            material:new THREE.MeshLambertMaterial({side:THREE.DoubleSide}),
+            material:new THREE.MeshLambertMaterial(),
             flatShaded:true,
             name:'hospital',
             infos:{title:"Informations sur le bâtiment principal de l'hôpital",description:"Il a été bâti en 1982"},
