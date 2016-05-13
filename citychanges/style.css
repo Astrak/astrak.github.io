@@ -32,6 +32,9 @@ button:active{
 	width:100%;
 	text-align: center;
 }
+#top-interface button{
+	box-shadow: 0 0 20px #000;
+}
 #compass-bttn{
 	display: inline-block;
 	width:50px;height:50px;
@@ -65,61 +68,74 @@ button:active{
 }
 
 /*switchbuttons*/
-.sb{
-	height:50px;
-	width:100px;
-	position: relative;
-	padding:0;
-}
-.sb p {
-	margin:0;
-}
-.sb > p {
-	text-transform: uppercase;
-	position: absolute;
-	top:0;
-	margin-top:5px;
-	width:100%;
-}
-.sb-cont{
-	display: inline;
-	position: absolute;
-	width:90%;
-	left:5%;
-}
-.sb-cont p{
-	display: inline-block;
-	width:50%;
-	font-size:16px;
-	text-transform: uppercase;
-	color:#000;
-	padding:2px 0 1px 0;
-	box-shadow: 0 0 5px #000 inset;
-	text-shadow: 0 0 1px;
-}
-.sb-on{
-	background:#5A5;
-	border-radius: 110px 0 0 110px;
-}
-.sb-off{
-	background:#F77;
-	border-radius: 0 110px 110px 0;
-}
-.sb-cont span{
-	border-radius:100px;
-	width:50px;height:19px;
-	background:#666;
-	position: absolute;
-	left:0;
-	transition:margin-left 300ms linear;
-	border:solid 1px #444;
-}
-.sb-cont span.on{
-	margin-left:38px;
-}
-.sb-cont span.off{
-	margin-left:0px;
-}
+	.sb{
+		height:50px;
+		width:100px;
+		position: relative;
+		padding:0;
+	}
+	.sb p {
+		margin:0;
+	}
+	.sb > p {
+		text-transform: uppercase;
+		position: absolute;
+		top:0;
+		margin-top:5px;
+		width:100%;
+	}
+	.sb-cont{
+		display: inline;
+		position: absolute;
+		width:90%;
+		left:5%;
+	}
+	.sb-cont p{
+		display: inline-block;
+		width:50%;
+		font-size:16px;
+		text-transform: uppercase;
+		color:#000;
+		padding:2px 0 1px 0;
+		box-shadow: 0 0 5px #000 inset;
+		text-shadow: 0 0 1px;
+	}
+	.sb-on{
+		background:#5A5;
+		border-radius: 110px 0 0 110px;
+	}
+	.sb-off{
+		background:#F77;
+		border-radius: 0 110px 110px 0;
+	}
+	.sb-cont span{
+		border-radius:100px;
+		width:50px;height:19px;
+		background:#666;
+		position: absolute;
+		left:0;
+		transition:margin-left 300ms linear;
+		border:solid 1px #444;
+		box-shadow: 0 0 5px #000;
+	}
+	.sb-cont span:after, .sb-cont span:before{
+		content:' ';
+		width:2px;height:14px;
+		position: absolute;
+		margin-top:-8px;
+		top:50%;
+		background:#444;
+		margin-left:3px;
+	}
+	.sb-cont span:before{
+		margin-left: -3px;
+	}
+	.sb-cont span.on{
+		margin-left:38px;
+	}
+	.sb-cont span.off{
+		margin-left:0px;
+	}
 
 
 /*slider*/
@@ -127,11 +143,12 @@ button:active{
 		overflow:hidden;
 		padding:5px 0;
 		bottom:0;
-		background:#111;
+		background:#000;
 		width:55%;
 		position: absolute;
 		left:22%;
 		text-align: center;
+		box-shadow: 0 0 20px #000;
 	}
 	#UI-slider{
 		height:100%;
@@ -151,6 +168,7 @@ button:active{
 		height:100px;
 		width:43px;
 		margin-top:-50px;
+		box-shadow: 0 0 20px #000;
 	}
 	#UI-button-before{
 		left:0;

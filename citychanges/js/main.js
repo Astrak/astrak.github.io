@@ -5,6 +5,7 @@ var renderer, scene, camera, controls, raycaster;
 
 //objects
 var carsMeshes = [],
+	carsTls = [],
 	parkedCarsMesh,
 	treesMesh = {}, 
 	meshes = [];
@@ -290,12 +291,16 @@ function SwitchButton ( title, callback, init ) {
 function showAnimations () {
 	anims = new SwitchButton( 'animations', function () {
 		if ( animated ) {
-			for ( var i = 0 ; i < carsMeshes.length ; i++ )
+			for ( var i = 0 ; i < carsMeshes.length ; i++ ) {
 				scene.remove( carsMeshes[ i ] );
+				carsTls[ i ].pause();
+			}
 			camera.update = true;
 		} else {
-			for ( var i = 0 ; i < carsMeshes.length ; i++ )
+			for ( var i = 0 ; i < carsMeshes.length ; i++ ) {
 				scene.add( carsMeshes[ i ] );
+				carsTls[ i ].resume();
+			}
 		}
 		animated = ! animated;
 	}, true );
@@ -1013,6 +1018,8 @@ function createCars () {
         };
 
 		for ( var k = 0 ; k < tL ; k++ ) createAnimatedPath( k );
+
+	    carsTls.push( tl );
 
 		var beginPos = car.curve.spline.getPoint( car.begin )
 		mesh.position.set( beginPos.x, beginPos.y, beginPos.z );
