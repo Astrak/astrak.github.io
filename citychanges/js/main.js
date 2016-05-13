@@ -13,7 +13,8 @@ var carsMeshes = [],
 var loadLayer;
 
 //UI
-var slC, topInterface, closePLU, closeInfos;
+var slC, topInterface;
+var anims, PLUs, closePLU, closeInfos;
 
 //rendering
 var animated = true;
@@ -208,8 +209,8 @@ function setUI () {
 	topInterface.id = 'top-interface';
 
 	topInterface.appendChild( compass() );
-	topInterface.appendChild( switchAnimations() );
-	topInterface.appendChild( showPLU() );
+	showAnimations();
+	showPLU();
 	topInterface.appendChild( showInfos() );
 
 	document.body.appendChild( topInterface );
@@ -221,6 +222,7 @@ function compass () {
 	var	button = document.createElement( 'button' );
 	compass = document.createElement( 'span' );
 	compass.id = 'compass';
+	button.id = 'compass-bttn';
 	button.appendChild( compass );
 
 	button.addEventListener( 'click', function ( e ) {
@@ -232,27 +234,72 @@ function compass () {
 	return button;
 }
 
-function switchAnimations () {
-	var button = document.createElement( 'button' );
-	button.innerHTML = 'ANIM : TURN OFF';
+function SwitchButton ( title, callback, init ) {
+	var b = document.createElement( 'button' ),
+		p = document.createElement( 'p' ),
+		container = document.createElement( 'div' ),
+		on = document.createElement( 'p' ),
+		off = document.createElement( 'p' ),
+		thumb = document.createElement( 'span' );
 
-	button.addEventListener( 'click', function ( e ) {
-        e.stopPropagation();
+	b.className = 'sb';
+	container.className = 'sb-cont';
+	on.className = 'sb-on';
+	off.className = 'sb-off';
+	thumb.className = init ? 'on' : 'off';
+
+	p.innerHTML = title;
+	on.innerHTML = 'on';
+	off.innerHTML = '&nbsp;off';
+
+	container.appendChild( on );
+	container.appendChild( off );
+	container.appendChild( thumb );
+	b.appendChild( p );
+	b.appendChild( container );
+
+	b.bool = init;
+
+	b.on = function () {
+		if ( b.bool ) return;
+		b.bool = false;
+		thumb.className = 'on';
+		callback();
+		return false;
+	};
+
+	b.off = function () {
+		if ( ! b.bool ) return;
+		b.bool = true;
+		thumb.className = 'off';
+		callback();
+		return false;
+	};
+
+	b.addEventListener( 'click', function ( e ) {
+		e.stopPropagation();
+		callback();
+		b.bool = ! b.bool;
+		thumb.className = b.bool ? 'on' : 'off';
+		return false;
+	}, false );
+
+	return b;
+}
+
+function showAnimations () {
+	anims = new SwitchButton( 'animations', function () {
 		if ( animated ) {
-			button.innerHTML = 'ANIM : TURN ON';
 			for ( var i = 0 ; i < carsMeshes.length ; i++ )
 				scene.remove( carsMeshes[ i ] );
 			camera.update = true;
 		} else {
-			button.innerHTML = 'ANIM : TURN OFF';
 			for ( var i = 0 ; i < carsMeshes.length ; i++ )
 				scene.add( carsMeshes[ i ] );
 		}
 		animated = ! animated;
-		return false;
-	}, false );
-
-	return button;
+	}, true );
+	topInterface.appendChild( anims );
 }
 
 function showPLU () {
@@ -271,9 +318,6 @@ function showPLU () {
 			}
 		};
 
-	var button = document.createElement( 'button' );
-	button.innerHTML = 'PLU';
-
 	var PLU = createPLU(),
 		showPLU = false,
 		PLU_raycaster= new THREE.Raycaster(),
@@ -281,8 +325,7 @@ function showPLU () {
 		PLU_INTERSECTED = null,
 		mouseMove = false;
 
-	button.addEventListener( 'click', function ( e ) {
-        e.stopPropagation();
+	PLUs = new SwitchButton( 'PLU', function () {
 		if ( ! showPLU ) {
 			PLU.UA.ON();PLU.UAa.ON();PLU.UB.ON();
 	        setTimeout( function(){
@@ -300,8 +343,9 @@ function showPLU () {
 	        renderer.domElement.style.cursor = '';
 		}
 		showPLU = ! showPLU;
-		return false;
-	}, false );
+	}, showPLU );
+
+	topInterface.appendChild( PLUs );
 
 	function PLU_raycast ( e ) {
 	    if ( ! mouseMove ) {
@@ -561,7 +605,7 @@ function showPLU () {
         renderer.domElement.style.cursor='move';
 	};
 
-	return button;
+	return PLUs;
 }
 
 function showInfos () {
@@ -1041,7 +1085,6 @@ function setLighting () {
     var light = new THREE.DirectionalLight( 0xffffff, 1.3 );
     light.position.set( 0, 35, 20 );
 	light.castShadow = true;
-	light.shadow.bias = - 0.002;
 	light.shadow.camera.far = 60;
 	light.shadow.camera.top = 25;
 	light.shadow.camera.near = light.shadow.camera.right = 25;
