@@ -111,21 +111,24 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	};
 
+	var position, 
+		offset = new THREE.Vector3(),
+		vert = new THREE.Vector3( 0, 1, 0 ),
+		lastPosition = new THREE.Vector3(),
+		quat = new THREE.Quaternion(),
+		quatInverse = new THREE.Quaternion(),
+		lastQuaternion = new THREE.Quaternion();
+
 	// this method is exposed, but perhaps it would be better if we can make it private...
 	this.update = function() {
 
-		var offset = new THREE.Vector3();
-
 		// so camera.up is the orbit axis
-		var quat = new THREE.Quaternion().setFromUnitVectors( object.up, new THREE.Vector3( 0, 1, 0 ) );
-		var quatInverse = quat.clone().inverse();
-
-		var lastPosition = new THREE.Vector3();
-		var lastQuaternion = new THREE.Quaternion();
+		quat.setFromUnitVectors( object.up, vert );
+		quatInverse.copy( quat ).inverse();
 
 		return function () {
 
-			var position = scope.object.position;
+			position = scope.object.position;
 
 			offset.copy( position ).sub( scope.target );
 

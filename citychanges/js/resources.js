@@ -20,7 +20,7 @@ var resources = {
         'gambettacitytest299'   //14  minfilter : 
         ],
     geometries:[
-        'hospital',//0
+        'hospital_higher',//0
         'hugo',
         'gambettacity19',
         'gambetta',
@@ -99,14 +99,12 @@ var resources = {
             geometry:13,
             map:13,
             material:new THREE.MeshLambertMaterial(),
-            flatShaded:true,
             name:'gardens'
         },
         {//9
             geometry:14,
             map:10,
             material:new THREE.MeshLambertMaterial(),
-            flatShaded:true,
             name:'routes'
         },
         {//10
@@ -136,7 +134,6 @@ var resources = {
             geometry:10,
             map:7,
             material:unique,
-            flatShaded:true,
             name:'nouveau_sol',
             steps:[false,false,true]
         },

@@ -21,9 +21,7 @@ var anims, PLUs, closePLU, closeInfos;
 var animated = true;
 var height;
 var compass, ref = new THREE.Vector3( 0, 0, -1 ), cam = new THREE.Vector3();
-var lastPosition = new THREE.Vector3(),
-	actualPosition = new THREE.Vector3(),
-	distance = new THREE.Vector3();
+var angle, s;
 
 //webgl
 var webgl = ( function () {
@@ -205,17 +203,17 @@ function setScene () {
 
 function setUI () {
 	setSteps();
-
+	
 	topInterface = document.createElement( 'div' );
 	topInterface.id = 'top-interface';
-
+	
 	topInterface.appendChild( compass() );
 	showAnimations();
 	showPLU();
 	topInterface.appendChild( showInfos() );
-
+	
 	document.body.appendChild( topInterface );
-
+	
 	resize();
 }
 
@@ -1131,20 +1129,17 @@ function setSky () {
 function animate () {
 	requestAnimationFrame( animate );
 
-	lastPosition.copy( camera.position );
 	controls.update();
-	actualPosition.copy( camera.position );
-	distance.subVectors( actualPosition, lastPosition );
 
-	if ( animated || distance.length() > .001 || camera.update ) {
+	if ( animated || camera.update ) {
 	
-		if ( typeof compass !== 'undefined' ) {
+		if ( typeof compass !== 'undefined' && compass.style ) {
 			cam.set( camera.position.x, 0, camera.position.z ).normalize();
-			var angle = cam.angleTo( ref ) * 180 / Math.PI;
+			angle = cam.angleTo( ref ) * 180 / Math.PI;
 			angle = camera.position.x > 0 ? - angle : angle;
-			var s = 'rotateZ(' + angle + 'deg);';
+			s = 'rotateZ(' + angle + 'deg);';
 			compass.style.cssText = 'transform :'+s;
-		}		
+		}
 
 		renderer.render( scene, camera );
 		camera.update = false;
