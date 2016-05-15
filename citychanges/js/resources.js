@@ -92,7 +92,7 @@ var resources = {
             },
         {//8
             geometry:21,
-            map:15,
+            map:12,
             material:new THREE.MeshLambertMaterial(),
             name:'ground'
         },
