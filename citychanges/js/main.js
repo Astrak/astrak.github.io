@@ -160,7 +160,6 @@ function loadScreen () {
 				resources.textures[ v ].dispose();
 				resources.textures[ v ] = t;
 				resources.textures[ v ].needsUpdate = true;
-				camera.update = true;
 				updateTextures();
 			});
 		}
@@ -176,7 +175,6 @@ function loadScreen () {
 						resources.meshes[ i ].material.needsUpdate = true;
 					}
 				}
-				resources.textures[ 8 ].minFilter = THREE.NearestFilter;
 				treesMesh.high.material.map = resources.textures[ 8 ];
 				updateShadows();
 			}

@@ -19,7 +19,7 @@ var resources = {
     geometries:[
         'hospital_higher',//0
         'hugo',
-        'gambettacity19',
+        'gambettacity',
         'gambetta',
         'gambetta2',
         'chantier',//5
