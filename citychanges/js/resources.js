@@ -2,7 +2,6 @@ var linearFilteredSmoothLambertMaterial=new THREE.MeshLambertMaterial({transpare
 var unique = new THREE.MeshLambertMaterial();
 var resources = {
     textures:[
-        // 18 textures = madness
         'hospitaltest142',      // 0  minfilter : 
         'gambetta2test095',     // 1  minfilter : 
         'gambettatest187',      // 2  minfilter : 
@@ -13,11 +12,9 @@ var resources = {
         'nouveauxbat048',       // 7  minfilter : 
         'platane10',            // 8  minfilter : linearfilter
         'gridtest047',          // 9  minfilter : linearfilter
-        'routestest090',        //10  minfilter : linearfilter
-        'trottoirstest042',     //11  minfilter : linearfilter
-        'carstest041',          //12  minfilter : 
-        'gardenstest033',       //13  minfilter : linearfilter
-        'gambettacitytest299'   //14  minfilter : 
+        'carstest041',          //10  minfilter : 
+        'gambettacitytest299',  //11  minfilter : 
+        'groundtest001'         //12
         ],
     geometries:[
         'hospital_higher',//0
@@ -33,86 +30,71 @@ var resources = {
         'nouveau_sol',//10
         'residences',
         'RPA',
-        'gardens2',
-        'routes5',
-        'trottoirs4',//15
         '4x4_shadow',
         'citadine_shadow',
-        'break_shadow',
+        'break_shadow',//15
         'berline_shadow',
-        'kangoo_shadow',//20
+        'kangoo_shadow',
         'sportive_shadow',
         'camionette_shadow',
-        'familiale_shadow'
+        'familiale_shadow',//20
+        'ground'
         ],
     meshes:[//! dont change cars indices
         /*CARS*/
             {//0
-                geometry:16,
-                map:12,
+                geometry:13,
+                map:10,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_4x4'
             },
             {//1
-                geometry:17,
-                map:12,
+                geometry:14,
+                map:10,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_citadine'
             },
             {//2
-                geometry:18,
-                map:12,
+                geometry:15,
+                map:10,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_break'
             },
             {//3
-                geometry:19,
-                map:12,
+                geometry:16,
+                map:10,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_berline'
             },
             {//4
-                geometry:20,
-                map:12,
+                geometry:17,
+                map:10,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_kangoo'
             },
             {//5
-                geometry:21,
-                map:12,
+                geometry:18,
+                map:10,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_sportive'
             },
             {//6
-                geometry:22,
-                map:12,
+                geometry:19,
+                map:10,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_camionette'
             },
             {//7
-                geometry:23,
-                map:12,
+                geometry:20,
+                map:10,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_familiale'
             },
         {//8
-            geometry:13,
-            map:13,
+            geometry:21,
+            map:15,
             material:new THREE.MeshLambertMaterial(),
-            name:'gardens'
-        },
-        {//9
-            geometry:14,
-            map:10,
-            material:new THREE.MeshLambertMaterial(),
-            name:'routes'
-        },
-        {//10
-            geometry:15,
-            map:11,
-            material:new THREE.MeshLambertMaterial(),
-            flatShaded:true,
-            name:'trottoirs'
+            name:'ground'
         },
         {//11
             geometry:12,
@@ -214,7 +196,7 @@ var resources = {
         },
         {//23
             geometry:2,
-            map:14,
+            map:11,
             material:new THREE.MeshLambertMaterial(),
             flatShaded:true,
             name:'gambettacity'
