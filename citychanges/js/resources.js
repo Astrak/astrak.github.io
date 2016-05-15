@@ -2,19 +2,19 @@ var linearFilteredSmoothLambertMaterial=new THREE.MeshLambertMaterial({transpare
 var unique = new THREE.MeshLambertMaterial();
 var resources = {
     textures:[
-        'hospitaltest142',      // 0  minfilter : 
-        'gambetta2test095',     // 1  minfilter : 
-        'gambettatest187',      // 2  minfilter : 
-        'hugotest181',          // 3  minfilter : 
-        'chantier1test018',     // 4  minfilter : linearfilter
-        'chantiertest043',      // 5  minfilter : linearfilter
-        'commercestest019',     // 6  minfilter : 
-        'nouveauxbat048',       // 7  minfilter : 
-        'platane10',            // 8  minfilter : linearfilter
-        'gridtest047',          // 9  minfilter : linearfilter
-        'carstest041',          //10  minfilter : 
-        'gambettacitytest299',  //11  minfilter : 
-        'groundtest001'         //12
+        'hospitaltest142',      // 0  
+        'gambetta2test095',     // 1  
+        'gambettatest187',      // 2  
+        'hugotest181',          // 3  
+        'chantier1test018',     // 4  linearfilter
+        'chantiertest043',      // 5  linearfilter
+        'commercestest019',     // 6  
+        'nouveauxbat048',       // 7  
+        'platane10',            // 8  linearfilter
+        'gridtest047',          // 9  linearfilter
+        'carstest041',          //10  
+        'gambettacitytest299',  //11  
+        'groundtest001'         //12  linearfilter
         ],
     geometries:[
         'hospital_higher',//0
