@@ -834,7 +834,6 @@ function setSteps () {
 
     function addMesh ( mesh ) {
         if ( mesh.material.depthTest == false ) return;//dont add commercesdepth now
-        mesh.receiveShadow = false;
         scene.add( mesh );
         //if ( mesh.name !== 'chantier' ) {
             mesh.material.transparent = true;
@@ -844,7 +843,6 @@ function setSteps () {
                 onUpdate : function () { camera.update = true; },
             	onComplete : function () { 
             		mesh.material.transparent = false;
-            		mesh.receiveShadow = true;
             		updateShadows();
             	}
             });
