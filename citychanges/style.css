@@ -30,16 +30,17 @@ button:active{
 	position: absolute;
 	top:0;
 	width:100%;
-	text-align: center;
 }
-#top-interface div{
+#top-interface > div{
 	box-shadow: 0 0 20px #000;
 	display:inline-block;
 	font-size:0;
 }
 #compass-bttn{
-	display: inline-block;
 	width:50px;height:50px;
+	top:0;right:0;
+	position: absolute;
+	box-shadow: 0 0 20px #000;
 }
 #compass{
 	width:10px;
@@ -75,6 +76,7 @@ button:active{
 		width:100px;
 		position: relative;
 		padding:0;
+		display: block;
 	}
 	.sb p {
 		margin:0;

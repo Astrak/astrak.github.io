@@ -207,10 +207,10 @@ function setUI () {
 	shadowContainter = document.createElement( 'div' );
 	topInterface.appendChild( shadowContainter );
 	
-	shadowContainter.appendChild( compass() );
 	showAnimations();
 	showPLU();
 	//shadowContainter.appendChild( showInfos() );
+	topInterface.appendChild( compass() );
 	
 	document.body.appendChild( topInterface );
 	
