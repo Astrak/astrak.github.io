@@ -35,7 +35,6 @@ var trees = [
         {x:8.98,y:.76,z:11.36,scaleX:1,scaleY:.7,scaleZ:1},
         {x:10.18,y:.76,z:11.36,scaleX:1,scaleY:.7,scaleZ:1},
         {x:12.35,y:.76,z:11.36,scaleX:1,scaleY:.7,scaleZ:1},
-        {x:-1.1,y:.76,z:13.56,scaleX:1,scaleY:.8,scaleZ:1},
         {x:1.03,y:.76,z:14.6,scaleX:1,scaleY:.9,scaleZ:1},
         {x:4.94,y:.76,z:14.6,scaleX:1,scaleY:.8,scaleZ:1},
         {x:6.15,y:.76,z:14.6,scaleX:1,scaleY:.9,scaleZ:1},

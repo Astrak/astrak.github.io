@@ -2,7 +2,7 @@ var linearFilteredSmoothLambertMaterial=new THREE.MeshLambertMaterial({transpare
 var unique = new THREE.MeshLambertMaterial();
 var resources = {
     textures:[
-        'hospitaltest142',      // 0  
+        'hospitaltest143',      // 0  
         'gambetta2test095',     // 1  
         'gambettatest187',      // 2  
         'hugotest181',          // 3  
@@ -13,13 +13,13 @@ var resources = {
         'platane10',            // 8  linearfilter
         'gridtest047',          // 9  linearfilter
         'carstest041',          //10  
-        'gambettacitytest299',  //11  
-        'groundtest001'         //12  linearfilter
+        'gambettacitytest302',  //11  
+        'groundtest002'         //12  linearfilter
         ],
     geometries:[
         'hospital_higher',//0
         'hugo',
-        'gambettacity',
+        'gambettacity_higher',
         'gambetta',
         'gambetta2',
         'chantier',//5
@@ -167,7 +167,7 @@ var resources = {
         {//19
             geometry:0,
             map:0,
-            material:new THREE.MeshLambertMaterial(),
+            material:new THREE.MeshLambertMaterial({transparent:true, alphaTest:.4}),
             flatShaded:true,
             name:'hospital',
             infos:{title:"Informations sur le bâtiment principal de l'hôpital",description:"Il a été bâti en 1982"},
@@ -197,7 +197,7 @@ var resources = {
         {//23
             geometry:2,
             map:11,
-            material:new THREE.MeshLambertMaterial(),
+            material:new THREE.MeshLambertMaterial({transparent:true}),
             flatShaded:true,
             name:'gambettacity'
         }

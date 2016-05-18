@@ -14,7 +14,7 @@ var carsMeshes = [],
 var loadLayer;
 
 //UI
-var slC, topInterface;
+var slC, topInterface, shadowContainter;
 var anims, PLUs, closePLU, closeInfos;
 
 //rendering
@@ -204,11 +204,13 @@ function setUI () {
 	
 	topInterface = document.createElement( 'div' );
 	topInterface.id = 'top-interface';
+	shadowContainter = document.createElement( 'div' );
+	topInterface.appendChild( shadowContainter );
 	
-	topInterface.appendChild( compass() );
+	shadowContainter.appendChild( compass() );
 	showAnimations();
 	showPLU();
-	topInterface.appendChild( showInfos() );
+	//shadowContainter.appendChild( showInfos() );
 	
 	document.body.appendChild( topInterface );
 	
@@ -289,7 +291,7 @@ function showAnimations () {
 		if ( animated ) {
 			for ( var i = 0 ; i < carsMeshes.length ; i++ ) {
 				scene.remove( carsMeshes[ i ] );
-				carsTls[ i ].pause();
+				carsTls[ i ].pause( 0, true );
 			}
 			camera.update = true;
 		} else {
@@ -300,7 +302,7 @@ function showAnimations () {
 		}
 		animated = ! animated;
 	}, true );
-	topInterface.appendChild( anims );
+	shadowContainter.appendChild( anims );
 }
 
 function showPLU () {
@@ -346,7 +348,7 @@ function showPLU () {
 		showPLU = ! showPLU;
 	}, showPLU );
 
-	topInterface.appendChild( PLUs );
+	shadowContainter.appendChild( PLUs );
 
 	function PLU_raycast ( e ) {
 	    if ( ! mouseMove ) {
@@ -832,8 +834,9 @@ function setSteps () {
 
     function addMesh ( mesh ) {
         if ( mesh.material.depthTest == false ) return;//dont add commercesdepth now
+        mesh.receiveShadow = false;
         scene.add( mesh );
-        if ( mesh.name !== 'chantier' ) {
+        //if ( mesh.name !== 'chantier' ) {
             mesh.material.transparent = true;
             mesh.material.opacity = 0;
             TweenLite.to( mesh.material, .7, {
@@ -841,10 +844,11 @@ function setSteps () {
                 onUpdate : function () { camera.update = true; },
             	onComplete : function () { 
             		mesh.material.transparent = false;
+            		mesh.receiveShadow = true;
             		updateShadows();
             	}
             });
-        }
+        //}
     }
 
     function removeMesh ( mesh ) {

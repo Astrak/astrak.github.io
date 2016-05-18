@@ -32,8 +32,10 @@ button:active{
 	width:100%;
 	text-align: center;
 }
-#top-interface button{
+#top-interface div{
 	box-shadow: 0 0 20px #000;
+	display:inline-block;
+	font-size:0;
 }
 #compass-bttn{
 	display: inline-block;
