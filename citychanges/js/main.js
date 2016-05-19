@@ -169,13 +169,13 @@ function loadScreen () {
 			if ( tCounter === resources.textures.length ) {
 				for ( var i = 0 ; i < resources.meshes.length ; i++ ) {
 					if ( resources.meshes[ i ].userData.hasOwnProperty( 'map' ) ) {
-		            	if ( [ 4, 5, 8, 9, 12 ].indexOf( i ) > -1 ) resources.textures[ i ].minFilter = THREE.LinearFilter;
+		            	if ( [ 2, 3, 6, 7, 10 ].indexOf( i ) > -1 ) resources.textures[ i ].minFilter = THREE.LinearFilter;
 						resources.meshes[ i ].material.map = resources.textures[ resources.meshes[ i ].userData.map ];
 						resources.meshes[ i ].material.color.set( 0xffffff );//for sky
 						resources.meshes[ i ].material.needsUpdate = true;
 					}
 				}
-				treesMesh.high.material.map = resources.textures[ 8 ];
+				treesMesh.high.material.map = resources.textures[ 6 ];
 				updateShadows();
 			}
 		}
@@ -877,7 +877,7 @@ function setSteps () {
 
 function createTrees () {
 	//textured model : create foliage geometry
-    var plane = new THREE.PlaneGeometry(1.7,2.5,1,1);
+    var plane = new THREE.PlaneGeometry( 1.7, 2.5, 1, 1 );
     var noMaterial = new THREE.MeshBasicMaterial();
     
     var plane1 = new THREE.Mesh( plane, noMaterial );
@@ -902,7 +902,7 @@ function createTrees () {
     
     //mat
     var m = new THREE.MeshBasicMaterial({
-            map : resources.textures[ 8 ],
+            map : resources.textures[ 6 ],
             transparent : true,
             side : THREE.DoubleSide,
             depthWrite : true,
@@ -1122,7 +1122,7 @@ function setSky () {
     sky.name = 'sky';
     sky.updateMatrixWorld();
     sky.matrixAutoUpdate = false;
-    sky.userData.map = 9;
+    sky.userData.map = 7;
     resources.meshes.push( sky );
 }
 

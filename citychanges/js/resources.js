@@ -2,133 +2,129 @@ var linearFilteredSmoothLambertMaterial=new THREE.MeshLambertMaterial({transpare
 var unique = new THREE.MeshLambertMaterial();
 var resources = {
     textures:[
-        'hospitaltest143',      // 0  
-        'gambetta2test095',     // 1  
-        'gambettatest187',      // 2  
-        'hugotest181',          // 3  
-        'chantier1test018',     // 4  linearfilter
-        'chantiertest043',      // 5  linearfilter
-        'commercestest019',     // 6  
-        'nouveauxbat048',       // 7  
-        'platane10',            // 8  linearfilter
-        'gridtest047',          // 9  linearfilter
-        'carstest041',          //10  
-        'gambettacitytest302',  //11  
-        'groundtest002'         //12  linearfilter
+        'hospitaltest143',      // 0
+        'gambettatest187',      // 1  
+        'chantier1test018',     // 2  linearfilter
+        'chantiertest043',      // 3  linearfilter
+        'commercestest019',     // 4  
+        'nouveauxbat048',       // 5  
+        'platane10',            // 6  linearfilter
+        'gridtest047',          // 7  linearfilter
+        'carstest041',          // 8  
+        'gambettacitytest304',  // 9  
+        'groundtest002'         //10  linearfilter
         ],
     geometries:[
         'hospital_higher',//0
-        'hugo',
         'gambettacity_higher',
         'gambetta',
-        'gambetta2',
-        'chantier',//5
+        'chantier',
         'chantier1',
-        'commerces',
+        'commerces',//5
         'commercesdepth',
         'escalier',
-        'nouveau_sol',//10
+        'nouveau_sol',
         'residences',
-        'RPA',
+        'RPA',//10
         '4x4_shadow',
         'citadine_shadow',
-        'break_shadow',//15
+        'break_shadow',
         'berline_shadow',
-        'kangoo_shadow',
+        'kangoo_shadow',//15
         'sportive_shadow',
         'camionette_shadow',
-        'familiale_shadow',//20
-        'ground'
+        'familiale_shadow',
+        'ground'//19
         ],
     meshes:[//! dont change cars indices
         /*CARS*/
             {//0
-                geometry:13,
-                map:10,
+                geometry:11,
+                map:8,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_4x4'
             },
             {//1
-                geometry:14,
-                map:10,
+                geometry:12,
+                map:8,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_citadine'
             },
             {//2
-                geometry:15,
-                map:10,
+                geometry:13,
+                map:8,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_break'
             },
             {//3
-                geometry:16,
-                map:10,
+                geometry:14,
+                map:8,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_berline'
             },
             {//4
-                geometry:17,
-                map:10,
+                geometry:15,
+                map:8,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_kangoo'
             },
             {//5
-                geometry:18,
-                map:10,
+                geometry:16,
+                map:8,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_sportive'
             },
             {//6
-                geometry:19,
-                map:10,
+                geometry:17,
+                map:8,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_camionette'
             },
             {//7
-                geometry:20,
-                map:10,
+                geometry:18,
+                map:8,
                 material:linearFilteredSmoothLambertMaterial,
                 name:'cars_familiale'
             },
         {//8
-            geometry:21,
-            map:12,
+            geometry:19,
+            map:10,
             material:new THREE.MeshLambertMaterial(),
             name:'ground'
         },
         {//11
-            geometry:12,
-            map:7,
+            geometry:10,
+            map:5,
             material:unique,
             flatShaded:true,
             name:'RPA',
             steps:[false,false,true]
         },
         {//12
-            geometry:11,
-            map:7,
+            geometry:9,
+            map:5,
             material:unique,
             flatShaded:true,
             name:'residences',
             steps:[false,false,true]
         },
         {//13
-            geometry:10,
-            map:7,
+            geometry:8,
+            map:5,
             material:unique,
             name:'nouveau_sol',
             steps:[false,false,true]
         },
         {//14
-            geometry:9,
-            map:7,
+            geometry:7,
+            map:5,
             material:unique,
             flatShaded:true,
             name:'escalier',
             steps:[false,false,true]
         },
         {//15
-            geometry:8,
+            geometry:6,
             map:undefined,
             material:new THREE.MeshLambertMaterial({
 				color:0xaaaaff,
@@ -142,23 +138,23 @@ var resources = {
             steps:[false,false,true]
         },
         {//16
-            geometry:7,
-            map:6,
+            geometry:5,
+            map:4,
             material:new THREE.MeshLambertMaterial(),
             flatShaded:true,
             name:'commerces',
             steps:[false,false,true]
         },
         {//17
-            geometry:5,
-            map:5,
+            geometry:3,
+            map:3,
             material:new THREE.MeshLambertMaterial(),
             name:'chantier',
             steps:[false,true,false]
         },
         {//18
-            geometry:6,
-            map:4,
+            geometry:4,
+            map:2,
             material:new THREE.MeshLambertMaterial(),
             flatShaded:true,
             name:'chantier1',
@@ -174,30 +170,16 @@ var resources = {
             steps:[true,false,false]
         },
         {//20
-            geometry:3,
-            map:2,
+            geometry:2,
+            map:1,
             material:new THREE.MeshLambertMaterial(),
             flatShaded:true,
             name:'gambetta'
         },
-        {//21
-            geometry:4,
-            map:1,
-            material:new THREE.MeshLambertMaterial(),
-            flatShaded:true,
-            name:'gambetta2'
-        },
         {//22
             geometry:1,
-            map:3,
-            material:new THREE.MeshLambertMaterial(),
-            flatShaded:true,
-            name:'hugo'
-        },
-        {//23
-            geometry:2,
-            map:11,
-            material:new THREE.MeshLambertMaterial({transparent:true}),
+            map:9,
+            material:new THREE.MeshLambertMaterial({transparent:true, alphaTest:.5}),
             flatShaded:true,
             name:'gambettacity'
         }
