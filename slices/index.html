@@ -263,9 +263,8 @@
 						'varying float vSlice;',
 						'void main () {',
 						'	vec3 col = texture2D( map, vUv ).rgb;',
-						'	float blackness;',
-						'	blackness = slice < vSlice ? 0. : col.r + col.g + col.b;',
-						'	gl_FragColor = vec4( col, blackness / 10. );',
+						'	float blackness = slice < vSlice ? 0. : ( col.r + col.g + col.b ) / 10. ;',
+						'	gl_FragColor = vec4( col, blackness );',
 						'}'
 					].join('\n'),
 					uniforms : {
