@@ -46,6 +46,7 @@
 			var ballx, bally, ballz;
 
 			//gui
+			var gui;
 			var effectController = {
 				resolution: 54,
 				strength : 2.5,
@@ -60,6 +61,10 @@
 				grid : true,
 				speeds : false
 			};
+
+			//render
+			var lastPosition = new THREE.Vector3(),
+				distance = new THREE.Vector3();
 
 			setScene();
 
@@ -127,12 +132,18 @@
 			}
 
 			function setGUI () {
-				var gui = new dat.GUI();
+				gui = new dat.GUI();
+				gui.width = 300;
 
-				var help = gui.add( effectController, 'grid' );help.name( 'display grid' );help.listen();help.onChange( function () {
+				var help = gui.add( effectController, 'grid' );help.name( 'Display Grid' );help.listen();help.onChange( function () {
 					effectController.grid ? scene.add( grid ) : scene.remove( grid );
 					camera.update = true;
 				});
+				var h0 = gui.add( effectController, 'cubes' );h0.name( 'Display Density Field' );h0.listen();h0.onChange( function () {
+					effectController.cubes ? scene.add( effect ) : scene.remove( effect );
+					camera.update = true;
+				} );
+
 				var cat = gui.addFolder( 'Catalogs' );
 				var h9 = cat.add( effectController, '_2MASS' );h9.name( '2MASS' );h9.listen();h9.onChange( function () {
 					effectController._2MASS ? scene.add( _2MASS_particles ) : scene.remove( _2MASS_particles );
@@ -144,10 +155,9 @@
 				} );
 				var h11 = cat.add( effectController, '_V8K' );h11.name( 'V8k' );h11.listen();h11.onChange( function () {
 					effectController._V8K ? scene.add( _V8K_particles ) : scene.remove( _V8K_particles );
-					updateCubes();
 					camera.update = true;
 				} );
-				var h12 = cat.add( effectController, 'speeds' );h12.name( 'Radial speeds' );h12.listen();h12.onChange( function () {
+				var h12 = cat.add( effectController, 'speeds' );h12.name( 'V8k Radial Speeds' );h12.listen();h12.onChange( function () {
 					effectController.speeds ? scene.add( flow ) : scene.remove( flow );
 					camera.update = true;
 				} );
@@ -173,12 +183,8 @@
 					camera.update = true;
 				} );
 
-				var mcf = gui.addFolder( 'Density field' );
+				//var mcf = gui.addFolder( 'Density field' );
 
-				var h0 = mcf.add( effectController, 'cubes' );h0.name( 'display' );h0.listen();h0.onChange( function () {
-					effectController.cubes ? scene.add( effect ) : scene.remove( effect );
-					camera.update = true;
-				} );
 				/*var h1 = mcf.add( effectController, 'resolution', 14, 80, 1 );h1.listen();h1.onChange( updateCubes );
 				var h4 = mcf.add( effectController, 'strength', .1, 10 );h4.listen();h4.onChange( updateCubes );
 				var h6 = mcf.add( effectController, 'MCside', 1000, 25000 );h6.name( 'cube edge' );h6.listen();h6.onChange( updateCubes );*/
@@ -426,10 +432,6 @@
 					result[ i ][ 0 ] = parseFloat( arr[ 0 ] ) * Math.PI / 180 + Math.PI / 2;
 					result[ i ][ 1 ] = parseFloat( arr[ 1 ] ) * Math.PI / 180;
 					result[ i ][ 2 ] = parseFloat( arr[ 2 ] );
-
-					if (isNaN(result[i][0]))console.log(arr,i)
-					if (isNaN(result[i][1]))console.log(arr,i)
-					if (isNaN(result[i][2]))console.log(arr,i)
 				}
 				return result;
 			}
@@ -486,7 +488,7 @@
 				camera.update = false;
 
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
-				controls.addEventListener( 'change', function () { camera.update = true; }, false );
+				//controls.addEventListener( 'change', function () { camera.update = true; }, false );
 				controls.enableDamping = true;
 				controls.dampingFactor = .05;
 				controls.rotateSpeed = .07;
@@ -504,9 +506,13 @@
 
 			function animate () {
 				requestAnimationFrame( animate );
+
 				controls.update();
 
-				if ( camera.update ) {
+				distance.subVectors( camera.position, lastPosition );
+				lastPosition.copy( camera.position );
+
+				if ( camera.update || distance.length() > 5 ) {
 					camera.update = false;
 					renderer.render( scene, camera );
 				}
