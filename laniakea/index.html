@@ -67,6 +67,7 @@
 
 			function setScene () {
 				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( innerWidth, innerHeight );
 				document.body.appendChild( renderer.domElement );
 
@@ -120,7 +121,7 @@
 					'font-family:Arial;'+
 					'font-size:13px;'+
 					'margin:16px;';
-				scale.innerHTML = '1 grid unit = 1000 km.s<sup>-1</sup> <br>or 13.7 Mpsec with H<sub>0</sub> = 73 km.s<sup>-1</sup>.Mpsec<sup>-1</sup> <br> which is 45 millions light-years. <br>The cube\'s edges have a length of 50 units <br>= 50 000 km.s<sup>-1</sup> <br>= 685 Mpsec <br>= 2.25 billions light-years <br>= 8% of the diameter of the observable universe';
+				scale.innerHTML = '1 grid unit = 13.7 Mpsec = 45 Mly. <br>1 cube edge = 50 units = 685 Mpsec = 2.25 Gly';
 
 				scaleContainer.appendChild( scale );
 				document.body.appendChild( scaleContainer );
