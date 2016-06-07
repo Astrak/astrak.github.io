@@ -63,8 +63,8 @@
 			};
 
 			//render
-			var lastPosition = new THREE.Vector3(),
-				distance = new THREE.Vector3();
+			var lastPos = new THREE.Vector3(),
+				angle;
 
 			setScene();
 
@@ -386,7 +386,7 @@
 						_2MASS = parse2MASS( xhr.response.split('\n') );
 						create2MASS();
 						setTimeout( function () {
-							document.body.removeChild( progress );
+							//document.body.removeChild( progress );
 							progress = undefined;
 						}, 500);
 					}
@@ -490,7 +490,7 @@
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
 				//controls.addEventListener( 'change', function () { camera.update = true; }, false );
 				controls.enableDamping = true;
-				controls.dampingFactor = .05;
+				controls.dampingFactor = .07;
 				controls.rotateSpeed = .07;
 				controls.maxDistance = 20000;
 				controls.minDistance = 200;
@@ -509,10 +509,10 @@
 
 				controls.update();
 
-				distance.subVectors( camera.position, lastPosition );
-				lastPosition.copy( camera.position );
+				angle = camera.position.angleTo( lastPos );
+				lastPos.copy( camera.position );
 
-				if ( camera.update || distance.length() > 5 ) {
+				if ( camera.update || angle > .0008 ) {
 					camera.update = false;
 					renderer.render( scene, camera );
 				}
