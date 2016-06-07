@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>LANIAKEA</title>
+		<meta name='theme-color' content='#444'/>
+		<meta name='viewport' content='width=device-width, user-scalable=no'/>
+		<style>
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script src='../libs/threer76.js'></script>
+		<script src='../libs/controls/OrbitControlsr76.js'></script>
+		<script src='../libs/MarchingCubes.js'></script>
+		<script src='../libs/dat.gui.js'></script>
+
+		<script>
+			'use strict';
+			
+			//three
+			var scene, renderer, camera, controls, grid;
+
+			//data
+			var _2MASS, _CF2, _V8K;
+			var _2MASS_particles, _CF2_particles, _V8K_particles;
+			var _2MASS_color = new THREE.Color( 0xffffff );
+			var _CF2_color = new THREE.Color( 0xffffff );
+			var _V8K_color = new THREE.Color( 0xffffff );
+			var loaded = 0;
+
+			//marching cubes
+			var balls = [];
+			var effect;
+			var substract = 12, strength = .3;
+			var ballx, bally, ballz;
+
+			//gui
+			var effectController = {
+				resolution: 39,
+				strength : 7.2,
+				MCside : 25000,
+				opacity : .36,
+				particlesSize : 400,
+				depthTest : false,
+				_2MASS : true,
+				_CF2 : true,
+				_V8K : true,
+				cubes : false,
+				grid : false
+			};
+
+			setScene();
+
+			function setScene () {
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( innerWidth, innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				scene = new THREE.Scene();
+
+				setView();
+
+				addMarchingCubes();
+
+				load2MASS();
+				loadCF2();
+				loadV8K();
+
+				addHelpers();
+
+				addInfo();
+
+				animate();
+			}
+
+			function addHelpers () {
+				var helper = new THREE.BoxHelper(
+					new THREE.Mesh(
+						new THREE.BoxGeometry( 50000, 50000, 50000 )
+						)
+					);
+				helper.material.color.setHex( 0x999999 );
+				helper.material.transparent = true;
+				helper.material.blending = THREE.AdditiveBlending;
+				scene.add( helper );
+
+				grid = new THREE.GridHelper( 25000, 1000 );
+				grid.material.color.setHex( 0x999999 );
+				grid.material.transparent = true;
+				grid.material.blending = THREE.AdditiveBlending;
+				if ( effectController.grid ) scene.add( grid );
+			}
+
+			function addInfo () {
+				var scaleContainer = document.createElement( 'div' ), 
+					scale = document.createElement( 'p' );
+
+				scaleContainer.style.cssText = ''+
+					'text-align:center;'+
+					'position:absolute;'+
+					'bottom:0;left:0;'+
+					'background:black;';
+				scale.style.cssText = ''+
+					'color:#bbb;'+
+					'text-align:left;'+
+					'font-family:Arial;'+
+					'font-size:13px;'+
+					'margin:16px;';
+				scale.innerHTML = '1 grid unit = 1000 km.s<sup>-1</sup> <br>or 13.7 Mpsec with H<sub>0</sub> = 73 km.s<sup>-1</sup>.Mpsec<sup>-1</sup> <br> which is 45 millions light-years. <br>The cube\'s edges have a length of 50 units <br>= 50 000 km.s<sup>-1</sup> <br>= 685 Mpsec <br>= 2.25 billions light-years <br>= 8% of the diameter of the observable universe';
+
+				scaleContainer.appendChild( scale );
+				document.body.appendChild( scaleContainer );
+			}
+
+			function setGUI () {
+				var gui = new dat.GUI();
+
+				var help = gui.add( effectController, 'grid' );help.name( 'display grid' );help.listen();help.onChange( function () {
+					effectController.grid ? scene.add( grid ) : scene.remove( grid );
+					camera.update = true;
+				});
+				var cat = gui.addFolder( 'Catalogs' );
+				var h9 = cat.add( effectController, '_2MASS' );h9.name( '2MASS' );h9.listen();h9.onChange( function () {
+					effectController._2MASS ? scene.add( _2MASS_particles ) : scene.remove( _2MASS_particles );
+					updateCubes();
+					camera.update = true;
+				} );
+				var h10 = cat.add( effectController, '_CF2' );h10.name( 'CosmicFlows-2' );h10.listen();h10.onChange( function () {
+					effectController._CF2 ? scene.add( _CF2_particles ) : scene.remove( _CF2_particles );
+					updateCubes();
+					camera.update = true;
+				} );
+				var h11 = cat.add( effectController, '_V8K' );h11.name( 'V8k' );h11.listen();h11.onChange( function () {
+					effectController._V8K ? scene.add( _V8K_particles ) : scene.remove( _V8K_particles );
+					updateCubes();
+					camera.update = true;
+				} );
+
+				var partf = gui.addFolder( 'Particles' );
+
+				var h6 = partf.add( effectController, 'opacity', 0, 1 );h6.listen();h6.onChange( function () {
+					_CF2_particles.material.color.copy( _CF2_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
+					_2MASS_particles.material.color.copy( _2MASS_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
+					_V8K_particles.material.color.copy( _V8K_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
+					camera.update = true;
+				} );
+				var h7 = partf.add( effectController, 'particlesSize', 1, 400, 1 );h7.listen();h7.onChange( function () {
+					_CF2_particles.material.size = effectController.particlesSize;
+					_2MASS_particles.material.size = effectController.particlesSize;
+					_V8K_particles.material.size = effectController.particlesSize;
+					camera.update = true;
+				} );
+				var h8 = partf.add( effectController, 'depthTest' );h8.listen();h8.onChange( function () {
+					_CF2_particles.material.depthTest = effectController.depthTest;
+					_2MASS_particles.material.depthTest = effectController.depthTest;
+					_V8K_particles.material.depthTest = effectController.depthTest;
+					camera.update = true;
+				} );
+
+				var mcf = gui.addFolder( 'Marching Cubes' );
+
+				var h0 = mcf.add( effectController, 'cubes' );h0.name( 'display' );h0.listen();h0.onChange( function () {
+					effectController.cubes ? scene.add( effect ) : scene.remove( effect );
+					camera.update = true;
+				} );
+				var h1 = mcf.add( effectController, 'resolution', 14, 80, 1 );h1.listen();h1.onChange( updateCubes );
+				var h4 = mcf.add( effectController, 'strength', .1, 10 );h4.listen();h4.onChange( updateCubes );
+				var h6 = mcf.add( effectController, 'MCside', 1000, 25000 );h6.name( 'cube edge' );h6.listen();h6.onChange( updateCubes );
+			}
+
+			function updateCubes () {
+				effect.scale.set( effectController.MCside, effectController.MCside, effectController.MCside );
+
+				effect.init( Math.floor( effectController.resolution ) );
+
+				effect.isolation = Math.pow( effectController.MCside * .1, 2 ) * .7;
+
+				effect.reset();
+
+				strength = 1.2 / ( ( Math.sqrt( balls.length ) - 1 ) / 4 + 1 );
+
+				var added = 0;
+
+				if ( effectController._2MASS ) {
+					for ( var i = 0 ; i < balls[ 0 ].length ; i++ ) {
+						if ( ! ( Math.abs( balls[ 0 ][ i ][ 0 ] ) > effectController.MCside || 
+								Math.abs( balls[ 0 ][ i ][ 1 ] ) > effectController.MCside || 
+								Math.abs( balls[ 0 ][ i ][ 1 ] ) > effectController.MCside ) ) {
+							ballx = ( balls[ 0 ][ i ][ 0 ] / effectController.MCside + 1 ) / 2;
+							bally = ( balls[ 0 ][ i ][ 1 ] / effectController.MCside + 1 ) / 2;
+							ballz = ( balls[ 0 ][ i ][ 2 ] / effectController.MCside + 1 ) / 2;
+
+							effect.addBall( ballx, bally, ballz, effectController.strength, 3000 );
+
+							added ++;
+						}
+					}
+				}
+
+				if ( effectController._CF2 ) {
+					for ( var i = 0 ; i < balls[ 1 ].length ; i++ ) {
+						if ( ! ( Math.abs( balls[ 1 ][ i ][ 0 ] ) > effectController.MCside || 
+								Math.abs( balls[ 1 ][ i ][ 1 ] ) > effectController.MCside || 
+								Math.abs( balls[ 1 ][ i ][ 1 ] ) > effectController.MCside ) ) {
+							ballx = ( balls[ 1 ][ i ][ 0 ] / effectController.MCside + 1 ) / 2;
+							bally = ( balls[ 1 ][ i ][ 1 ] / effectController.MCside + 1 ) / 2;
+							ballz = ( balls[ 1 ][ i ][ 2 ] / effectController.MCside + 1 ) / 2;
+
+							effect.addBall( ballx, bally, ballz, effectController.strength, 3000 );
+
+							added ++;
+						}
+					}
+				}
+
+				if ( effectController._V8K ) {
+					for ( var i = 0 ; i < balls[ 2 ].length ; i++ ) {
+						if ( ! ( Math.abs( balls[ 2 ][ i ][ 0 ] ) > effectController.MCside || 
+								Math.abs( balls[ 2 ][ i ][ 1 ] ) > effectController.MCside || 
+								Math.abs( balls[ 2 ][ i ][ 1 ] ) > effectController.MCside ) ) {
+							ballx = ( balls[ 2 ][ i ][ 0 ] / effectController.MCside + 1 ) / 2;
+							bally = ( balls[ 2 ][ i ][ 1 ] / effectController.MCside + 1 ) / 2;
+							ballz = ( balls[ 2 ][ i ][ 2 ] / effectController.MCside + 1 ) / 2;
+
+							effect.addBall( ballx, bally, ballz, effectController.strength, 3000 );
+
+							added ++;
+						}
+					}
+				}
+
+				console.info( 'marching cubes : ' + added + ' influences considered with the new size' );
+
+				camera.update = true;
+			}
+
+			function addMarchingCubes () {
+				setGUI();
+				effect = new THREE.MarchingCubes( effectController.resolution, new THREE.MeshLambertMaterial({
+						color : 0x999999,
+						side : THREE.DoubleSide
+					}));
+
+				if ( effectController.cubes ) scene.add( effect );
+
+				setLighting();
+			}
+
+			function create2MASS () {
+				var positions = [];
+				balls[ 0 ] = [];
+
+				var ra, dec, v;
+
+				for ( var i = 0 ; i < _2MASS.length ; i++ ) {
+					ra = _2MASS[ i ][ 0 ];
+					dec = _2MASS[ i ][ 1 ];
+					v = _2MASS[ i ][ 2 ];
+
+					positions[ i * 3 ] = Math.sin( ra ) * Math.cos( dec ) * v;
+					positions[ i * 3 + 1 ] = Math.sin( dec ) * v;
+					positions[ i * 3 + 2 ] = Math.cos( ra ) * Math.cos( dec ) * v;
+
+					balls[ 0 ].push([
+						positions[ i * 3 ],
+						positions[ i * 3 + 1 ], 
+						positions[ i * 3 + 2 ]
+					]);
+				}
+
+				var g = new THREE.BufferGeometry();
+				g.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( positions ), 3 ) );
+
+				var m = new THREE.PointsMaterial({
+					sizeAttenuation : true,
+					size : effectController.particlesSize,
+					color : new THREE.Color().copy( _2MASS_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
+					depthTest : effectController.depthTest,
+					transparent : true,
+					blending : THREE.AdditiveBlending
+				});
+
+				_2MASS_particles = new THREE.Points( g, m );
+
+				scene.add( _2MASS_particles );
+
+				camera.update = true;
+			}
+
+			function createCF2 () {
+				var positions = [];
+				balls[ 1 ] = [];
+
+				var ra, dec, v;
+
+				for ( var i = 0 ; i < _CF2.length ; i++ ) {
+					ra = _CF2[ i ][ 0 ];
+					dec = _CF2[ i ][ 1 ];
+					v = _CF2[ i ][ 2 ];
+
+					positions[ i * 3 ] = Math.sin( ra ) * Math.cos( dec ) * v;
+					positions[ i * 3 + 1 ] = Math.sin( dec ) * v;
+					positions[ i * 3 + 2 ] = Math.cos( ra ) * Math.cos( dec ) * v;
+
+					balls[ 1 ].push([
+						positions[ i * 3 ],
+						positions[ i * 3 + 1 ], 
+						positions[ i * 3 + 2 ]
+					]);
+				}
+
+				var g = new THREE.BufferGeometry();
+				g.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( positions ), 3 ) );
+
+				var m = new THREE.PointsMaterial({
+					sizeAttenuation : true,
+					size : effectController.particlesSize,
+					color : new THREE.Color().copy( _CF2_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
+					transparent : true,
+					blending : THREE.AdditiveBlending,
+					depthTest : effectController.depthTest
+				});
+
+				_CF2_particles = new THREE.Points( g, m );
+
+				scene.add( _CF2_particles );
+
+				camera.update = true;
+			}
+
+			function createV8K () {
+				var positions = [];
+				balls[ 2 ] = [];
+
+				var ra, dec, v;
+
+				for ( var i = 0 ; i < _V8K.length ; i++ ) {
+					ra = _V8K[ i ][ 0 ];
+					dec = _V8K[ i ][ 1 ];
+					v = _V8K[ i ][ 2 ];
+
+					positions[ i * 3 ] = Math.sin( ra ) * Math.cos( dec ) * v;
+					positions[ i * 3 + 1 ] = Math.sin( dec ) * v;
+					positions[ i * 3 + 2 ] = Math.cos( ra ) * Math.cos( dec ) * v;
+
+					balls[ 2 ].push([
+						positions[ i * 3 ],
+						positions[ i * 3 + 1 ], 
+						positions[ i * 3 + 2 ]
+					]);
+				}
+
+				var g = new THREE.BufferGeometry();
+				g.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( positions ), 3 ) );
+
+				var m = new THREE.PointsMaterial({
+					sizeAttenuation : true,
+					size : effectController.particlesSize,
+					color : new THREE.Color().copy( _V8K_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
+					transparent : true,
+					blending : THREE.AdditiveBlending,
+					depthTest : effectController.depthTest
+				});
+
+				_V8K_particles = new THREE.Points( g, m );
+
+				scene.add( _V8K_particles );
+
+				camera.update = true;
+			}
+
+			function load2MASS () {
+				var xhr = new XMLHttpRequest();
+				var progress = document.createElement( 'span' );
+				document.body.appendChild( progress );
+				progress.style.cssText = ''+
+					'background:#FFB300;'+
+					'height:3px;'+
+					'border-radius:3px;'+
+					'width:0;'+
+					'position:absolute;'+
+					'top:0;left:0;';
+				xhr.onreadystatechange = function ( e ) {
+					if ( xhr.readyState == 4 ) {
+						document.body.removeChild( progress );
+						progress = undefined;
+						_2MASS = parse2MASS( xhr.response.split('\n') );
+						create2MASS();
+						if ( loaded++ === 2 ) updateCubes();
+					}
+				};
+				xhr.onprogress = function ( e ) {
+					progress.style.width = e.loaded / e.total * innerWidth + 'px';
+				}
+				xhr.open( 'GET', 'catalogs/2MASS.txt', true );
+				xhr.send();
+			}
+
+			function loadCF2 () {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function () {
+					if ( xhr.readyState == 4 ) {
+						_CF2 = parseCF2( xhr.response.split('\n') );
+						createCF2();
+						if ( loaded++ === 2 ) updateCubes();
+					}
+				};
+				xhr.open( 'GET', 'catalogs/Cf2.txt', true );
+				xhr.send();
+			}
+
+			function loadV8K () {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function () {
+					if ( xhr.readyState == 4 ) {
+						_V8K = parseV8K( xhr.response.split('\n') );
+						createV8K();
+						if ( loaded++ === 2 ) updateCubes();
+					}
+				};
+				xhr.open( 'GET', 'catalogs/V8k.txt', true );
+				xhr.send();				
+			}
+
+			function parse2MASS ( dat ) {
+				var arr = [], 
+					result = [];
+				for ( var i = 0 ; i < dat.length ; i++ ) {
+					arr = dat[ i ].split( '\t' );
+					result[ i ] = [];
+					result[ i ][ 0 ] = parseFloat( arr[ 0 ] ) * Math.PI / 180 + Math.PI / 2;
+					result[ i ][ 1 ] = parseFloat( arr[ 1 ] ) * Math.PI / 180;
+					result[ i ][ 2 ] = parseFloat( arr[ 2 ] );
+
+					if (isNaN(result[i][0]))console.log(arr,i)
+					if (isNaN(result[i][1]))console.log(arr,i)
+					if (isNaN(result[i][2]))console.log(arr,i)
+				}
+				return result;
+			}
+
+			function parseCF2 ( dat ) {
+				var arr = [], result = [],
+					ra = [], dec = [],
+					hour = Math.PI / 12, minute = hour / 60, second = minute / 60;
+
+				for ( var i = 0 ; i < dat.length ; i++ ) {
+					arr = dat[ i ].split( '\t' );
+					result[ i ] = [];
+
+					ra = arr[ 0 ].split( 'h' );//ra = ['xx','xxmxx.xs' ]
+					ra[ 2 ] = ra[ 1 ].split( 'm' )[ 1 ].split( 's' )[ 0 ];//ra = ['xx', 'xxmxx.xs', 'xx.x']
+					ra[ 1 ] = ra[ 1 ].split( 'm' )[ 0 ];
+					result[ i ][ 0 ] = ra[ 0 ] * hour + ra[ 1 ] * minute + ra[ 2 ] * second + Math.PI / 2;
+
+					dec = arr[ 1 ].split( 'd' );//dec = ['+-xx', 'xxmxxs']
+					dec[ 0 ] = parseFloat( dec[ 0 ] ) * Math.PI / 180;
+					dec[ 2 ] = dec[ 1 ].split( 'm' )[ 1 ].split( 's' )[ 0 ];
+					dec[ 1 ] = dec[ 1 ].split( 'm' )[ 0 ];
+					result[ i ][ 1 ] = dec[ 0 ] + dec[ 1 ] * minute + dec[ 2 ] * second;
+
+					result[ i ][ 2 ] = parseFloat( arr[ 2 ] );
+				}
+				return result;
+			}
+
+			function parseV8K ( dat ) {
+				var arr = [], 
+					result = [];
+				for ( var i = 0 ; i < dat.length ; i++ ) {
+					arr = dat[ i ].split( '\t' );
+					result[ i ] = [];
+					result[ i ][ 0 ] = parseFloat( arr[ 2 ] ) * Math.PI / 180 + Math.PI;
+					result[ i ][ 1 ] = parseFloat( arr[ 3 ] ) * Math.PI / 180;
+					result[ i ][ 2 ] = parseFloat( arr[ 5 ] );
+
+					if (isNaN(result[i][0]))console.log(arr,i)
+					if (isNaN(result[i][1]))console.log(arr,i)
+					if (isNaN(result[i][2]))console.log(arr,i)
+				}
+				return result;
+			}
+
+			function setLighting () {
+				var light= new THREE.DirectionalLight( 0xffffff, .6, 50000 );
+				light.position.set( 50000, 30000, -20000 );
+				var ambient = new THREE.AmbientLight( 0x555555 );
+				scene.add( light, ambient );
+			}
+
+			function setView () {
+				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 100, 150000 );
+				camera.position.set( 30000, 36000, 50000 );
+				camera.update = false;
+
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', function () { camera.update = true; }, false );
+				//controls.enableDamping = true;
+				controls.dampingFactor = .05;
+				//controls.rotateSpeed = .07;
+				controls.maxDistance = 75000;
+				controls.minDistance = 200;
+
+				window.addEventListener( 'resize', function () {
+					camera.aspect = innerWidth / innerHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize( innerWidth, innerHeight );
+					camera.update = true;
+				}, false );
+			}
+
+			function animate () {
+				requestAnimationFrame( animate );
+
+				if ( camera.update ) {
+					camera.update = false;
+					renderer.render( scene, camera );
+				}
+			}
+		</script>
+	</body>
+</html>
