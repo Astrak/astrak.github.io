@@ -385,8 +385,10 @@
 					if ( xhr.readyState == 4 ) {
 						_2MASS = parse2MASS( xhr.response.split('\n') );
 						create2MASS();
+						console.log(progress.style.width, innerWidth)
 						progress.style.width = innerWidth + 'px';//in case headers do not specify byte length on the server
 						setTimeout( function () {
+							console.log('removed progress')
 							document.body.removeChild( progress );
 							progress = undefined;
 						}, 500);
