@@ -62,10 +62,6 @@
 				speeds : false
 			};
 
-			//render
-			var lastPos = new THREE.Vector3(),
-				angle;
-
 			setScene();
 
 			function setScene () {
@@ -489,7 +485,7 @@
 				camera.update = false;
 
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
-				//controls.addEventListener( 'change', function () { camera.update = true; }, false );
+				controls.addEventListener( 'change', function () { camera.update = true; }, false );
 				controls.enableDamping = true;
 				controls.dampingFactor = .07;
 				controls.rotateSpeed = .07;
@@ -510,10 +506,7 @@
 
 				controls.update();
 
-				angle = camera.position.angleTo( lastPos );
-				lastPos.copy( camera.position );
-
-				if ( camera.update || angle > .0008 ) {
+				if ( camera.update ) {
 					camera.update = false;
 					renderer.render( scene, camera );
 				}
