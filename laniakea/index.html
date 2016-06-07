@@ -35,12 +35,9 @@
 			var scene, renderer, camera, controls, grid;
 
 			//data
-			var _2MASS, _CF2, _V8K;
+			var _2MASS, _CF2, _V8K, flow;
 			var _2MASS_particles, _CF2_particles, _V8K_particles;
-			var _2MASS_color = new THREE.Color( 0xffffff );
-			var _CF2_color = new THREE.Color( 0xffffff );
-			var _V8K_color = new THREE.Color( 0xffffff );
-			var loaded = 0;
+			var particles_color = new THREE.Color( 0xffffff );
 
 			//marching cubes
 			var balls = [];
@@ -50,17 +47,18 @@
 
 			//gui
 			var effectController = {
-				resolution: 39,
-				strength : 7.2,
-				MCside : 25000,
-				opacity : .36,
-				particlesSize : 400,
+				resolution: 54,
+				strength : 2.5,
+				MCside : 9000,
+				opacity : .64,
+				particlesSize : 45,
 				depthTest : false,
-				_2MASS : true,
-				_CF2 : true,
+				_2MASS : false,
+				_CF2 : false,
 				_V8K : true,
-				cubes : false,
-				grid : false
+				cubes : true,
+				grid : true,
+				speeds : false
 			};
 
 			setScene();
@@ -91,7 +89,7 @@
 			function addHelpers () {
 				var helper = new THREE.BoxHelper(
 					new THREE.Mesh(
-						new THREE.BoxGeometry( 50000, 50000, 50000 )
+						new THREE.BoxGeometry( 16000, 16000, 16000 )
 						)
 					);
 				helper.material.color.setHex( 0x999999 );
@@ -99,7 +97,7 @@
 				helper.material.blending = THREE.AdditiveBlending;
 				scene.add( helper );
 
-				grid = new THREE.GridHelper( 25000, 1000 );
+				grid = new THREE.GridHelper( 8000, 1000 );
 				grid.material.color.setHex( 0x999999 );
 				grid.material.transparent = true;
 				grid.material.blending = THREE.AdditiveBlending;
@@ -121,7 +119,8 @@
 					'font-family:Arial;'+
 					'font-size:13px;'+
 					'margin:16px;';
-				scale.innerHTML = '1 grid unit = 13.7 Mpsec = 45 Mly. <br>1 cube edge = 50 units = 685 Mpsec = 2.25 Gly';
+				scale.innerHTML = '1 grid unit = 13.7 Mpsec = 45 Mly<br>1 cube edge = 16 units = 219 Mpsec = 670 Mly';
+				//scale.innerHTML = '1 grid unit = 1000 km.s<sup>-1</sup> <br>or 13.7 Mpsec with H<sub>0</sub> = 73 km.s<sup>-1</sup>.Mpsec<sup>-1</sup> <br> which is 45 millions light-years. <br>The cube\'s edges have a length of 50 units <br>= 50 000 km.s<sup>-1</sup> <br>= 685 Mpsec <br>= 2.25 billions light-years <br>= 8% of the diameter of the observable universe';
 
 				scaleContainer.appendChild( scale );
 				document.body.appendChild( scaleContainer );
@@ -137,12 +136,10 @@
 				var cat = gui.addFolder( 'Catalogs' );
 				var h9 = cat.add( effectController, '_2MASS' );h9.name( '2MASS' );h9.listen();h9.onChange( function () {
 					effectController._2MASS ? scene.add( _2MASS_particles ) : scene.remove( _2MASS_particles );
-					updateCubes();
 					camera.update = true;
 				} );
 				var h10 = cat.add( effectController, '_CF2' );h10.name( 'CosmicFlows-2' );h10.listen();h10.onChange( function () {
 					effectController._CF2 ? scene.add( _CF2_particles ) : scene.remove( _CF2_particles );
-					updateCubes();
 					camera.update = true;
 				} );
 				var h11 = cat.add( effectController, '_V8K' );h11.name( 'V8k' );h11.listen();h11.onChange( function () {
@@ -150,13 +147,17 @@
 					updateCubes();
 					camera.update = true;
 				} );
+				var h12 = cat.add( effectController, 'speeds' );h12.name( 'Radial speeds' );h12.listen();h12.onChange( function () {
+					effectController.speeds ? scene.add( flow ) : scene.remove( flow );
+					camera.update = true;
+				} );
 
 				var partf = gui.addFolder( 'Particles' );
 
 				var h6 = partf.add( effectController, 'opacity', 0, 1 );h6.listen();h6.onChange( function () {
-					_CF2_particles.material.color.copy( _CF2_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
-					_2MASS_particles.material.color.copy( _2MASS_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
-					_V8K_particles.material.color.copy( _V8K_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
+					_CF2_particles.material.color.copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
+					_2MASS_particles.material.color.copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
+					_V8K_particles.material.color.copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
 					camera.update = true;
 				} );
 				var h7 = partf.add( effectController, 'particlesSize', 1, 400, 1 );h7.listen();h7.onChange( function () {
@@ -172,15 +173,15 @@
 					camera.update = true;
 				} );
 
-				var mcf = gui.addFolder( 'Marching Cubes' );
+				var mcf = gui.addFolder( 'Density field' );
 
 				var h0 = mcf.add( effectController, 'cubes' );h0.name( 'display' );h0.listen();h0.onChange( function () {
 					effectController.cubes ? scene.add( effect ) : scene.remove( effect );
 					camera.update = true;
 				} );
-				var h1 = mcf.add( effectController, 'resolution', 14, 80, 1 );h1.listen();h1.onChange( updateCubes );
+				/*var h1 = mcf.add( effectController, 'resolution', 14, 80, 1 );h1.listen();h1.onChange( updateCubes );
 				var h4 = mcf.add( effectController, 'strength', .1, 10 );h4.listen();h4.onChange( updateCubes );
-				var h6 = mcf.add( effectController, 'MCside', 1000, 25000 );h6.name( 'cube edge' );h6.listen();h6.onChange( updateCubes );
+				var h6 = mcf.add( effectController, 'MCside', 1000, 25000 );h6.name( 'cube edge' );h6.listen();h6.onChange( updateCubes );*/
 			}
 
 			function updateCubes () {
@@ -194,57 +195,19 @@
 
 				strength = 1.2 / ( ( Math.sqrt( balls.length ) - 1 ) / 4 + 1 );
 
-				var added = 0;
-
-				if ( effectController._2MASS ) {
-					for ( var i = 0 ; i < balls[ 0 ].length ; i++ ) {
-						if ( ! ( Math.abs( balls[ 0 ][ i ][ 0 ] ) > effectController.MCside || 
-								Math.abs( balls[ 0 ][ i ][ 1 ] ) > effectController.MCside || 
-								Math.abs( balls[ 0 ][ i ][ 1 ] ) > effectController.MCside ) ) {
-							ballx = ( balls[ 0 ][ i ][ 0 ] / effectController.MCside + 1 ) / 2;
-							bally = ( balls[ 0 ][ i ][ 1 ] / effectController.MCside + 1 ) / 2;
-							ballz = ( balls[ 0 ][ i ][ 2 ] / effectController.MCside + 1 ) / 2;
-
-							effect.addBall( ballx, bally, ballz, effectController.strength, 3000 );
-
-							added ++;
-						}
-					}
-				}
-
-				if ( effectController._CF2 ) {
-					for ( var i = 0 ; i < balls[ 1 ].length ; i++ ) {
-						if ( ! ( Math.abs( balls[ 1 ][ i ][ 0 ] ) > effectController.MCside || 
-								Math.abs( balls[ 1 ][ i ][ 1 ] ) > effectController.MCside || 
-								Math.abs( balls[ 1 ][ i ][ 1 ] ) > effectController.MCside ) ) {
-							ballx = ( balls[ 1 ][ i ][ 0 ] / effectController.MCside + 1 ) / 2;
-							bally = ( balls[ 1 ][ i ][ 1 ] / effectController.MCside + 1 ) / 2;
-							ballz = ( balls[ 1 ][ i ][ 2 ] / effectController.MCside + 1 ) / 2;
-
-							effect.addBall( ballx, bally, ballz, effectController.strength, 3000 );
-
-							added ++;
-						}
-					}
-				}
-
 				if ( effectController._V8K ) {
-					for ( var i = 0 ; i < balls[ 2 ].length ; i++ ) {
-						if ( ! ( Math.abs( balls[ 2 ][ i ][ 0 ] ) > effectController.MCside || 
-								Math.abs( balls[ 2 ][ i ][ 1 ] ) > effectController.MCside || 
-								Math.abs( balls[ 2 ][ i ][ 1 ] ) > effectController.MCside ) ) {
-							ballx = ( balls[ 2 ][ i ][ 0 ] / effectController.MCside + 1 ) / 2;
-							bally = ( balls[ 2 ][ i ][ 1 ] / effectController.MCside + 1 ) / 2;
-							ballz = ( balls[ 2 ][ i ][ 2 ] / effectController.MCside + 1 ) / 2;
+					for ( var i = 0 ; i < balls.length ; i++ ) {
+						if ( ! ( Math.abs( balls[ i ][ 0 ] ) > effectController.MCside || 
+								Math.abs( balls[ i ][ 1 ] ) > effectController.MCside || 
+								Math.abs( balls[ i ][ 1 ] ) > effectController.MCside ) ) {
+							ballx = ( balls[ i ][ 0 ] / effectController.MCside + 1 ) / 2;
+							bally = ( balls[ i ][ 1 ] / effectController.MCside + 1 ) / 2;
+							ballz = ( balls[ i ][ 2 ] / effectController.MCside + 1 ) / 2;
 
-							effect.addBall( ballx, bally, ballz, effectController.strength, 3000 );
-
-							added ++;
+							effect.addBall( ballx, bally, ballz, effectController.strength * balls[ i ][ 3 ] / 2000, 3000 );
 						}
 					}
 				}
-
-				console.info( 'marching cubes : ' + added + ' influences considered with the new size' );
 
 				camera.update = true;
 			}
@@ -263,8 +226,6 @@
 
 			function create2MASS () {
 				var positions = [];
-				balls[ 0 ] = [];
-
 				var ra, dec, v;
 
 				for ( var i = 0 ; i < _2MASS.length ; i++ ) {
@@ -275,12 +236,6 @@
 					positions[ i * 3 ] = Math.sin( ra ) * Math.cos( dec ) * v;
 					positions[ i * 3 + 1 ] = Math.sin( dec ) * v;
 					positions[ i * 3 + 2 ] = Math.cos( ra ) * Math.cos( dec ) * v;
-
-					balls[ 0 ].push([
-						positions[ i * 3 ],
-						positions[ i * 3 + 1 ], 
-						positions[ i * 3 + 2 ]
-					]);
 				}
 
 				var g = new THREE.BufferGeometry();
@@ -289,7 +244,7 @@
 				var m = new THREE.PointsMaterial({
 					sizeAttenuation : true,
 					size : effectController.particlesSize,
-					color : new THREE.Color().copy( _2MASS_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
+					color : new THREE.Color().copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
 					depthTest : effectController.depthTest,
 					transparent : true,
 					blending : THREE.AdditiveBlending
@@ -297,15 +252,13 @@
 
 				_2MASS_particles = new THREE.Points( g, m );
 
-				scene.add( _2MASS_particles );
+				if ( effectController._2MASS ) scene.add( _2MASS_particles );
 
 				camera.update = true;
 			}
 
 			function createCF2 () {
 				var positions = [];
-				balls[ 1 ] = [];
-
 				var ra, dec, v;
 
 				for ( var i = 0 ; i < _CF2.length ; i++ ) {
@@ -316,12 +269,6 @@
 					positions[ i * 3 ] = Math.sin( ra ) * Math.cos( dec ) * v;
 					positions[ i * 3 + 1 ] = Math.sin( dec ) * v;
 					positions[ i * 3 + 2 ] = Math.cos( ra ) * Math.cos( dec ) * v;
-
-					balls[ 1 ].push([
-						positions[ i * 3 ],
-						positions[ i * 3 + 1 ], 
-						positions[ i * 3 + 2 ]
-					]);
 				}
 
 				var g = new THREE.BufferGeometry();
@@ -330,7 +277,7 @@
 				var m = new THREE.PointsMaterial({
 					sizeAttenuation : true,
 					size : effectController.particlesSize,
-					color : new THREE.Color().copy( _CF2_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
+					color : new THREE.Color().copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
 					transparent : true,
 					blending : THREE.AdditiveBlending,
 					depthTest : effectController.depthTest
@@ -338,30 +285,50 @@
 
 				_CF2_particles = new THREE.Points( g, m );
 
-				scene.add( _CF2_particles );
+				if ( effectController._CF2 ) scene.add( _CF2_particles );
 
 				camera.update = true;
 			}
 
 			function createV8K () {
 				var positions = [];
-				balls[ 2 ] = [];
+				var velocities = [], colors = [];
 
-				var ra, dec, v;
+				var ra, dec, v, vel;
 
 				for ( var i = 0 ; i < _V8K.length ; i++ ) {
 					ra = _V8K[ i ][ 0 ];
 					dec = _V8K[ i ][ 1 ];
 					v = _V8K[ i ][ 2 ];
+					vel = _V8K[ i ][ 3 ];
 
-					positions[ i * 3 ] = Math.sin( ra ) * Math.cos( dec ) * v;
-					positions[ i * 3 + 1 ] = Math.sin( dec ) * v;
-					positions[ i * 3 + 2 ] = Math.cos( ra ) * Math.cos( dec ) * v;
+					positions[ i * 3 ] = velocities[ i * 6 ] = Math.sin( ra ) * Math.cos( dec ) * v;
+					positions[ i * 3 + 1 ] = velocities[ i * 6 + 1 ] = Math.sin( dec ) * v;
+					positions[ i * 3 + 2 ] = velocities[ i * 6 + 2 ] = Math.cos( ra ) * Math.cos( dec ) * v;
 
-					balls[ 2 ].push([
+					if ( ( vel - v ) === 0 ) {
+						colors[ i * 6 ] = 0;			colors[ i * 6 + 3 ] = 0;
+						colors[ i * 6 + 1 ] = 0;		colors[ i * 6 + 4 ] = 0;
+						colors[ i * 6 + 2 ] = 0;		colors[ i * 6 + 5 ] = 0;	
+					} else if ( ( vel - v ) < 0 ) {
+						colors[ i * 6 ] = 0;			colors[ i * 6 + 3 ] = 0;
+						colors[ i * 6 + 1 ] = 0;		colors[ i * 6 + 4 ] = 0;
+						colors[ i * 6 + 2 ] = 1;		colors[ i * 6 + 5 ] = 1;
+					} else if ( ( vel - v ) > 0 ) {
+						colors[ i * 6 ] = .5;			colors[ i * 6 + 3 ] = .5;
+						colors[ i * 6 + 1 ] = 0;		colors[ i * 6 + 4 ] = 0;
+						colors[ i * 6 + 2 ] = 0;		colors[ i * 6 + 5 ] = 0;						
+					}
+
+					velocities[ i * 6 + 3 ] = Math.sin( ra ) * Math.cos( dec ) * vel;
+					velocities[ i * 6 + 4 ] = Math.sin( dec ) * vel;
+					velocities[ i * 6 + 5 ] = Math.cos( ra ) * Math.cos( dec ) * vel;
+
+					balls.push([
 						positions[ i * 3 ],
 						positions[ i * 3 + 1 ], 
-						positions[ i * 3 + 2 ]
+						positions[ i * 3 + 2 ],
+						v
 					]);
 				}
 
@@ -371,7 +338,7 @@
 				var m = new THREE.PointsMaterial({
 					sizeAttenuation : true,
 					size : effectController.particlesSize,
-					color : new THREE.Color().copy( _V8K_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
+					color : new THREE.Color().copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
 					transparent : true,
 					blending : THREE.AdditiveBlending,
 					depthTest : effectController.depthTest
@@ -379,7 +346,20 @@
 
 				_V8K_particles = new THREE.Points( g, m );
 
-				scene.add( _V8K_particles );
+				var geo = new THREE.BufferGeometry();
+				geo.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( velocities ), 3 ) );
+				geo.addAttribute( 'color', new THREE.BufferAttribute( new Float32Array( colors ), 3 ) );
+
+				var mat = new THREE.LineBasicMaterial({
+					vertexColors : THREE.VertexColors,
+					blending : THREE.AdditiveBlending,
+					transparent : true
+				})
+
+				flow = new THREE.LineSegments( geo, mat );
+
+				if ( effectController._V8K ) scene.add( _V8K_particles );
+				if ( effectController.speeds ) scene.add( flow );
 
 				camera.update = true;
 			}
@@ -397,11 +377,12 @@
 					'top:0;left:0;';
 				xhr.onreadystatechange = function ( e ) {
 					if ( xhr.readyState == 4 ) {
-						document.body.removeChild( progress );
-						progress = undefined;
 						_2MASS = parse2MASS( xhr.response.split('\n') );
 						create2MASS();
-						if ( loaded++ === 2 ) updateCubes();
+						setTimeout( function () {
+							document.body.removeChild( progress );
+							progress = undefined;
+						}, 500);
 					}
 				};
 				xhr.onprogress = function ( e ) {
@@ -417,7 +398,6 @@
 					if ( xhr.readyState == 4 ) {
 						_CF2 = parseCF2( xhr.response.split('\n') );
 						createCF2();
-						if ( loaded++ === 2 ) updateCubes();
 					}
 				};
 				xhr.open( 'GET', 'catalogs/Cf2.txt', true );
@@ -430,7 +410,7 @@
 					if ( xhr.readyState == 4 ) {
 						_V8K = parseV8K( xhr.response.split('\n') );
 						createV8K();
-						if ( loaded++ === 2 ) updateCubes();
+						updateCubes();
 					}
 				};
 				xhr.open( 'GET', 'catalogs/V8k.txt', true );
@@ -488,10 +468,7 @@
 					result[ i ][ 0 ] = parseFloat( arr[ 2 ] ) * Math.PI / 180 + Math.PI;
 					result[ i ][ 1 ] = parseFloat( arr[ 3 ] ) * Math.PI / 180;
 					result[ i ][ 2 ] = parseFloat( arr[ 5 ] );
-
-					if (isNaN(result[i][0]))console.log(arr,i)
-					if (isNaN(result[i][1]))console.log(arr,i)
-					if (isNaN(result[i][2]))console.log(arr,i)
+					result[ i ][ 3 ] = parseFloat( arr[ 4 ] )
 				}
 				return result;
 			}
@@ -505,16 +482,17 @@
 
 			function setView () {
 				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 100, 150000 );
-				camera.position.set( 30000, 36000, 50000 );
+				camera.position.set( 2400, 3100, -14000 );
 				camera.update = false;
 
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
 				controls.addEventListener( 'change', function () { camera.update = true; }, false );
-				//controls.enableDamping = true;
+				controls.enableDamping = true;
 				controls.dampingFactor = .05;
-				//controls.rotateSpeed = .07;
-				controls.maxDistance = 75000;
+				controls.rotateSpeed = .07;
+				controls.maxDistance = 20000;
 				controls.minDistance = 200;
+				controls.enablePan = false;
 
 				window.addEventListener( 'resize', function () {
 					camera.aspect = innerWidth / innerHeight;
@@ -526,6 +504,7 @@
 
 			function animate () {
 				requestAnimationFrame( animate );
+				controls.update();
 
 				if ( camera.update ) {
 					camera.update = false;
