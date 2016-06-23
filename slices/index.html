@@ -178,6 +178,7 @@
 			function setScene(){
 				renderer = new THREE.WebGLRenderer();
 				renderer.setSize( innerWidth, innerHeight );
+				renderer.setPixelRatio( window.devicePixelRatio * .5 );
 				document.body.appendChild( renderer.domElement );
 				scene = new THREE.Scene();
 
@@ -254,7 +255,7 @@
 						'void main () {',
 						'	vUv = uv;',
 						'	vSlice = sl;',
-						'	gl_Position = modelViewMatrix * vec4( position, 1. ) * projectionMatrix;',
+						'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1. );',
 						'}'
 					].join('\n'),
 					fragmentShader : [

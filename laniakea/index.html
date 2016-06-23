@@ -32,12 +32,13 @@
 			'use strict';
 			
 			//three
-			var scene, renderer, camera, controls, grid;
+			var scene, renderer, camera, controls, grid, helper;
 
 			//data
-			var _2MASS, _CF2, _V8K, flow;
-			var _2MASS_particles, _CF2_particles, _V8K_particles;
+			var _2MASS, _CF2, _V8K, _CF3, flow;
+			var _2MASS_particles, _CF2_particles, _CF3_particles, _V8K_particles;
 			var particles_color = new THREE.Color( 0xffffff );
+			var loaded = 0;
 
 			//marching cubes
 			var balls = [];
@@ -56,10 +57,12 @@
 				depthTest : false,
 				_2MASS : false,
 				_CF2 : false,
-				_V8K : true,
+				_V8K : false,
+				_CF3 : true,
 				cubes : true,
 				grid : true,
-				speeds : false
+				speeds : false,
+				displayParticles : true
 			};
 
 			setScene();
@@ -79,6 +82,7 @@
 				load2MASS();
 				loadCF2();
 				loadV8K();
+				loadCF3();
 
 				addHelpers();
 
@@ -88,7 +92,7 @@
 			}
 
 			function addHelpers () {
-				var helper = new THREE.BoxHelper(
+				helper = new THREE.BoxHelper(
 					new THREE.Mesh(
 						new THREE.BoxGeometry( 16000, 16000, 16000 )
 						)
@@ -131,27 +135,37 @@
 				gui = new dat.GUI();
 				gui.width = 300;
 
-				var help = gui.add( effectController, 'grid' );help.name( 'Display Grid' );help.listen();help.onChange( function () {
-					effectController.grid ? scene.add( grid ) : scene.remove( grid );
+				var help = gui.add( effectController, 'grid' );help.name( 'Display Grid & Box' );help.listen();help.onChange( function () {
+					effectController.grid ? scene.add( grid, helper ) : scene.remove( grid, helper );
 					camera.update = true;
 				});
-				var h0 = gui.add( effectController, 'cubes' );h0.name( 'Display Density Field' );h0.listen();h0.onChange( function () {
-					effectController.cubes ? scene.add( effect ) : scene.remove( effect );
-					camera.update = true;
-				} );
 
 				var cat = gui.addFolder( 'Catalogs' );
 				var h9 = cat.add( effectController, '_2MASS' );h9.name( '2MASS' );h9.listen();h9.onChange( function () {
-					effectController._2MASS ? scene.add( _2MASS_particles ) : scene.remove( _2MASS_particles );
-					camera.update = true;
+					if ( effectController.displayParticles ) {
+						effectController._2MASS ? scene.add( _2MASS_particles ) : scene.remove( _2MASS_particles );
+						camera.update = true;
+					}
 				} );
 				var h10 = cat.add( effectController, '_CF2' );h10.name( 'CosmicFlows-2' );h10.listen();h10.onChange( function () {
-					effectController._CF2 ? scene.add( _CF2_particles ) : scene.remove( _CF2_particles );
-					camera.update = true;
+					if ( effectController.displayParticles ) {
+						effectController._CF2 ? scene.add( _CF2_particles ) : scene.remove( _CF2_particles );
+						camera.update = true;
+					}
+				} );
+				var h13 = cat.add( effectController, '_CF3' );h13.name( 'CosmicFlows-3' );h13.listen();h13.onChange( function () {
+					if ( effectController.displayParticles ) {
+						effectController._CF3 ? scene.add( _CF3_particles ) : scene.remove( _CF3_particles );
+						camera.update = true;
+					}
+					updateCubes();
 				} );
 				var h11 = cat.add( effectController, '_V8K' );h11.name( 'V8k' );h11.listen();h11.onChange( function () {
-					effectController._V8K ? scene.add( _V8K_particles ) : scene.remove( _V8K_particles );
-					camera.update = true;
+					if ( effectController.displayParticles ) {
+						effectController._V8K ? scene.add( _V8K_particles ) : scene.remove( _V8K_particles );
+						camera.update = true;
+					}
+					updateCubes();
 				} );
 				var h12 = cat.add( effectController, 'speeds' );h12.name( 'V8k Radial Speeds' );h12.listen();h12.onChange( function () {
 					effectController.speeds ? scene.add( flow ) : scene.remove( flow );
@@ -163,27 +177,48 @@
 				var h6 = partf.add( effectController, 'opacity', 0, 1 );h6.listen();h6.onChange( function () {
 					_CF2_particles.material.color.copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
 					_2MASS_particles.material.color.copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
+					_CF3_particles.material.color.copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
 					_V8K_particles.material.color.copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) );
 					camera.update = true;
 				} );
 				var h7 = partf.add( effectController, 'particlesSize', 1, 400, 1 );h7.listen();h7.onChange( function () {
 					_CF2_particles.material.size = effectController.particlesSize;
 					_2MASS_particles.material.size = effectController.particlesSize;
+					_CF3_particles.material.size = effectController.particlesSize;
 					_V8K_particles.material.size = effectController.particlesSize;
 					camera.update = true;
 				} );
 				var h8 = partf.add( effectController, 'depthTest' );h8.listen();h8.onChange( function () {
 					_CF2_particles.material.depthTest = effectController.depthTest;
 					_2MASS_particles.material.depthTest = effectController.depthTest;
+					_CF3_particles.material.depthTest = effectController.depthTest;
 					_V8K_particles.material.depthTest = effectController.depthTest;
 					camera.update = true;
 				} );
+				var h14 = partf.add( effectController, 'displayParticles' );h14.name( 'Display Particles' );h14.listen();h14.onChange( function () {
+					if ( effectController.displayParticles ) {
+						if ( effectController._2MASS ) scene.add( _2MASS_particles );
+						if ( effectController._CF2 ) scene.add( _CF2_particles );
+						if ( effectController._CF3 ) scene.add( _CF3_particles );
+						if ( effectController._V8K ) scene.add( _V8K_particles );
+					} else {
+						if ( effectController._2MASS ) scene.remove( _2MASS_particles );
+						if ( effectController._CF2 ) scene.remove( _CF2_particles );
+						if ( effectController._CF3 ) scene.remove( _CF3_particles );
+						if ( effectController._V8K ) scene.remove( _V8K_particles );						
+					}
+					camera.update = true;
+				} );
 
-				//var mcf = gui.addFolder( 'Density field' );
+				var mcf = gui.addFolder( 'Density field' );
 
-				/*var h1 = mcf.add( effectController, 'resolution', 14, 80, 1 );h1.listen();h1.onChange( updateCubes );
+				var h0 = mcf.add( effectController, 'cubes' );h0.name( 'Display Density Field' );h0.listen();h0.onChange( function () {
+					effectController.cubes ? scene.add( effect ) : scene.remove( effect );
+					camera.update = true;				
+				} );
+				var h1 = mcf.add( effectController, 'resolution', 14, 80, 1 );h1.listen();h1.onChange( updateCubes );
 				var h4 = mcf.add( effectController, 'strength', .1, 10 );h4.listen();h4.onChange( updateCubes );
-				var h6 = mcf.add( effectController, 'MCside', 1000, 25000 );h6.name( 'cube edge' );h6.listen();h6.onChange( updateCubes );*/
+				var h6 = mcf.add( effectController, 'MCside', 1000, 25000 );h6.name( 'cube edge' );h6.listen();h6.onChange( updateCubes );
 			}
 
 			function updateCubes () {
@@ -198,15 +233,30 @@
 				strength = 1.2 / ( ( Math.sqrt( balls.length ) - 1 ) / 4 + 1 );
 
 				if ( effectController._V8K ) {
-					for ( var i = 0 ; i < balls.length ; i++ ) {
-						if ( ! ( Math.abs( balls[ i ][ 0 ] ) > effectController.MCside || 
-								Math.abs( balls[ i ][ 1 ] ) > effectController.MCside || 
-								Math.abs( balls[ i ][ 1 ] ) > effectController.MCside ) ) {
-							ballx = ( balls[ i ][ 0 ] / effectController.MCside + 1 ) / 2;
-							bally = ( balls[ i ][ 1 ] / effectController.MCside + 1 ) / 2;
-							ballz = ( balls[ i ][ 2 ] / effectController.MCside + 1 ) / 2;
+					console.log('he')
+					for ( var i = 0 ; i < balls[ 0 ].length ; i++ ) {
+						if ( ! ( Math.abs( balls[ 0 ][ i ][ 0 ] ) > effectController.MCside || 
+								Math.abs( balls[ 0 ][ i ][ 1 ] ) > effectController.MCside || 
+								Math.abs( balls[ 0 ][ i ][ 2 ] ) > effectController.MCside ) ) {
+							ballx = ( balls[ 0 ][ i ][ 0 ] / effectController.MCside + 1 ) / 2;
+							bally = ( balls[ 0 ][ i ][ 1 ] / effectController.MCside + 1 ) / 2;
+							ballz = ( balls[ 0 ][ i ][ 2 ] / effectController.MCside + 1 ) / 2;
 
-							effect.addBall( ballx, bally, ballz, effectController.strength * balls[ i ][ 3 ] / 2000, 3000 );
+							effect.addBall( ballx, bally, ballz, effectController.strength * balls[ 0 ][ i ][ 3 ] / 2000, 3000 );
+						}
+					}
+				}
+
+				if ( effectController._CF3 ) {
+					for ( var i = 0 ; i < balls[ 1 ].length ; i++ ) {
+						if ( ! ( Math.abs( balls[ 1 ][ i ][ 0 ] ) > effectController.MCside || 
+								Math.abs( balls[ 1 ][ i ][ 1 ] ) > effectController.MCside || 
+								Math.abs( balls[ 1 ][ i ][ 2 ] ) > effectController.MCside ) ) {
+							ballx = ( balls[ 1 ][ i ][ 0 ] / effectController.MCside + 1 ) / 2;
+							bally = ( balls[ 1 ][ i ][ 1 ] / effectController.MCside + 1 ) / 2;
+							ballz = ( balls[ 1 ][ i ][ 2 ] / effectController.MCside + 1 ) / 2;
+
+							effect.addBall( ballx, bally, ballz, effectController.strength * balls[ 1 ][ i ][ 3 ] / 2000, 3000 );
 						}
 					}
 				}
@@ -295,6 +345,7 @@
 			function createV8K () {
 				var positions = [];
 				var velocities = [], colors = [];
+				balls[ 0 ] = [];
 
 				var ra, dec, v, vel;
 
@@ -326,7 +377,7 @@
 					velocities[ i * 6 + 4 ] = Math.sin( dec ) * vel;
 					velocities[ i * 6 + 5 ] = Math.cos( ra ) * Math.cos( dec ) * vel;
 
-					balls.push([
+					balls[ 0 ].push([
 						positions[ i * 3 ],
 						positions[ i * 3 + 1 ], 
 						positions[ i * 3 + 2 ],
@@ -362,6 +413,81 @@
 
 				if ( effectController._V8K ) scene.add( _V8K_particles );
 				if ( effectController.speeds ) scene.add( flow );
+
+				camera.update = true;
+			}
+
+			function createCF3 () {
+				var positions = [];
+				var velocities = [], colors = [];
+				balls[ 1 ] = [];
+
+				var ra, dec, v, vel;
+
+				for ( var i = 0 ; i < _CF3.length ; i++ ) {
+					ra = _CF3[ i ][ 0 ];
+					dec = _CF3[ i ][ 1 ];
+					v = _CF3[ i ][ 2 ];
+					//vel = _CF3[ i ][ 3 ];
+
+					positions[ i * 3 ] = /*velocities[ i * 6 ] = */Math.sin( ra ) * Math.cos( dec ) * v;
+					positions[ i * 3 + 1 ] = /*velocities[ i * 6 + 1 ] = */Math.sin( dec ) * v;
+					positions[ i * 3 + 2 ] = /*velocities[ i * 6 + 2 ] = */Math.cos( ra ) * Math.cos( dec ) * v;
+
+					/*if ( ( vel - v ) === 0 ) {
+						colors[ i * 6 ] = 0;			colors[ i * 6 + 3 ] = 0;
+						colors[ i * 6 + 1 ] = 0;		colors[ i * 6 + 4 ] = 0;
+						colors[ i * 6 + 2 ] = 0;		colors[ i * 6 + 5 ] = 0;	
+					} else if ( ( vel - v ) < 0 ) {
+						colors[ i * 6 ] = 0;			colors[ i * 6 + 3 ] = 0;
+						colors[ i * 6 + 1 ] = 0;		colors[ i * 6 + 4 ] = 0;
+						colors[ i * 6 + 2 ] = 1;		colors[ i * 6 + 5 ] = 1;
+					} else if ( ( vel - v ) > 0 ) {
+						colors[ i * 6 ] = .5;			colors[ i * 6 + 3 ] = .5;
+						colors[ i * 6 + 1 ] = 0;		colors[ i * 6 + 4 ] = 0;
+						colors[ i * 6 + 2 ] = 0;		colors[ i * 6 + 5 ] = 0;						
+					}
+
+					velocities[ i * 6 + 3 ] = Math.sin( ra ) * Math.cos( dec ) * vel;
+					velocities[ i * 6 + 4 ] = Math.sin( dec ) * vel;
+					velocities[ i * 6 + 5 ] = Math.cos( ra ) * Math.cos( dec ) * vel;*/
+
+					balls[ 1 ].push([
+						positions[ i * 3 ],
+						positions[ i * 3 + 1 ], 
+						positions[ i * 3 + 2 ],
+						v
+					]);
+				}
+
+				var g = new THREE.BufferGeometry();
+				g.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( positions ), 3 ) );
+
+				var m = new THREE.PointsMaterial({
+					sizeAttenuation : true,
+					size : effectController.particlesSize,
+					color : new THREE.Color().copy( particles_color ).multiplyScalar( Math.pow( effectController.opacity, 4 ) ),
+					transparent : true,
+					blending : THREE.AdditiveBlending,
+					depthTest : effectController.depthTest
+				});
+
+				_CF3_particles = new THREE.Points( g, m );
+
+				/*var geo = new THREE.BufferGeometry();
+				geo.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( velocities ), 3 ) );
+				geo.addAttribute( 'color', new THREE.BufferAttribute( new Float32Array( colors ), 3 ) );
+
+				var mat = new THREE.LineBasicMaterial({
+					vertexColors : THREE.VertexColors,
+					blending : THREE.AdditiveBlending,
+					transparent : true
+				})
+
+				flow = new THREE.LineSegments( geo, mat );*/
+
+				if ( effectController._CF3 ) scene.add( _CF3_particles );
+				//if ( effectController.speeds ) scene.add( flow );
 
 				camera.update = true;
 			}
@@ -407,13 +533,26 @@
 				xhr.send();
 			}
 
+			function loadCF3 () {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function () {
+					if ( xhr.readyState == 4 ) {
+						_CF3 = parseCF3( xhr.response.split('\n') );
+						createCF3();
+						if ( loaded ++ === 1 ) updateCubes();
+					}
+				};
+				xhr.open( 'GET', 'catalogs/CF3.txt', true );
+				xhr.send();				
+			}
+
 			function loadV8K () {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function () {
 					if ( xhr.readyState == 4 ) {
 						_V8K = parseV8K( xhr.response.split('\n') );
 						createV8K();
-						updateCubes();
+						if ( loaded ++ === 1 ) updateCubes();
 					}
 				};
 				xhr.open( 'GET', 'catalogs/V8k.txt', true );
@@ -472,6 +611,19 @@
 				return result;
 			}
 
+			function parseCF3 ( dat ) {
+				var arr = [], 
+					result = [];
+				for ( var i = 0 ; i < dat.length ; i++ ) {
+					arr = dat[ i ].split( '\t' );
+					result[ i ] = [];
+					result[ i ][ 0 ] = parseFloat( arr[ 2 ] ) * Math.PI / 180 + Math.PI;
+					result[ i ][ 1 ] = parseFloat( arr[ 3 ] ) * Math.PI / 180;
+					result[ i ][ 2 ] = ( parseFloat( arr[ 11 ] ) - parseFloat( arr[ 1 ] ) / 80 ) * 80;
+				}
+				return result;
+			}
+
 			function setLighting () {
 				var light= new THREE.DirectionalLight( 0xffffff, .6, 50000 );
 				light.position.set( 50000, 30000, -20000 );
@@ -489,7 +641,7 @@
 				controls.enableDamping = true;
 				controls.dampingFactor = .07;
 				controls.rotateSpeed = .07;
-				controls.maxDistance = 20000;
+				controls.maxDistance = 30000;
 				controls.minDistance = 200;
 				controls.enablePan = false;
 
