@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test</title>
+	<meta name='theme-color' content='#444'>
+	<meta name='viewport' content='width=device-width, user-scalable=no'/>
+	<style>
+		body{
+		    margin:0;
+		    overflow:hidden;
+		}
+		canvas{
+			cursor:grab;
+			cursor:-webkit-grab;
+			cursor:-moz-grab;
+		}
+		canvas:active{
+			cursor:grabbing;
+			cursor:-webkit-grabbing;
+			cursor:-moz-grabbing;
+		}
+	</style>
+</head>
+<body>
+<script src='../../js/threer76.js'></script>
+<script src='../../js/controls/OrbitControlsr76.js'></script>
+<script src='phylslider.js'></script>
+<script type="text/javascript">
+
+	'use strict';
+
+	var camera, scene, renderer, controls, mesh, slider;
+	var gLoader = new THREE.JSONLoader(),
+		tLoader = new THREE.TextureLoader();
+
+
+	var tree = {
+			content:'H. habilis',
+			content0:'Australopithecus',
+			content0X:-23,
+			content0Y:132,
+			mode:'off',
+			xStart:10,
+			yStart:110,
+			xEnd:70,
+			yEnd:85,
+			tween:{
+				tI:[1,0,0,0,0,0,0,0,0,0]
+			},
+			children:[
+				{
+					content:'H. ergaster',
+					xEnd:130,
+					yEnd:60,
+					tween:{
+						tI:[0,1,0,0,0,0,0,0,0,0]
+					},
+					children:[
+						{
+							content:'H. erectus',
+							tween:{
+								tI:[0,0,1,0,0,0,0,0,0,0]
+							},
+							xEnd:190,
+							yEnd:35,
+							children:[
+								{
+									content:'H. floresiensis',
+									tween:{
+										tI:[0,0,0,1,0,0,0,0,0,0]
+									},
+									xEnd:250,
+									yEnd:10
+								}
+							]
+						},
+						{
+							content:'H. antecessor',
+							tween:{
+								tI:[0,0,0,0,1,0,0,0,0,0]
+							},
+							xEnd:190,
+							yEnd:85,
+							children:[
+								{
+									content:'H. heidelbergensis',
+									contentX:110,
+									contentY:-70,
+									xEnd:250,
+									yEnd:60,
+									tween:{
+										tI:[0,0,0,0,0,1,0,0,0,0]
+									},
+									children:[
+										{
+											content:'Denisova<br>(no skull <br>discovered yet)',
+											xEnd:310,
+											yEnd:35,
+											mode:'off',
+											tween:{
+												tI:[0,0,0,0,0,0,1,0,0,0]
+											}
+										},
+										{
+											content:'Neandertal',
+											xEnd:310,
+											yEnd:85,
+											tween:{
+												tI:[0,0,0,0,0,0,0,1,0,0]
+											}
+										}
+									]
+								},
+								{
+									content:'H. rhodesiensis',
+									xEnd:250,
+									yEnd:110,
+									tween:{
+										tI:[0,0,0,0,0,0,0,0,1,0]
+									},
+									children:[
+										{
+											content:'Sapiens',
+											xEnd:310,
+											yEnd:135,
+											tween:{
+												tI:[0,0,0,0,0,0,0,0,0,1]
+											}
+										}
+									]
+								}
+							]
+						},
+						
+					]
+				}
+			]
+		};
+
+	setScene();
+
+	function setScene () {
+		renderer = new THREE.WebGLRenderer();
+		//renderer.setClearAlpha(0);
+		renderer.setSize( innerWidth, innerHeight );
+		document.body.appendChild( renderer.domElement );
+
+		scene = new THREE.Scene();
+
+		setView();
+
+		setLighting();
+
+		setPhylSlider();
+
+		makeSkulls();
+	}
+
+	function setView () {
+		camera = new THREE.PerspectiveCamera( 30, innerWidth / innerHeight, 1, 100 );
+		camera.position.x = 45;
+		camera.update = false;
+
+		controls = new THREE.OrbitControls( camera, renderer.domElement );
+		controls.addEventListener( 'change', update, false );
+		controls.enableDamping = true;
+		controls.enablePan = false;
+		controls.enableZoom = false;
+		controls.dampingFactor = .05;
+		controls.rotateSpeed = .07;
+		controls.target.set( 0, -3, 0 );
+
+		window.addEventListener( 'resize', function () {
+			renderer.setSize( innerWidth, innerHeight );
+			camera.aspect = innerWidth / innerHeight;
+			camera.updateProjectionMatrix();
+			camera.update = true;
+		}, false );
+	}
+
+	function makeSkulls () {
+		gLoader.load( 'evol.js', function ( g ) {
+			g.computeMorphNormals();
+
+			var t = tLoader.load( 'normals.png', update );
+			var t2 = tLoader.load( 'noise.jpg', update );
+
+			mesh = new THREE.Mesh( g, new THREE.MeshPhongMaterial({
+				color : 0xffcc99,
+				normalMap : t,
+				specularMap : t2,
+				map : t2,
+				morphTargets : true,
+				morphNormals : true,
+				shininess : 50,
+				specular : 0x444444
+			}));
+			mesh.receiveShadow = mesh.castShadow = true;
+			scene.add( mesh );
+			camera.update = true;
+			renderer.shadowMap.needsUpdate = true;
+			animate();
+		});
+	}
+
+	function update () { camera.update = true; }
+
+	function setLighting () {
+		var light1 = new THREE.PointLight( 0xffffff, 1, 20 );
+		light1.position.set(5,5,10);
+		var light4 = new THREE.PointLight( 0xffffff, 1, 30 );
+		light4.position.set( 0, -8, -15 );
+		var ambient = new THREE.AmbientLight( 0x444444 );
+		scene.add( light1, light4, ambient );
+
+		light1.castShadow = light4.castShadow = renderer.shadowMap.enabled = true;
+		renderer.shadowMapWidth = renderer.shadowMapHeight = 2048;
+		renderer.shadowMap.autoUpdate = false;
+	}
+
+	function setPhylSlider () {
+		slider = new PhylSlider({
+			tree:tree,
+			width:340,
+			height:145,
+			fontSize:20,
+			fontFamily:'Arial',
+			bezier:false,
+			color:'#333',
+			colorOff:'#222',
+			strokeWidth:8,
+			switchableStyle:false,
+			callback:function ( tween ) {
+				if ( mesh ) mesh.morphTargetInfluences = tween.tI;
+				camera.update = renderer.shadowMap.needsUpdate = true;
+			}
+		});
+
+		slider.setThumb( 'H. habilis' );
+
+		document.body.appendChild( slider.slider );
+		slider.slider.style.position = 'absolute';
+
+		var meta = document.querySelector( "meta[name='viewport']" ),
+			prop = meta.getAttribute( 'content' ).split( ',' ),
+			cacheI;
+
+		for ( var i = 0 ; i < prop.length ; i++ ) if ( prop[ i ].indexOf( 'width' ) > -1 ) cacheI = i;
+
+		var updateWidth = function () {
+			window.removeEventListener( 'resize', updateWidth, false );
+			if ( innerWidth > innerHeight && innerHeight < slider.height * 3 ) {
+				slider.slider.style.left = '95%';
+				slider.slider.style.top = '50%';
+				slider.slider.style.marginTop = -slider.height / 2 + 'px';
+				slider.slider.style.marginLeft = -slider.totalWidth + 'px';
+				prop[ cacheI ] = 'width=' + ( 2 * slider.totalWidth + 30 );
+				meta.setAttribute( 'content', prop.join( ',' ) );
+			} else {
+				slider.slider.style.left = '50%';
+				slider.slider.style.top = '95%';
+				slider.slider.style.marginTop = -slider.height + 'px';
+				slider.slider.style.marginLeft = -slider.totalWidth / 2 + 'px';
+				prop[ cacheI ] = 'width=' + ( slider.totalWidth + 30 );
+				meta.setAttribute( 'content', prop.join( ',' ) );
+			}
+			setTimeout( function () { window.addEventListener( 'resize', updateWidth, false ); }, 0 );
+		};
+
+		updateWidth();
+
+		window.addEventListener( 'resize', updateWidth, false );
+		//window.addEventListener( 'orientationchange', updateWidth, false );
+	}
+
+	function animate () {
+		requestAnimationFrame( animate );
+		controls.update();
+
+		if ( camera.update ) {
+			renderer.render( scene, camera );
+			camera.update = false;
+		}
+	}
+
+</script>
+</body>
+</html>

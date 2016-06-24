@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>VOLUME RENDERING</title>
+		<meta name='theme-color' content='#444'/>
+		<meta name='viewport' content='width=device-width, user-scalable=no'/>
+		<style>
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+			/*SPEED SLIDER*/
+				div.slider-container{
+					position:absolute;
+					left:50%;
+					margin-left:-100px;
+					width:200px;
+					height:60px;
+					bottom:20px;
+				}
+				span.slider-range{
+					position:absolute;
+					left:50%;top:50%;
+					margin-left:-50%;
+					margin-top:-4px;
+					width:100%;
+					height:8px;
+					border-radius:2px;
+					background:#FFB300;
+				}
+				span.slider-thumb{
+					left:50px;
+				    background:#444;
+				    box-shadow:0px 0px 10px black;
+					margin-bottom:7px;
+					width:50px;height:50px;
+					border-radius:50%;
+					margin-left:-50px;
+					position:absolute;
+					margin-top:-21px;/*25-4 of slider-range margin-top*/
+				}
+				p.slider-thumb-content{
+					position:absolute;
+					color:#FFB300;
+					font:bold 25px Arial;
+					top:50%;left:50%;
+					padding:0;
+					margin:-15px 0px 0px -10px;
+				}
+				input{
+				    position:absolute;
+				    bottom:-2px;
+				    opacity:0;
+				    cursor:pointer;
+				 	-webkit-appearance: none; 
+				    width:200px;
+				    height:60px;
+				    left:50%;
+				    margin-left:-100px;
+					background:none;
+					border:none;
+				}
+
+			/**********************************/
+			/** SLIDER STYLE FROM CSS TRICKS **/
+			/**********************************/
+
+			/* the real slider is hidden on top of 
+			the visible range and thumb that let 
+			display the value inside the latter */
+
+			/** 1. REMOVE AUTOMATIC STYLES **/
+				input[type=range]::-webkit-slider-thumb {
+				  -webkit-appearance: none;
+				}
+				input[type=range]:focus {
+				  outline: none;
+				}
+				input[type=range]::-ms-track {
+				  cursor: pointer;
+				  background: transparent; /* Hides the slider so custom styles can be added */
+				  border-color: transparent;
+				  color: transparent;
+				}
+
+			/** 2. THE THUMB **/
+				input[type=range]::-webkit-slider-thumb {
+				  -webkit-appearance: none;
+				  height: 50px;
+				  width: 50px;
+				  border-radius: 50%;
+				  background: #444;
+				  margin-top: -21px; /* needed in Chrome, not in Firefox and IE */
+				  box-shadow:0px 0px 10px #000;
+				}
+				input[type=range]::-moz-range-thumb {
+				  height: 50px;
+				  width: 50px;
+				  border-radius: 50%;
+				  background: #444;
+				  box-shadow:0px 0px 10px #000;
+				  border:none;
+				}
+				input[type=range]::-ms-thumb {
+				  height: 50px;
+				  width: 50px;
+				  border-radius: 50%;
+				  background: #444;
+				  box-shadow:0px 0px 10px #000;
+				  border:none;
+				}
+
+			/** 3. THE TRACK **/
+				input[type=range]::-webkit-slider-runnable-track {
+				  width: 100%;
+				  height: 8.4px;
+				  background: #FFB300;
+				  border-radius: 1.3px;
+				}
+				input[type=range]:focus::-webkit-slider-runnable-track {
+				  background: #FFB300;
+				}
+				input[type=range]::-moz-range-track {
+				  width: 100%;
+				  height: 8.4px;
+				  background: #FFB300;
+				  border-radius: 1.3px;
+				}
+				input[type=range]::-ms-track {
+				  width: 100%;
+				  height: 8.4px;
+				  background: transparent;
+				  border-color: transparent;
+				  border-width: 16px 0;
+				  color: transparent;
+				}
+				input[type=range]::-ms-fill-lower {
+				  background: #FFB300;
+				  border-radius: 2.6px;
+				}
+				input[type=range]:focus::-ms-fill-lower {
+				  background: #FFB300;
+				}
+				input[type=range]::-ms-fill-upper {
+				  background: #FFB300;
+				  border-radius: 2.6px;
+				}
+				input[type=range]:focus::-ms-fill-upper {
+				  background: #FFB300;
+				}
+		</style>
+	</head>
+	<body>
+
+		<script src='../../js/threer76.js'></script>
+		<script src='../../js/controls/OrbitControlsr76.js'></script>
+
+		<script>
+			'use strict';
+			
+			var scene, renderer, camera, controls;
+			var material, geometry, mesh;
+			var tLoader = new THREE.TextureLoader();
+			
+			setScene();
+			animate();
+
+			function setScene(){
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( innerWidth, innerHeight );
+				renderer.setPixelRatio( window.devicePixelRatio * .5 );
+				document.body.appendChild( renderer.domElement );
+				scene = new THREE.Scene();
+
+				setView();
+
+				createSlices();
+
+				setSlider();
+			}
+
+			function setView () {
+				camera = new THREE.PerspectiveCamera( 40, innerWidth / innerHeight, 1, 100 );
+				camera.position.set( -8.5, 4.9, -3.7 );
+				camera.update = false;
+
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', function () { camera.update = true; }, false );
+				controls.enableDamping = true;
+				controls.enablePan = controls.enableZoom = false;
+				controls.dampingFactor = .05;
+				controls.rotateSpeed = .07;
+				controls.minPolarAngle = controls.maxPolarAngle = 1.2;
+
+				window.addEventListener( 'resize', function () {
+					renderer.setSize( innerWidth, innerHeight );
+					camera.aspect = innerWidth / innerHeight;
+					camera.updateProjectionMatrix();
+					camera.update = true;
+				}, false );
+			}
+
+			function setSlider () {
+				//1. Appearance
+
+				//container
+				var sliderContainer=document.createElement('div');
+				sliderContainer.className='slider-container';
+				document.body.appendChild(sliderContainer);
+
+				//fake slider
+				var sliderRange=document.createElement('span');
+				sliderRange.className='slider-range';
+				sliderContainer.appendChild(sliderRange);
+
+				var sliderThumb=document.createElement('span');
+				sliderThumb.className='slider-thumb';
+				sliderRange.appendChild(sliderThumb);
+
+				//real slider
+				var slider=document.createElement('input');
+			    slider.type='range';
+			    slider.min=0;slider.max=1;slider.step = 1 / ( 16 * 16 );
+			    slider.value=0;
+			    sliderContainer.appendChild(slider);
+
+			    //2. Event listener
+
+			    var range=slider.max-slider.min;
+
+			    slider.addEventListener('input',function(){
+			    	if ( mesh ) mesh.material.uniforms.slice.value = 1 - slider.value;
+					sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
+					camera.update = true;
+			    },false);
+			}
+
+			function createSlices () {
+				geometry = createGeometry();
+				material = new THREE.ShaderMaterial({
+					vertexShader : [
+						'varying vec2 vUv;',
+						'varying float vSlice;',
+						'attribute float sl;',
+						'void main () {',
+						'	vUv = uv;',
+						'	vSlice = sl;',
+						'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1. );',
+						'}'
+					].join('\n'),
+					fragmentShader : [
+						'uniform sampler2D map;',
+						'uniform float slice;',
+						'varying vec2 vUv;',
+						'varying float vSlice;',
+						'void main () {',
+						'	vec3 col = texture2D( map, vUv ).rgb;',
+						'	float blackness = slice < vSlice ? 0. : ( col.r + col.g + col.b ) / 10. ;',
+						'	gl_FragColor = vec4( col, blackness );',
+						'}'
+					].join('\n'),
+					uniforms : {
+						map : { type: 't', value : tLoader.load( 'slices.jpg', function () { camera.update = true; } ) },
+						slice : { type : 'f', value : 1 }
+					},
+					transparent : true,
+					side : THREE.FrontSide
+				});
+				mesh = new THREE.Mesh( geometry, material );
+				mesh.position.y = .4;
+				scene.add( mesh );
+			}
+
+			function createGeometry () {
+				var position = [],
+					uvs = [],
+					sliceIndex = [],
+					indices = [];
+
+				var side = 5;
+
+				for ( var i = 0 ; i < 16 * 16 ; i++ ) {
+					position[ i * 12 ] = position[ i * 12 + 2 ] = position[ i * 12 + 3 ] = position[ i * 12 + 8 ] = - side / 2;
+					position[ i * 12 + 1 ] = position[ i * 12 + 4 ] = position[ i * 12 + 7 ] = position[ i * 12 + 10 ] = ( - side / 2 + side * i / ( 16 * 16 ) ) * 1.4;
+					position[ i * 12 + 6 ] = position[ i * 12 + 9 ] = side / 2;
+					position[ i * 12 + 5 ] = position[ i * 12 + 11 ] = 1.5 * side / 2; 
+
+					uvs[ i * 8 ] = uvs[ i * 8 + 2 ] = ( i % 16 ) / 16 + .001;
+					uvs[ i * 8 + 1 ] = uvs[ i * 8 + 5 ] = 1 - Math.floor( i / 16 ) / 16 - .001;
+					uvs[ i * 8 + 3 ] = uvs[ i * 8 + 7 ] = 15 / 16 - Math.floor( i / 16 ) / 16 + .004;
+					uvs[ i * 8 + 4 ] = uvs[ i * 8 + 6 ] = ( i % 16 ) / 16 + 1 / 16 - .001;
+
+					sliceIndex[ i * 4 ] = sliceIndex[ i * 4 + 1 ] = sliceIndex[ i * 4 + 2 ] = sliceIndex[ i * 4 + 3 ] = i / ( 16 * 16 );
+
+					indices[ i * 6 ] = i * 4;			indices[ i * 6 + 3 ] = i * 4 + 2;
+					indices[ i * 6 + 1 ] = i * 4 + 1;	indices[ i * 6 + 4 ] = i * 4 + 1;
+					indices[ i * 6 + 2 ] = i * 4 + 2;	indices[ i * 6 + 5 ] = i * 4 + 3;
+				}
+
+				var g = new THREE.BufferGeometry();
+
+				var p = new Float32Array( position );
+				g.addAttribute( 'position', new THREE.BufferAttribute( p, 3 ) );
+
+				var uv = new Float32Array( uvs );
+				g.addAttribute( 'uv', new THREE.BufferAttribute( uv, 2 ) );
+
+				var sliceI = new Float32Array( sliceIndex );
+				g.addAttribute( 'sl', new THREE.BufferAttribute( sliceI, 1 ) );
+
+				var ind = new Uint32Array( indices );
+				g.setIndex( new THREE.BufferAttribute( ind, 1 ) );
+
+				return g;
+			}
+
+			function animate () {
+				requestAnimationFrame( animate );
+				controls.update();
+
+				if ( camera.update ) {
+					renderer.render( scene, camera );
+					camera.update = false;
+				}
+			}
+		</script>
+	</body>
+</html>

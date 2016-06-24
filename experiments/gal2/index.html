@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Galaxy experiment</title>
+	<style>
+		body {
+			margin:0;
+			overflow:hidden;
+		}
+		#preview{
+			position:absolute;
+			top:50px;left:0;
+			margin-top:20px;
+			margin-left:20px;
+		}
+	</style>
+</head>
+<body>
+	<canvas id='main'></canvas>
+	<canvas id='preview'></canvas>
+
+	<script src='../../js/three.js'></script>
+	<script src='../../js/controls/OrbitControls.js'></script>
+	<script src='../../js/stats.min.js'></script>
+	<script src='../../js/dat.gui.js'></script>
+
+	<script id='vShader' type='x-vertex/x-shader'>
+		uniform float gasRatio;
+	  	uniform float size;
+		uniform float pixelRatio;
+		uniform float gasRadiusRatio;
+		attribute vec3 color;
+		varying vec3 vPosition;
+		varying vec3 vColor;
+		void main(){
+			vColor = color;
+			vPosition = position;
+			float gasRadius = ( .5 + distance( position, vec3(.0))*gasRadiusRatio);
+			vec4 mvPosition = modelViewMatrix * vec4( position, 1. );
+			gl_PointSize = pixelRatio * gasRadius * size / length( mvPosition.xyz );
+			gl_Position = mvPosition * projectionMatrix;
+		}
+	</script>
+	<script id='fShader' type='x-fragment/x-shader'>
+		uniform float gasRatio;
+		uniform float colorAmount;
+		uniform float luminosity;
+		uniform sampler2D tex;
+		uniform float useTex;
+		varying vec3 vPosition;
+		varying vec3 vColor;
+		void main(){
+			if(useTex==0.){
+				float a = distance( gl_PointCoord, vec2(.5) );
+				float starlook = - ( a - .5 ) * 1.2 * gasRatio; 
+				float gaslook = ( 1. - gasRatio ) / ( a * 10. );
+				float look = starlook + gaslook; 
+				gl_FragColor = vec4( vColor * .0002, 1. ) * look * ( 1. - a * .35 );
+			}else{
+				gl_FragColor = texture2D(tex,gl_PointCoord.xy)*vec4(vColor*colorAmount,1.)*luminosity;
+			}
+		}
+	</script>
+
+	<script>
+		'use strict';
+		
+		var scene,renderer,camera,controls, stats;
+		var galaxy, galMat, galGeo, galData;
+		var sources = [
+			'milky.jpg',
+			'ngc1365.jpg'
+		];
+		var params = {
+			points:10000,
+			pointSize:2.5,
+			gasRatio:.5,
+			source:0,
+			useTex:false,
+			luminosity:.3,
+			colorAmount:.02,
+			gasRadiusRatio:0
+		};
+
+		var preview = document.getElementById('preview'),
+			ctx = preview.getContext('2d');
+		
+		setScene();
+		animate();
+
+		function setScene(){
+			renderer=new THREE.WebGLRenderer({canvas:document.getElementById('main')});
+			renderer.setSize(innerWidth,innerHeight);
+			document.body.appendChild(renderer.domElement);
+			scene=new THREE.Scene();
+			camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,1,1000);
+			camera.position.set( 0, 100, 0 );
+			controls=new THREE.OrbitControls(camera,renderer.domElement);
+			controls.enableDamping=true;
+			controls.dampingFactor=.05;
+			controls.rotateSpeed=.07;
+			controls.maxPolarAngle=2;
+
+			getTexture();
+
+			addInteraction();
+
+			addStats();
+		}
+
+		function addStats () {
+			stats = new Stats();
+			stats.setMode( 0 );
+			stats.domElement.style.cssText = ''+
+				'position : absolute;'+
+				'left : 0; top : 0;';
+			document.body.appendChild( stats.domElement );
+		}
+
+		function createGalGeo ( ) {
+			if (galGeo !== undefined)galGeo.dispose();
+			galGeo = new THREE.BufferGeometry();
+			var vertices = [],
+				colors = [];
+
+			for ( var i = 0 ; i < params.points ; i++ ) {
+				var x = Math.random() * preview.width, fx = Math.floor( x ),distx = fx * 2 - preview.width,
+					y = Math.random() * preview.height, fy = Math.floor( y ),disty = fy * 2 - preview.height,
+					index = fy * preview.height + fx,
+					R = galData[ index * 4 ],
+					G = galData[ index * 4 + 1 ],
+					B = galData[ index * 4 + 2 ],
+					av = ( R + G + B ) / 3, 
+					dist = Math.sqrt(distx*distx+disty*disty);
+				if ( av > Math.random() * 255 * ( 1 + dist * params.gasRadiusRatio )) {
+					vertices[ i * 3 ] = ( x - preview.width / 2 ) * 2 * 20 / preview.width;
+					vertices[ i * 3 + 1 ] = ( Math.random() * 2 - 1) * av / 255 * 1.2 * ( 1 + 5*(Math.random() - .5));
+					vertices[ i * 3 + 2 ] = ( preview.height / 2 - y ) * 2 * 20 / preview.height;
+					colors[ i * 3 ] = R;
+					colors[ i * 3 + 1 ] = G;
+					colors[ i * 3 + 2 ] = B;
+				} else {
+					i--;
+				}
+			}
+
+			galGeo.addAttribute('position',new THREE.BufferAttribute(new Float32Array( vertices ), 3 ));
+			galGeo.addAttribute('color',new THREE.BufferAttribute(new Float32Array( colors ), 3 ));
+
+			createGalaxy();
+		}
+
+		function addInteraction () {
+			var gui = new dat.GUI();
+			var s = gui.add(params, 'source', {Milky1:0,NGC1365:1});s.onChange( getTexture );
+			var pP = gui.add(params, 'points', 0, 100000);pP.step(1);pP.onChange( createGalGeo );
+			var pS = gui.add(params, 'pointSize', 0, 2.5);pS.onChange( function () {
+				galaxy.material.uniforms.size.value = params.pointSize;
+			} );
+			var ch = gui.add(params, 'useTex' );ch.onChange( function () {
+				galaxy.material.uniforms.useTex.value = params.useTex ? 1 : 0;
+			} );
+			var c = gui.add(params, 'luminosity', 0, .5 );c.onChange( function () {
+				galaxy.material.uniforms.luminosity.value = params.luminosity;
+			} );
+			var cA = gui.add(params, 'colorAmount', 0, .1 );cA.onChange( function () {
+				galaxy.material.uniforms.colorAmount.value = params.colorAmount;
+			} );
+			var cA = gui.add(params, 'gasRadiusRatio', 0, 1 );cA.onChange( function () {
+				galaxy.material.uniforms.gasRadiusRatio.value = params.gasRadiusRatio;
+				createGalGeo();
+			} );
+		}
+
+		function createGalaxy () {
+			if ( galMat === undefined ) {
+				galMat = new THREE.ShaderMaterial({
+					vertexShader:document.getElementById('vShader').textContent,
+					fragmentShader:document.getElementById('fShader').textContent,
+					uniforms:{
+						pixelRatio:{type:'f',value:innerHeight},
+						size:{type:'f',value:params.pointSize},
+						gasRatio:{type:'f',value:params.gasRatio},
+						tex:{type:'t',value:new THREE.TextureLoader().load('star2.png')},
+						useTex:{type:'f',value:params.useTex ? 1 : 0},
+						colorAmount:{type:'f',value:params.colorAmount},
+						gasRadiusRatio:{type:'f',value:params.gasRadiusRatio},
+						luminosity:{type:'f',value:params.luminosity}
+					},
+					transparent:true,
+					depthTest:false,
+					blending : THREE.AdditiveBlending
+				});
+			}
+			if ( galaxy !== undefined ) {
+				scene.remove(galaxy);
+				galaxy.geometry.dispose();
+				galaxy.material.dispose();
+				galaxy=null;
+			}
+			galaxy = new THREE.Points( galGeo, galMat );
+			scene.add( galaxy );
+		}
+
+		function getTexture () {
+			var img = new Image();
+			img.onload = function () {
+				var ratio = 200 / Math.max( 200, Math.max( img.width, img.height ) );
+				preview.width = img.width * ratio;
+				preview.height = img.height * ratio;
+				ctx.drawImage( img, 0, 0, preview.width, preview.height);
+				if (galData!==undefined)galData=undefined;
+				galData = ctx.getImageData( 0, 0, preview.width, preview.height ).data;
+				createGalGeo( );
+			};
+			img.src = sources[ params.source ];
+		}
+
+		function animate () {
+			stats.update();
+			controls.update();
+			requestAnimationFrame( animate );
+			renderer.render(scene, camera)
+		}
+	</script>
+</body>
+</html>

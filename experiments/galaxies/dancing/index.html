@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<head>
+	<title>Hubble deep field</title>
+	<meta name='viewport' content='width=device-width,user-scalable=no'/>
+</head>
+<body style="margin:0;overflow:hidden;background:url('opo0416c.jpg');background-size:100% auto; ">
+	<a class=twitter href="http://twitter.com/home?status=%23Hubble%20A%20definitive%20proof%20of%20advanced%20life%2C%20billions%20of%20light%20years%20from%20us%20!%20astrak.github.io%2Fgalaxies%2Fdancing%2Findex.html%0A" style='position:absolute; bottom:10px;right:10px;font-family:Arial;color:#33c;margin-right:-500px;transition:margin-right 500ms ease;' target='_blank'>Share on twitter !</a>
+	<script src='../../../js/three.js'></script>
+	<script src='../../../js/controls/TrackballControls.js'></script>
+
+	<script id='vShader' type='x-vertex/x-shader'>
+		uniform float f0;
+		uniform float f1;
+		uniform float f2;
+		uniform float f3;
+		uniform float f4;
+		uniform float f5;
+		uniform float f6;
+		uniform float f7;
+		uniform float f8;
+		uniform float f9;
+		uniform float size;
+		uniform float pixelRatio;
+
+		varying vec3 vPosition;
+		varying float gas;
+		varying float val;
+
+		void main(){
+
+			vPosition=position;
+
+			//find angle in rad
+			float tenth=.628;
+			float x=position.x;
+			float y=position.y;
+			float angle=atan(y/x);
+			if(x>.0){
+				if(y<.0)angle=6.28+angle;
+			}else{
+				angle=3.14+angle;
+			}
+			if(f0>.0){
+				if(angle<tenth)								val=.015*(f0-7.);
+				if(angle>=tenth && angle<2.*tenth)			val=.05*(f1-255.);
+				if(angle>=2.*tenth && angle<3.*tenth)		val=.028*(f2-230.);
+				if(angle>=3.*tenth && angle<4.*tenth)		val=.028*(f3-200.);
+				if(angle>=4.*tenth && angle<5.*tenth)		val=.028*(f4-205.);
+				if(angle>=5.*tenth && angle<6.*tenth)		val=.028*(f5-215.);
+				if(angle>=6.*tenth && angle<7.*tenth)		val=.028*(f6-195.);
+				if(angle>=7.*tenth && angle<8.*tenth)		val=.028*(f7-195.);
+				if(angle>=8.*tenth && angle<9.*tenth)		val=.028*(f8-161.);
+				if(angle>=9.*tenth && angle<10.*tenth)		val=.008*(f9-130.);
+
+				vPosition*=1.+val;
+			}
+			vec4 mvPosition=modelViewMatrix*vec4(vPosition,1.);
+			gl_Position=mvPosition*projectionMatrix;
+
+			//pointsize = f(gas)
+			gas=sin(-length(position)/20.);
+			if(gas<0.)gas=0.;
+			gl_PointSize=pixelRatio*size*(1.+gas*2.)/length(mvPosition.xyz);
+
+		}
+
+	</script>
+	<script id='fShader' type='x-fragment/x-shader'>
+		uniform float f9;
+		uniform float time;
+
+		varying vec3 vPosition;
+		varying float gas;
+		varying float val;
+
+		void main(){
+
+			//progressive blue color
+			float a=.0045*length(vPosition);
+			if(a<.32)a=.32;
+
+			//general look
+			float b=distance(gl_PointCoord,vec2(.5));
+			float c=-(b-.5)*.8*gas+(1.-gas)/(b*10.);//=star size decrease with 'gas' + gas size increase with 'gas'
+
+			float d=.05*(f9-70.);
+
+					gl_FragColor=vec4(.22,.22,a,1.)*c; 
+			if(f9>0.)gl_FragColor=vec4(.32*(1.-d*(1.+cos(time/60.))),.32*(1.+d*(1.+cos(time/20.+1.57))),a,1.)*c*.8; 
+
+		}
+
+	</script>
+
+	<script id='simplevShader' type='x-vertex/x-shader'>
+		uniform float size;
+		uniform float pixelRatio;
+
+		varying vec3 vPosition;
+		varying float gas;
+		varying float val;
+
+		void main(){
+
+			vPosition=position;
+
+			vec4 mvPosition=modelViewMatrix*vec4(vPosition,1.);
+			gl_Position=mvPosition*projectionMatrix;
+
+			//pointsize = f(gas)
+			gas=sin(-length(position)/20.);
+			if(gas<0.)gas=0.;
+			gl_PointSize=pixelRatio*size*(1.+gas*1.)/length(mvPosition.xyz);
+
+		}
+
+	</script>
+	<script id='simplefShader' type='x-fragment/x-shader'>
+
+		varying vec3 vPosition;
+		varying float gas;
+		varying float val;
+
+		void main(){
+
+			//progressive blue color
+			float a=.01*length(vPosition);
+			if(a<.32)a=.32;
+
+			//general look
+			float b=distance(gl_PointCoord,vec2(.5));
+			float c=-(b-.5)*.9*gas+(1.-gas)/(b*20.);//=star size decrease with 'gas' + gas size increase with 'gas'
+
+			gl_FragColor=vec4(a,.22*(1.+a*2.7),.22,1.)*c; 
+
+		}
+
+	</script>
+
+	<script id='simplevShader2' type='x-vertex/x-shader'>
+		uniform float size;
+		uniform float pixelRatio;
+
+		varying vec3 vPosition;
+		varying float gas;
+		varying float val;
+
+		void main(){
+
+			vPosition=position;
+
+			vec4 mvPosition=modelViewMatrix*vec4(vPosition,1.);
+			gl_Position=mvPosition*projectionMatrix;
+
+			//pointsize = f(gas)
+			gas=sin(-length(position)/20.);
+			if(gas<0.)gas=0.;
+			gl_PointSize=pixelRatio*size*(1.+gas*1.)/length(mvPosition.xyz);
+
+		}
+
+	</script>
+	<script id='simplefShader2' type='x-fragment/x-shader'>
+
+		varying vec3 vPosition;
+		varying float gas;
+		varying float val;
+
+		void main(){
+
+			//progressive blue color
+			float a=.0065*length(vPosition);
+			if(a<.32)a=.32;
+
+			//general look
+			float b=distance(gl_PointCoord,vec2(.5));
+			float c=-(b-.5)*.9*gas+(1.-gas)/(b*20.);//=star size decrease with 'gas' + gas size increase with 'gas'
+
+			gl_FragColor=vec4(.22*(1.+a*.2),.22,a*.7,1.)*c; 
+
+		}
+
+	</script>
+
+	<script>
+		var time=0;
+		setScene()
+		function newGalaxy (_n, _axis1, _axis2, _armsAngle, _bulbSize, _ellipticity){
+			var n=(typeof _n === 'undefined')?5000:_n;
+			var axis1=(typeof _axis1 === 'undefined')?(60+Math.random()*20):_axis1;
+			var axis2=(typeof _axis2 === 'undefined')?(axis1+30+Math.random()*40):_axis2;
+			var maja,mina;
+			axis1>axis2?(maja=axis1,mina=axis2):
+			axis1==axis2?(maja=axis1+1,mina=axis2):(maja=axis2,mina=axis1);
+			var armsAngle=(typeof _armsAngle === 'undefined')?((Math.random()*2-1)>0?1:-1)*12+3:_armsAngle;
+			var bulbSize=(typeof _bulbSize === 'undefined')?Math.random()*.7:_bulbSize>1?1:_bulbSize<0?0:_bulbSize;
+			var ellipticity=(typeof _ellipticity === 'undefined')?.2+Math.random()*.2:_ellipticity>1?1:_ellipticity<0?0:_ellipticity;
+			var stars=[];
+			for(var i=0;i<n;i++){
+				var dist=Math.random();
+				var angle=(dist-bulbSize)*armsAngle;
+
+				//ellipse parameters
+				var a=maja*dist;
+				var b=mina*dist;
+				var e=Math.sqrt(a*a-b*b)/a;
+				var phi=ellipticity*Math.PI/2*(1-dist)*(Math.random()*2-1);
+
+				//create point on the ellipse with polar coordinates
+				//1. random angle from the center
+				var theta=Math.random()*Math.PI*2;
+				//2. deduce radius from theta in polar coordinates, from the CENTER of an ellipse, plus variations
+				var radius=Math.sqrt(b*b/(1-e*e*Math.pow(Math.cos(theta),2)))*(1+Math.random()*.1);
+				//3. then shift theta with the angle offset to get arms, outside the bulb
+				if(dist>bulbSize)theta+=angle;
+
+				//convert to cartesian coordinates
+				stars.push({
+				x:Math.cos(phi)*Math.cos(theta)*radius,
+				y:Math.cos(phi)*Math.sin(theta)*radius,
+				z:Math.sin(phi)*radius
+				});
+			}
+			var stars1=new THREE.Geometry();
+			stars1.vertices=stars;
+			return stars1;
+		}
+		function setScene(){
+			/* 1. Loading screen */
+
+			var darkdiv=document.createElement('div');
+			darkdiv.style.cssText='position:absolute;width:100%;height:100%;text-align:center;color:#fff;font-family:Arial;'
+			document.body.appendChild(darkdiv);
+			var loader=document.createElement('p');
+			loader.innerHTML='Hubble just captured this definitive proof of intelligent life.<br/> Billions of light years from us.<br/><br/><span class=loader></span><br/>Loading...';
+			loader.style.cssText='position:relative;top:30%;background:#222;padding:20px;width:50%;margin:auto;'
+			darkdiv.appendChild(loader);
+
+			/*2. Music Part */
+
+			//url
+			var url=window.location.origin + '/galaxies/dancing/Patrick Hernandez - Born to Be Alive.mp3';
+
+			//creates a source, analyser node, connect it to destination
+			var ctx = new AudioContext();
+			var source = ctx.createBufferSource();
+			var volume = ctx.createGain();
+			analyser = ctx.createAnalyser();
+		    analyser.fftSize = 32;
+		    var bufferLength = analyser.frequencyBinCount; 
+		    dataArray = new Uint8Array(bufferLength);
+			source.connect(volume);
+		    volume.connect(analyser);
+		    analyser.connect(ctx.destination);
+
+		    //send request and play
+			var request = new XMLHttpRequest();
+			request.open("GET", url, true);
+			request.responseType = "arraybuffer";
+			request.onprogress=function(e){
+				var span=document.querySelector('.loader');
+				span.style.width=e.loaded/e.total*100+'%';
+				span.style.height='2px';
+				span.style.background='orange';
+				span.style.position='absolute';
+				span.style.left='0';
+			}
+			request.onload = function(e) {
+				ctx.decodeAudioData(	
+					this.response, 
+					function onSuccess(buffer) {
+						source.buffer = buffer;
+						loader.innerHTML='Make sure your volume is on. <br/>Click to play';
+						darkdiv.style.cursor='pointer';
+						darkdiv.onclick=function(){
+							document.body.removeChild(darkdiv);
+							setTimeout(function(){
+								source.start();
+								source.loop=true;
+									var i=0;
+								setInterval(function(){
+									if(i>7)i=0;
+									var positions=[
+										{x:400,y:-150,z:130},
+										{x:400,y:1000,z:300},
+										{x:500,y:-50,z:-130},
+										{x:0,y:100,z:3000},
+										{x:600,y:-100,z:-300},
+										{x:500,y:4000,z:-500},
+										{x:600,y:-100,z:500},
+										{x:-200,y:200,z:-500}
+									]
+									camera.position.copy(positions[i]);
+									i++
+								},7000)
+								renderer.domElement.style.cursor='move';
+							},1000);
+							setTimeout(function(){
+								document.querySelector('a.twitter').style.marginRight='0px';
+							},10000);
+							setTimeout(function(){
+								document.querySelector('a.more').style.marginRight='0px';
+							},15000);
+						}
+					}, 
+					function onFailure() {
+						console.log("Decoding the audio buffer failed");
+					}
+				);
+			};
+			request.send();
+
+			/* 3. 3D Stuff */
+
+			scene=new THREE.Scene();
+			camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.5,10000);
+			camera.position.z=2800;
+			renderTarget=new THREE.WebGLRenderTarget(innerWidth,innerHeight);
+			renderer=new THREE.WebGLRenderer();
+			renderer.setPixelRatio(.8)//so it looks like a zoomed deep field photo
+			renderer.setSize(innerWidth,innerHeight);
+			renderer.setClearColor(0x0000000);
+			document.body.appendChild(renderer.domElement);
+
+			controls=new THREE.TrackballControls(camera,renderer.domElement);
+			controls.rotateSpeed=5;
+			controls.noPan=true;
+			controls.maxDistance=3800;
+
+
+			//deep field
+			var simpleGalaxyMaterial=new THREE.ShaderMaterial({
+				vertexShader:document.getElementById('simplevShader').textContent,
+				fragmentShader:document.getElementById('simplefShader').textContent,
+				uniforms:{
+					size:{type:'f',value:6},
+					pixelRatio:{type:"f",value:innerHeight}
+				},
+				transparent:true,
+				depthTest:false,
+				blending:THREE.AdditiveBlending
+			});
+			var simpleGalaxyMaterial2=new THREE.ShaderMaterial({
+				vertexShader:document.getElementById('simplevShader2').textContent,
+				fragmentShader:document.getElementById('simplefShader2').textContent,
+				uniforms:{
+					size:{type:'f',value:6},
+					pixelRatio:{type:"f",value:innerHeight}
+				},
+				transparent:true,
+				depthTest:false,
+				blending:THREE.AdditiveBlending
+			});
+
+			for(var i=0;i<600;i++){
+				var mesh=new THREE.PointCloud(newGalaxy(2000),Math.random()>.5?simpleGalaxyMaterial:simpleGalaxyMaterial2);
+				scene.add(mesh);
+				mesh.position.set(Math.random()*10000-5000,Math.random()*10000-5000,Math.random()*10000-5000);
+				mesh.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
+				scalerandom=1+(Math.random()-.5)
+				mesh.scale.set(scalerandom,scalerandom,scalerandom)
+			}
+
+			//disco galaxy
+			galaxyMaterial=new THREE.ShaderMaterial({
+				vertexShader:document.getElementById('vShader').textContent,
+				fragmentShader:document.getElementById('fShader').textContent,
+				uniforms:{
+					size:{type:'f',value:5},
+					pixelRatio:{type:"f",value:innerHeight},
+					f0:{type:'f',value:0},
+					f1:{type:'f',value:0},
+					f2:{type:'f',value:0},
+					f3:{type:'f',value:0},
+					f4:{type:'f',value:0},
+					f5:{type:'f',value:0},
+					f6:{type:'f',value:0},
+					f7:{type:'f',value:0},
+					f8:{type:'f',value:0},
+					f9:{type:'f',value:0},
+					time:{type:"f",value:0}
+				},
+				transparent:true,
+				depthTest:false,
+				blending:THREE.AdditiveBlending
+			});
+			galaxy=new THREE.PointCloud(newGalaxy(),galaxyMaterial);
+			scene.add(galaxy);
+			galaxy.rotation.x=-1;
+			galaxy.rotation.z=.2;
+			galaxy.rotation.y=-.4;
+			galaxy.position.set(300,-100,0)
+
+			animate();
+		}
+		function animate(){
+
+			analyser.getByteFrequencyData(dataArray);
+			requestAnimationFrame(animate);
+			renderer.render(scene,camera);
+			var val=(dataArray[9]-75)*.0007;
+			if(dataArray[9]){
+				galaxy.rotation.z+=val;
+				time+=1;
+				galaxyMaterial.uniforms.time.value=time;
+				camera.position.x+=1.
+			}
+			controls.update();
+
+			for(var i = 0; i < 11; i++) {
+				switch(i){
+					case 10 : galaxyMaterial.uniforms.f0.value=dataArray[i];break;
+					case 1 : galaxyMaterial.uniforms.f1.value=dataArray[i];break;
+					case 2 : galaxyMaterial.uniforms.f2.value=dataArray[i];break;
+					case 3 : galaxyMaterial.uniforms.f3.value=dataArray[i];break;
+					case 4 : galaxyMaterial.uniforms.f4.value=dataArray[i];break;
+					case 5 : galaxyMaterial.uniforms.f5.value=dataArray[i];break;
+					case 6 : galaxyMaterial.uniforms.f6.value=dataArray[i];break;
+					case 7 : galaxyMaterial.uniforms.f7.value=dataArray[i];break;
+					case 8 : galaxyMaterial.uniforms.f8.value=dataArray[i];break;
+					case 9 : galaxyMaterial.uniforms.f9.value=dataArray[i];break;
+					default:;break;
+				}
+			}
+		}
+	</script>
+</body>
+</html>
