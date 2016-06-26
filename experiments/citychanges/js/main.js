@@ -138,11 +138,11 @@ function loadScreen () {
 				var m = resources.meshes[ v ], 
 					g = resources.geometries[ m.geometry ];
 
-				var geometry = m.hasOwnProperty( 'flatShaded' ) && m.flatShaded ? new THREE.FlatShadedGeometry( g ) : g;
+				if ( m.hasOwnProperty( 'flatShaded' ) && m.flatShaded ) g.computeFlatVertexNormals();
 
 				m.material.map = resources.textures[ m.map ];
 
-				var mesh = new THREE.Mesh( geometry, m.material );
+				var mesh = new THREE.Mesh( g, m.material );
 				mesh.name = m.name;
 				mesh.userData.map = m.map;
 				if ( m.hasOwnProperty( 'steps' ) ) mesh.userData.steps = m.steps;
