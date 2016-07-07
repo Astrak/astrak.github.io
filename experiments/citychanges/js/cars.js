@@ -7,7 +7,7 @@ var cars = {
 		{mesh:4,name:'kangoo',proba:12},
 		{mesh:5,name:'sportive',proba:2},
 		{mesh:6,name:'camionette',proba:8},
-		{mesh:7,name:'familiale',proba:7},
+		{mesh:7,name:'familiale',proba:7}
     ],
 	streetCars:[
 		{
