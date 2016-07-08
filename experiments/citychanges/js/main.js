@@ -1048,6 +1048,7 @@ function prepareScene () {
 			scene.add( resources.meshes[ i ] );
 		}
 		resources.meshes[ i ].castShadow = resources.meshes[ i ].receiveShadow = true;
+		//resources.meshes[i].material.depthWrite=true;
 	}
 
 	scene.add( treesMesh.low, parkedCarsMesh );
