@@ -248,7 +248,10 @@
 		
 		//main scene & usual stuff
 		renderer=new THREE.WebGLRenderer();
-		renderer.context.getExtension('OES_texture_float');
+		//renderer.context.getExtension('OES_texture_float');
+		console.log('OES_texture_half_float : ', renderer.context.getExtension('OES_texture_half_float'));
+		console.log('OES_texture_float : ', renderer.context.getExtension('OES_texture_float'));
+
 		renderer.setPixelRatio(.8);
 		renderer.setSize(innerWidth,innerHeight);
 		document.body.appendChild(renderer.domElement);
