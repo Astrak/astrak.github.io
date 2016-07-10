@@ -165,11 +165,25 @@
 		<script src='../../js/threer76.js'></script>
 		<script src='../../js/controls/OrbitControlsr76.js'></script>
 		<script src='../../js/shaders/SkyShader.js'></script>
+		<script src='../../js/svd.js'></script>
+		<script src='../../js/posit1-patched.js'></script>
+		<script src='../../js/cv.js'></script>
+		<script src='../../js/aruco.js'></script>
+		<script src='../../js/threex.jsarucomarker.js'></script>
+		<script src='../../js/threex.webcamgrabbing.js'></script>
 
 		<script>
 			'use strict';
+
+			if ( ! MediaStreamTrack.getSources ) 
+				alert('your browser doesn\'t support MediaStreamTrack.getSources()');
+
+			if ( !(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia) ) 
+				alert('your browser doesn\'t support navigator.getUserMedia()');
 			
-			var scene, renderer, camera, controls, sky, sunSphere, light1;
+			var scene, renderer, camera, controls, sky, sunSphere, light1, mesh;
+			var videoGrabbing;
+			var jsArucoMarker;
 
 			var jLoader = new THREE.JSONLoader();
 			var tLoader = new THREE.TextureLoader();
@@ -177,27 +191,27 @@
 			setScene();
 
 			function setScene () {
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer({alpha:true});
 				renderer.setSize( innerWidth, innerHeight );
 				document.body.appendChild( renderer.domElement );
 
 				scene = new THREE.Scene();
 
-				initSky();
+				//initSky();
 
-				setLighting();
+				//setLighting();
 
 				setView();
 
-				jLoader.load( 'main.json', function ( g ) {
+				jLoader.load( '../atka/model.json', function ( g ) {
 					g.computeFlatVertexNormals();
-					var mesh = new THREE.Mesh(
+					mesh = new THREE.Mesh(
 						g, 
 						new THREE.MeshLambertMaterial({
 							color:0xaaaaaa,
-							side:THREE.FrontSide,
-							envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
-							map:tLoader.load('tex.png')
+							//side:THREE.FrontSide,
+							//envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
+							//map:tLoader.load('tex.png')
 						})
 						);
 					mesh.receiveShadow = mesh.castShadow = true;
@@ -219,7 +233,14 @@
 					camera.update = true;
 				});*/
 
-				setSlider();
+				//setSlider();
+
+				// init the marker recognition
+				jsArucoMarker = new THREEx.JsArucoMarker();
+
+				videoGrabbing = new THREEx.WebcamGrabbing()
+				jsArucoMarker.videoScaleDown = 2;
+				document.body.appendChild( videoGrabbing.domElement );
 
 				animate();
 			}
@@ -344,12 +365,20 @@
 
 			function animate () {
 				requestAnimationFrame( animate );
-				controls.update();
-
-				if ( camera.update ) {
-					renderer.render( scene, camera );
-					camera.update = false;
+				//controls.update();
+				
+				if ( typeof mesh !== 'undefined' ) {
+					var domElement = videoGrabbing.domElement;
+					var markers	= jsArucoMarker.detectMarkers(domElement);
+					mesh.visible=false;
+					markers.forEach( function ( marker ) {
+						// if( marker.id !== 265 )	return;
+						jsArucoMarker.markerToObject3D( marker, mesh );
+						mesh.visible=true;
+					});
 				}
+
+				renderer.render( scene, camera );
 			}
 		</script>
 	</body>
