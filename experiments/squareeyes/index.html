@@ -197,7 +197,7 @@
 							color:0xaaaaaa,
 							side:THREE.FrontSide,
 							//envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
-							map:tLoader.load('tex.png')
+							map:tLoader.load('tex1.png')
 						})
 						);
 					mesh.receiveShadow = mesh.castShadow = true;
@@ -324,7 +324,7 @@
 			}
 
 			function setView () {
-				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 1, 2000 );
+				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, .1, 1200 );
 				camera.position.z = 15;
 				camera.update = false;
 
