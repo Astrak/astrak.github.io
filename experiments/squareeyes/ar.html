@@ -199,7 +199,7 @@
 
 				//initSky();
 
-				//setLighting();
+				setLighting();
 
 				setView();
 
@@ -208,13 +208,23 @@
 					mesh = new THREE.Mesh(
 						g, 
 						new THREE.MeshLambertMaterial({
-							color:0xaaaaaa,
+							color:0xaaaacc,
 							//side:THREE.FrontSide,
 							//envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
 							//map:tLoader.load('tex.png')
 						})
 						);
 					mesh.receiveShadow = mesh.castShadow = true;
+					mesh.rotation.x=Math.PI/2;
+					mesh.scale.set(.3,.3,.3);
+					mesh.updateMatrix();
+
+					mesh.geometry.applyMatrix( mesh.matrix );
+
+					mesh.position.set( 0, 0, 0 );
+					mesh.rotation.set( 0, 0, 0 );
+					mesh.scale.set( 1, 1, 1 );
+					mesh.updateMatrix();
 					scene.add( mesh );
 					renderer.shadowMap.needsUpdate = true;
 					camera.update = true;
