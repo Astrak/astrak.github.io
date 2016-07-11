@@ -206,18 +206,18 @@
 					camera.update = true;
 				});
 
-				/*jLoader.load( 'windows.json', function ( g ) {
+				jLoader.load( 'windows.json', function ( g ) {
 					var windows = new THREE.Mesh(
 						g,
 						new THREE.MeshBasicMaterial({
 							color:0xddddff,
 							envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
-							side:THREE.FrontSide
+							side:THREE.DoubleSide
 						}));
 					scene.add( windows );
 					windows.receiveShadow = true;
 					camera.update = true;
-				});*/
+				});
 
 				setSlider();
 
@@ -307,16 +307,14 @@
 			function setLighting () {
 				light1 = new THREE.DirectionalLight( 0xffffff, 3 );
 				light1.position.set(-20,5,5);
-				var light2 = new THREE.DirectionalLight( 0xffcc33, 1 );
-				light2.position.set(-20,10,-15);
-				var ambient = new THREE.AmbientLight( 0x666666 );
-				scene.add( light1, ambient, light2 );
+				var ambient = new THREE.AmbientLight( 0x999999 );
+				scene.add( light1, ambient);
 
 				light1.shadow.mapSize.set( 2048, 2048 );
-				light1.shadow.camera.right = 7;
-				light1.shadow.camera.top = 5;
-				light1.shadow.camera.left = -5;
-				light1.shadow.camera.bottom = -1;
+				light1.shadow.camera.right = 9;
+				light1.shadow.camera.top = 8;
+				light1.shadow.camera.left = -16;
+				light1.shadow.camera.bottom = -2;
 
 				light1.castShadow = renderer.shadowMap.enabled = true;
 				renderer.shadowMap.autoUpdate = false;
