@@ -192,6 +192,7 @@
 
 			function setScene () {
 				renderer = new THREE.WebGLRenderer({alpha:true});
+				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( innerWidth, innerHeight );
 				document.body.appendChild( renderer.domElement );
 
@@ -203,7 +204,7 @@
 
 				setView();
 
-				jLoader.load( '../atka/model.json', function ( g ) {
+				jLoader.load( 'main.json', function ( g ) {
 					g.computeFlatVertexNormals();
 					mesh = new THREE.Mesh(
 						g, 
@@ -211,7 +212,7 @@
 							color:0xaaaacc,
 							//side:THREE.FrontSide,
 							//envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
-							//map:tLoader.load('tex.png')
+							map:tLoader.load('tex1.png')
 						})
 						);
 					mesh.receiveShadow = mesh.castShadow = true;
