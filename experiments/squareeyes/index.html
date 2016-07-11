@@ -39,7 +39,7 @@
 					background:#FFB300;
 				}
 				span.slider-thumb{
-					left:200px;
+					left:51px;
 				    background:#444;
 				    box-shadow:0px 0px 10px black;
 					margin-bottom:7px;
@@ -170,6 +170,7 @@
 			'use strict';
 			
 			var scene, renderer, camera, controls, sky, sunSphere, light1;
+			var slider;
 
 			var jLoader = new THREE.JSONLoader();
 			var tLoader = new THREE.TextureLoader();
@@ -213,7 +214,9 @@
 						new THREE.MeshBasicMaterial({
 							color:0xddddff,
 							envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
-							side:THREE.DoubleSide
+							side:THREE.DoubleSide,
+							transparent:true,
+							opacity:.4
 						}));
 					scene.add( windows );
 					windows.receiveShadow = true;
@@ -257,10 +260,10 @@
 				sliderRange.appendChild(sliderThumb);
 
 				//real slider
-				var slider=document.createElement('input');
+				slider=document.createElement('input');
 			    slider.type='range';
-			    slider.min=0;slider.max=1;slider.step=0.001;
-			    slider.value=0;
+			    slider.min=0;slider.max=.5;slider.step=0.001;
+			    slider.value=.003;
 			    sliderContainer.appendChild(slider);
 
 			    //2. Event listener
@@ -268,7 +271,7 @@
 			    var range=slider.max-slider.min;
 
 			    slider.addEventListener('input',function(){
-			    	updateSky( this.value + 1, .9 );
+			    	updateSky( .2, this.value);
 					sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
 					camera.update = renderer.shadowMap.needsUpdate = true;
 			    },false);
@@ -281,8 +284,8 @@
 				scene.add( sky.mesh );
 
 				//set parameters
-				var inclination = 0.72;
-				var azimuth = 0.9;
+				var inclination = .2;
+				var azimuth = .003;
 				sky.uniforms.turbidity.value = 10;
 				sky.uniforms.reileigh.value = 2;
 				sky.uniforms.luminance.value = 1;
@@ -306,16 +309,17 @@
 			}
 
 			function setLighting () {
-				light1 = new THREE.DirectionalLight( 0xffffff, 3 );
-				light1.position.set(-20,5,5);
+				light1 = new THREE.DirectionalLight( 0xffffff, 2 );
+				light1.position.copy( sunSphere );
 				var ambient = new THREE.AmbientLight( 0x999999 );
 				scene.add( light1, ambient);
 
 				light1.shadow.mapSize.set( 2048, 2048 );
-				light1.shadow.camera.right = 9;
-				light1.shadow.camera.top = 8;
+				light1.shadow.camera.right = 10;
+				light1.shadow.camera.top = 9;
 				light1.shadow.camera.left = -16;
-				light1.shadow.camera.bottom = -2;
+				light1.shadow.camera.bottom = -12;
+				//light1.shadow.bias=.001;
 
 				light1.castShadow = renderer.shadowMap.enabled = true;
 				renderer.shadowMap.autoUpdate = false;
@@ -324,7 +328,7 @@
 
 			function setView () {
 				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, .1, 1200 );
-				camera.position.z = 15;
+				camera.position.set(6.36,.93,-4.43);
 				camera.update = false;
 
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
