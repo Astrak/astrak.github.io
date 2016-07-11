@@ -182,6 +182,7 @@
 				alert('your browser doesn\'t support navigator.getUserMedia()');
 			
 			var scene, renderer, camera, controls, sky, sunSphere, light1, mesh;
+			var windows;
 			var videoGrabbing;
 			var jsArucoMarker;
 
@@ -198,11 +199,23 @@
 
 				scene = new THREE.Scene();
 
-				//initSky();
-
 				setLighting();
 
 				setView();
+
+				jLoader.load( 'windows.json', function ( g ) {
+					windows = new THREE.Mesh(
+						g,
+						new THREE.MeshBasicMaterial({
+							color:0x999999,
+							envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
+							side:THREE.DoubleSide,
+							transparent:true,
+							opacity:.4
+						}));
+					windows.receiveShadow = true;
+					camera.update = true;
+				});
 
 				jLoader.load( 'main_triangulated.json', function ( g ) {
 					g.computeFlatVertexNormals();
@@ -215,12 +228,14 @@
 							map:tLoader.load('tex1.png')
 						})
 						);
+					mesh.add( windows );
 					mesh.receiveShadow = mesh.castShadow = true;
 					mesh.rotation.x=Math.PI/2;
 					mesh.scale.set(.3,.3,.3);
 					mesh.updateMatrix();
 
 					mesh.geometry.applyMatrix( mesh.matrix );
+					windows.geometry.applyMatrix( mesh.matrix );
 
 					mesh.position.set( 0, 0, 0 );
 					mesh.rotation.set( 0, 0, 0 );
@@ -230,23 +245,6 @@
 					renderer.shadowMap.needsUpdate = true;
 					camera.update = true;
 				});
-
-				jLoader.load( 'windows.json', function ( g ) {
-					var windows = new THREE.Mesh(
-						g,
-						new THREE.MeshBasicMaterial({
-							color:0x999999,
-							envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
-							side:THREE.DoubleSide,
-							transparent:true,
-							opacity:.4
-						}));
-					scene.add( windows );
-					windows.receiveShadow = true;
-					camera.update = true;
-				});
-
-				//setSlider();
 
 				// init the marker recognition
 				jsArucoMarker = new THREEx.JsArucoMarker();
@@ -258,103 +256,11 @@
 				animate();
 			}
 
-			function updateSky ( i, a ) {
-				var distance = 1000, lightDistance = 10;
-				var theta = Math.PI * ( i - 0.5 );
-				var phi = 2 * Math.PI * ( a - 0.5 );
-				sunSphere.position.x = distance * Math.cos( phi );
-				sunSphere.position.y = distance * Math.sin( phi ) * Math.sin( theta );
-				sunSphere.position.z = distance * Math.sin( phi ) * Math.cos( theta );
-				light1.position.x = lightDistance * Math.cos( phi );
-				light1.position.y = lightDistance * Math.sin( phi ) * Math.sin( theta );
-				light1.position.z = lightDistance * Math.sin( phi ) * Math.cos( theta );
-				sky.uniforms.sunPosition.value.copy( sunSphere.position );
-				renderer.shadowMap.needsUpdate = true;
-			}
-
-			function setSlider(){
-				//1. Appearance
-
-				//container
-				var sliderContainer=document.createElement('div');
-				sliderContainer.className='slider-container';
-				document.body.appendChild(sliderContainer);
-
-				//fake slider
-				var sliderRange=document.createElement('span');
-				sliderRange.className='slider-range';
-				sliderContainer.appendChild(sliderRange);
-
-				var sliderThumb=document.createElement('span');
-				sliderThumb.className='slider-thumb';
-				sliderRange.appendChild(sliderThumb);
-
-				//real slider
-				var slider=document.createElement('input');
-			    slider.type='range';
-			    slider.min=0;slider.max=1;slider.step=0.001;
-			    slider.value=0;
-			    sliderContainer.appendChild(slider);
-
-			    //2. Event listener
-
-			    var range=slider.max-slider.min;
-
-			    slider.addEventListener('input',function(){
-			    	updateSky( this.value + 1, .9 );
-					sliderThumb.style.left=(((slider.value-slider.min)/range)*150+50)+'px';
-					camera.update = renderer.shadowMap.needsUpdate = true;
-			    },false);
-			}
-
-			function initSky () {
-
-				// Add Sky Mesh
-				sky = new THREE.Sky();
-				scene.add( sky.mesh );
-
-				//set parameters
-				var inclination = 0.72;
-				var azimuth = 0.9;
-				sky.uniforms.turbidity.value = 10;
-				sky.uniforms.reileigh.value = 2;
-				sky.uniforms.luminance.value = 1;
-				sky.uniforms.mieCoefficient.value = 0.005;
-				sky.uniforms.mieDirectionalG.value = 0.99;
-
-				// Add Sun Helper
-				var distance = 1000;
-				var theta = Math.PI * ( inclination - 0.5 );
-				var phi = 2 * Math.PI * ( azimuth - 0.5 );
-				sunSphere = new THREE.Mesh(
-					new THREE.SphereGeometry( 200, 16, 8 ),
-					new THREE.MeshBasicMaterial( { color: 0xffffff } )
-				);
-				sunSphere.position.x = distance * Math.cos( phi );
-				sunSphere.position.y = distance * Math.sin( phi ) * Math.sin( theta );
-				sunSphere.position.z = distance * Math.sin( phi ) * Math.cos( theta );
-				sunSphere.visible = false;
-				sky.uniforms.sunPosition.value.copy( sunSphere.position );
-				//scene.add( sunSphere );
-			}
-
 			function setLighting () {
 				light1 = new THREE.DirectionalLight( 0xffffff, 3 );
 				light1.position.set(-20,5,5);
-				var light2 = new THREE.DirectionalLight( 0xffcc33, 1 );
-				light2.position.set(-20,10,-15);
 				var ambient = new THREE.AmbientLight( 0x666666 );
-				scene.add( light1, ambient, light2 );
-
-				light1.shadow.mapSize.set( 2048, 2048 );
-				light1.shadow.camera.right = 7;
-				light1.shadow.camera.top = 5;
-				light1.shadow.camera.left = -5;
-				light1.shadow.camera.bottom = -1;
-
-				light1.castShadow = renderer.shadowMap.enabled = true;
-				renderer.shadowMap.autoUpdate = false;
-				renderer.shadowMap.needsUpdate = true;
+				scene.add( light1, ambient);
 			}
 
 			function setView () {
