@@ -191,7 +191,7 @@
 
 				setView();
 
-				jLoader.load( 'main.json', function ( g ) {
+				jLoader.load( 'main_triangulated.json', function ( g ) {
 					g.computeFlatVertexNormals();
 					var mesh = new THREE.Mesh(
 						g, 
@@ -212,7 +212,7 @@
 					var windows = new THREE.Mesh(
 						g,
 						new THREE.MeshBasicMaterial({
-							color:0xddddff,
+							color:0x999999,
 							envMap:new THREE.CubeTextureLoader().load(['sky.png','sky.png','sky.png','sky.png','sky.png','sky.png']),
 							side:THREE.DoubleSide,
 							transparent:true,
