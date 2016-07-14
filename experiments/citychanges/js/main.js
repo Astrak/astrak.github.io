@@ -169,7 +169,7 @@ function loadScreen () {
 			if ( tCounter === resources.textures.length ) {
 				for ( var i = 0 ; i < resources.meshes.length ; i++ ) {
 					if ( resources.meshes[ i ].userData.hasOwnProperty( 'map' ) ) {
-		            	if ( [ 2, 3, 6, 7, 10 ].indexOf( i ) > -1 ) resources.textures[ i ].minFilter = THREE.LinearFilter;
+		            	if ( [ 2, 3, 6, 7, 9, 10 ].indexOf( i ) > -1 ) resources.textures[ i ].minFilter = THREE.LinearFilter;
 						resources.meshes[ i ].material.map = resources.textures[ resources.meshes[ i ].userData.map ];
 						resources.meshes[ i ].material.color.set( 0xffffff );//for sky
 						resources.meshes[ i ].material.needsUpdate = true;

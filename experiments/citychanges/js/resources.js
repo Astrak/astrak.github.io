@@ -11,7 +11,7 @@ var resources = {
         'platane10',            // 6  linearfilter
         'gridtest047',          // 7  linearfilter
         'carstest041',          // 8  
-        'gambettacitytest304',  // 9  
+        'gambettacitytest306',  // 9  
         'groundtest002'         //10  linearfilter
         ],
     geometries:[
