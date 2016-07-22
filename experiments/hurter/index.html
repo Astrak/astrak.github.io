@@ -79,23 +79,28 @@
 
 			function createMesh ( d ) {
 				var a = d.split( '\n' );
-				var position = new Float32Array( a.length * 3 );
+				var position = [];
+				var shift = 0;
 				for ( var i = 0 ; i < a.length ; i++ ) {
 					var b = a[ i ].split( ' ' );
-					position[ i * 3 ] = b[ 0 ];
-					position[ i * 3 + 1 ] = b[ 1 ];
-					position[ i * 3 + 2 ] = b[ 2 ];
-					if ( isNaN(b[ 0 ]) || isNaN(b[ 1 ]) || isNaN( b[ 2 ]) ) console.error(i);
+					if ( b[ 2 ] < 25 ) {
+						shift ++;
+						continue;
+					}
+					position[ ( i - shift ) * 3 ] = b[ 0 ];
+					position[ ( i - shift ) * 3 + 1 ] = b[ 1 ];
+					position[ ( i - shift ) * 3 + 2 ] = b[ 2 ];
 				}
+				console.info('rendering ' + position.length + ' points' );
 				var g = new THREE.BufferGeometry();
-				g.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
+				g.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( position ), 3 ) );
 				pc = new THREE.Points( g, new THREE.ShaderMaterial({ 
 					vertexShader : [
 						'varying float height;',
 						'varying float heightFactor;',
 						'uniform float aspect;',
 						'void main () {',
-						'	height = position.z / 1000.;',
+						'	height = position.z / 200.;',
 						'	vec4 mvPosition = modelViewMatrix * vec4( position, 1. );',
 						'	gl_Position = mvPosition * projectionMatrix;',
 						'	float sizeAttenuation = aspect / length( mvPosition.xyz );',
@@ -107,7 +112,7 @@
 						'varying float height;',
 						'varying float heightFactor;',
 						'void main () {',
-						'	gl_FragColor = vec4( sin( height ), 0., cos( height ), heightFactor );',
+						'	gl_FragColor = vec4( sin( ( height )  ), sin( ( height + 3.14 / 2. ) * 1.6 ), .0, heightFactor );',
 						'}'
 					].join( '\n'),
 					uniforms : {
@@ -152,29 +157,29 @@
 			}
 		</script>
 		<script>
-			if ( 'serviceWorker' in navigator ) {
-				navigator.serviceWorker.register( 'sw.js' ).then( function ( res ){
-					var p = document.createElement( 'p' );
-					p.innerHTML = 'Ce site est disponible hors-ligne. Création du mesh...';
-					p.style.cssText = ''+
-						'position:absolute;'+
-						'top:50%;left:50%;'+
-						'width:200px;height:60px;'+
-						'margin:-30px 0 0 -100px;'+
-						'color:chocolate;'+
-						'background:#222;'+
-						'text-align:center;';
-					document.body.appendChild( p );
-					setTimeout( function () {
-						document.body.removeChild( p );
-					}, 4000 );
-				}).catch( function ( err ) {
-					console.info('the service worker failed to install, the app will not be available offline after this session');
-				});
-				var c = navigator.serviceWorker.controller
-				console.log( c );
-				if (c) c.addEventListener('message',function(e){console.log(e)});
-			}
+			//if ( 'serviceWorker' in navigator ) {
+			//	navigator.serviceWorker.register( 'sw.js' ).then( function ( res ){
+			//		var p = document.createElement( 'p' );
+			//		p.innerHTML = 'Ce site est disponible hors-ligne. Création du mesh...';
+			//		p.style.cssText = ''+
+			//			'position:absolute;'+
+			//			'top:50%;left:50%;'+
+			//			'width:200px;height:60px;'+
+			//			'margin:-30px 0 0 -100px;'+
+			//			'color:chocolate;'+
+			//			'background:#222;'+
+			//			'text-align:center;';
+			//		document.body.appendChild( p );
+			//		setTimeout( function () {
+			//			document.body.removeChild( p );
+			//		}, 4000 );
+			//	}).catch( function ( err ) {
+			//		console.info('the service worker failed to install, the app will not be available offline after this session');
+			//	});
+			//	var c = navigator.serviceWorker.controller
+			//	console.log( c );
+			//	if (c) c.addEventListener('message',function(e){console.log(e)});
+			//}
 		</script>
 	</body>
 </html>
