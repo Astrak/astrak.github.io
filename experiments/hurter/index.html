@@ -151,5 +151,30 @@
 				}
 			}
 		</script>
+		<script>
+			if ( 'serviceWorker' in navigator ) {
+				navigator.serviceWorker.register( 'sw.js' ).then( function ( res ){
+					var p = document.createElement( 'p' );
+					p.innerHTML = 'Ce site est disponible hors-ligne. Création du mesh...';
+					p.style.cssText = ''+
+						'position:absolute;'+
+						'top:50%;left:50%;'+
+						'width:200px;height:60px;'+
+						'margin:-30px 0 0 -100px;'+
+						'color:chocolate;'+
+						'background:#222;'+
+						'text-align:center;';
+					document.body.appendChild( p );
+					setTimeout( function () {
+						document.body.removeChild( p );
+					}, 4000 );
+				}).catch( function ( err ) {
+					console.info('the service worker failed to install, the app will not be available offline after this session');
+				});
+				var c = navigator.serviceWorker.controller
+				console.log( c );
+				if (c) c.addEventListener('message',function(e){console.log(e)});
+			}
+		</script>
 	</body>
 </html>
