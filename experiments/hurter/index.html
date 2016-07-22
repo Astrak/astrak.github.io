@@ -1,0 +1,124 @@
+<!Doctype html>
+<html>
+	<head>
+		<title>Point Cloud</title>
+		<meta name='theme-color' content='#444'>
+		<meta name='viewport' content='width=device-width,user-scalable=no'/>
+		<script src=../../js/threer76.js></script>
+		<script src=../../js/controls/OrbitControlsr76.js></script>
+		<style>
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			'use strict';
+			
+			var scene, renderer, camera, controls;
+			var pc;
+			
+			setScene();
+
+			function setScene () {
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( innerWidth, innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				scene = new THREE.Scene();
+
+				loadPC( 'XYZ.txt' );
+
+				setView();
+
+				animate();
+			}
+
+			function loadPC ( url ) {
+				var xhr;
+				if ( window.XMLHttpRequest || window.ActiveXObject ) {
+					if ( window.ActiveXObject ) {
+						try {
+							xhr = new ActiveXObject("Msxml2.XMLHTTP");
+						} catch(e) {
+							xhr = new ActiveXObject("Microsoft.XMLHTTP");
+						}
+					} else {
+						xhr = new XMLHttpRequest(); 
+					}
+				}
+				xhr.onreadystatechange = function () {
+					if ( xhr.readyState === 4 ) createMesh( xhr.response );
+				};
+				xhr.open( 'GET', url, true );
+				xhr.send();
+			}
+
+			function createMesh ( d ) {
+				var a = d.split( '\n' );
+				var position = new Float32Array( a.length * 3 );
+				for ( var i = 0 ; i < a.length ; i++ ) {
+					var b = a[ i ].split( ' ' );
+					position[ i * 3 ] = b[ 0 ];
+					position[ i * 3 + 1 ] = b[ 1 ];
+					position[ i * 3 + 2 ] = b[ 2 ];
+					if ( isNaN(b[ 0 ]) || isNaN(b[ 1 ]) || isNaN( b[ 2 ]) ) console.log(i);
+				}
+				var g = new THREE.BufferGeometry();
+				g.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
+				pc = new THREE.Points( g, new THREE.PointsMaterial({ 
+					size : 1 ,
+					color : 0x111111,
+					transparent : true,
+					opacity : .1,
+					blending : THREE.AdditiveBlending
+				}));
+				pc.rotation.x = - Math.PI / 2;
+				pc.position.set( - 500, 0, 500 );
+				scene.add( pc );
+				camera.update = true;
+			}
+
+			function setView () {
+				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, 1, 2000 );
+				camera.position.set( 640, 476, -812);
+				camera.update = false;
+
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', function () { camera.update = true; }, false );
+				controls.enableDamping = true;
+				controls.dampingFactor = .05;
+				controls.rotateSpeed = .07;
+
+				window.addEventListener( 'resize', function () {
+					camera.aspect = innerWidth / innerHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize( innerWidth, innerHeight );
+					camera.update = true;
+				}, false );
+			}
+
+			function animate () {
+				requestAnimationFrame(animate);
+				controls.update();
+
+				if ( camera.update ) {
+					renderer.render( scene, camera );
+					camera.update = false;
+				}
+			}
+		</script>
+	</body>
+</html>
