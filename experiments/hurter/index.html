@@ -59,6 +59,18 @@
 			}
 
 			function loadPC ( url ) {
+				var p = document.createElement( 'p' );
+				p.innerHTML = 'Chargement des données';
+				p.style.cssText = ''+
+					'position:absolute;'+
+					'top:50%;left:50%;'+
+					'width:200px;height:60px;'+
+					'margin:-30px 0 0 -100px;'+
+					'color:chocolate;'+
+					'background:#222;'+
+					'text-align:center;';
+				document.body.appendChild( p );
+
 				var xhr;
 				if ( window.XMLHttpRequest || window.ActiveXObject ) {
 					if ( window.ActiveXObject ) {
@@ -72,7 +84,15 @@
 					}
 				}
 				xhr.onreadystatechange = function () {
-					if ( xhr.readyState === 4 ) createMesh( xhr.response );
+					if ( xhr.readyState === 4 ) {
+						p.innerHTML = 'Création de la géométrie';
+						setTimeout( function () {
+							createMesh( xhr.response );
+							setTimeout( function () {
+								document.body.removeChild( p );
+							}, 0 );
+						}, 10 );
+					}
 				};
 				xhr.open( 'GET', url, true );
 				xhr.send();
