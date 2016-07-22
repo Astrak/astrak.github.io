@@ -39,6 +39,7 @@
 
 			function setScene () {
 				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( innerWidth, innerHeight );
 				document.body.appendChild( renderer.domElement );
 
