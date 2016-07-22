@@ -4,6 +4,7 @@
 		<title>Point Cloud</title>
 		<meta name='theme-color' content='#444'>
 		<meta name='viewport' content='width=device-width,user-scalable=no'/>
+		<!-- <script src=../../js/dat.gui.js></script> -->
 		<script src=../../js/threer76.js></script>
 		<script src=../../js/controls/OrbitControlsr76.js></script>
 		<style>
@@ -27,8 +28,12 @@
 		<script>
 			'use strict';
 			
-			var scene, renderer, camera, controls;
-			var pc;
+			var scene, renderer, camera, controls, pc;
+			/*var gui, params = {
+				blending : true,
+				height : false,
+			}*/
+
 			
 			setScene();
 
@@ -43,7 +48,13 @@
 
 				setView();
 
+				setUI();
+
 				animate();
+			}
+
+			function setUI () {
+
 			}
 
 			function loadPC ( url ) {
@@ -74,15 +85,35 @@
 					position[ i * 3 ] = b[ 0 ];
 					position[ i * 3 + 1 ] = b[ 1 ];
 					position[ i * 3 + 2 ] = b[ 2 ];
-					if ( isNaN(b[ 0 ]) || isNaN(b[ 1 ]) || isNaN( b[ 2 ]) ) console.log(i);
+					if ( isNaN(b[ 0 ]) || isNaN(b[ 1 ]) || isNaN( b[ 2 ]) ) console.error(i);
 				}
 				var g = new THREE.BufferGeometry();
 				g.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
-				pc = new THREE.Points( g, new THREE.PointsMaterial({ 
-					size : 1 ,
-					color : 0x111111,
+				pc = new THREE.Points( g, new THREE.ShaderMaterial({ 
+					vertexShader : [
+						'varying float height;',
+						'varying float heightFactor;',
+						'uniform float aspect;',
+						'void main () {',
+						'	height = position.z / 1000.;',
+						'	vec4 mvPosition = modelViewMatrix * vec4( position, 1. );',
+						'	gl_Position = mvPosition * projectionMatrix;',
+						'	float sizeAttenuation = aspect / length( mvPosition.xyz );',
+						'	heightFactor = 100. * sin( height );',
+						'	gl_PointSize = heightFactor * sizeAttenuation;',
+						'}'
+					].join( '\n' ),
+					fragmentShader : [
+						'varying float height;',
+						'varying float heightFactor;',
+						'void main () {',
+						'	gl_FragColor = vec4( sin( height ), 0., cos( height ), heightFactor );',
+						'}'
+					].join( '\n'),
+					uniforms : {
+						aspect : { value : innerWidth / innerHeight }
+					},
 					transparent : true,
-					opacity : .1,
 					blending : THREE.AdditiveBlending
 				}));
 				pc.rotation.x = - Math.PI / 2;
