@@ -42,170 +42,8 @@
 				roughness : 1, 
 				metalness : 1,
 				aoMapIntensity : 2.2,
-				lightIntensity : 1,
-				useUV2 : true
+				lightIntensity : 1
 			};
-
-			//custom MeshStandardMaterial where the AO map is sampled with the uv attribute, not uv2
-			var material = new THREE.ShaderMaterial({
-
-				uniforms: THREE.UniformsUtils.merge( [
-					{
-						color: { value: new THREE.Color( 0xeeeeee ) },
-						opacity: { value: 1.0 },
-
-						map: { value: null },
-						offsetRepeat: { value: new THREE.Vector4( 0, 0, 1, 1 ) },
-
-						specularMap: { value: null },
-						alphaMap: { value: null },
-
-						envMap: { value: null },
-						flipEnvMap: { value: - 1 },
-						reflectivity: { value: 1.0 },
-						refractionRatio: { value: 0.98 }
-					},
-					THREE.UniformsLib.aomap,
-					THREE.UniformsLib.lightmap,
-					THREE.UniformsLib.emissivemap,
-					THREE.UniformsLib.bumpmap,
-					THREE.UniformsLib.normalmap,
-					THREE.UniformsLib.displacementmap,
-					THREE.UniformsLib.roughnessmap,
-					THREE.UniformsLib.metalnessmap,
-					THREE.UniformsLib.fog,
-					THREE.UniformsLib.lights,
-					{
-						emissive: { value: new THREE.Color( 0x000000 ) },
-						roughness: { value: 0.5 },
-						metalness: { value: 0 },
-						envMapIntensity: { value: 1 } // temporary
-					}
-				] ),
-
-				light: true,
-				fog: true,
-
-				vertexShader: ['#define PHYSICAL',
-					'varying vec3 vViewPosition;',
-					'#ifndef FLAT_SHADED',
-					'	varying vec3 vNormal;',
-					'#endif',
-					'#include <common>',
-					'#if defined( USE_MAP ) || defined( USE_BUMPMAP ) || defined( USE_AOMAP ) || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP ) || defined( USE_ALPHAMAP ) || defined( USE_EMISSIVEMAP ) || defined( USE_ROUGHNESSMAP ) || defined( USE_METALNESSMAP )',
-					'	varying vec2 vUv;',
-					'	uniform vec4 offsetRepeat;',
-					'#endif',
-					/*'#include <uv2_pars_vertex>',*/
-					'#include <displacementmap_pars_vertex>',
-					'#include <color_pars_vertex>',
-					'#include <fog_pars_vertex>',
-					'#include <morphtarget_pars_vertex>',
-					'#include <skinning_pars_vertex>',
-					'#include <shadowmap_pars_vertex>',
-					'#include <specularmap_pars_fragment>',
-					'#include <logdepthbuf_pars_vertex>',
-					'#include <clipping_planes_pars_vertex>',
-					'void main() {',
-					'	#if defined( USE_MAP ) || defined( USE_BUMPMAP ) || defined( USE_AOMAP ) || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP ) || defined( USE_ALPHAMAP ) || defined( USE_EMISSIVEMAP ) || defined( USE_ROUGHNESSMAP ) || defined( USE_METALNESSMAP )',
-					'		vUv = uv * offsetRepeat.zw + offsetRepeat.xy;',
-					'	#endif',
-					/*'	#include <uv2_vertex>',*/
-					'	#include <color_vertex>',
-					'	#include <beginnormal_vertex>',
-					'	#include <morphnormal_vertex>',
-					'	#include <skinbase_vertex>',
-					'	#include <skinnormal_vertex>',
-					'	#include <defaultnormal_vertex>',
-					'	#ifndef FLAT_SHADED',
-					'		vNormal = normalize( transformedNormal );',
-					'	#endif',
-					'	#include <begin_vertex>',
-					'	#include <displacementmap_vertex>',
-					'	#include <morphtarget_vertex>',
-					'	#include <skinning_vertex>',
-					'	#include <project_vertex>',
-					'	#include <logdepthbuf_vertex>',
-					'	#include <clipping_planes_vertex>',
-					'	vViewPosition = - mvPosition.xyz;',
-					'	#include <worldpos_vertex>',
-					'	#include <shadowmap_vertex>',
-					'	#include <fog_vertex>',
-					'}'].join( '\n' ),
-				fragmentShader: ['#define PHYSICAL',
-					'uniform vec3 diffuse;',
-					'uniform vec3 emissive;',
-					'uniform float roughness;',
-					'uniform float metalness;',
-					'uniform float opacity;',
-					'#ifndef STANDARD',
-					'	uniform float clearCoat;',
-					'	uniform float clearCoatRoughness;',
-					'#endif',
-					'varying vec3 vViewPosition;',
-					'#ifndef FLAT_SHADED',
-					'	varying vec3 vNormal;',
-					'#endif',
-					'#include <common>',
-					'#include <packing>',
-					'#include <color_pars_fragment>',
-					'#if defined( USE_MAP ) || defined( USE_BUMPMAP ) || defined( USE_AOMAP ) || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP ) || defined( USE_ALPHAMAP ) || defined( USE_EMISSIVEMAP ) || defined( USE_ROUGHNESSMAP ) || defined( USE_METALNESSMAP )',
-					'	varying vec2 vUv;',
-					'#endif',
-					/*'#include <uv2_pars_fragment>',*/
-					'#include <map_pars_fragment>',
-					'#include <alphamap_pars_fragment>',
-					'#include <aomap_pars_fragment>',
-					'#include <lightmap_pars_fragment>',
-					'#include <emissivemap_pars_fragment>',
-					'#include <envmap_pars_fragment>',
-					'#include <fog_pars_fragment>',
-					'#include <bsdfs>',
-					'#include <cube_uv_reflection_fragment>',
-					'#include <lights_pars>',
-					'#include <lights_physical_pars_fragment>',
-					'#include <shadowmap_pars_fragment>',
-					'#include <bumpmap_pars_fragment>',
-					'#include <normalmap_pars_fragment>',
-					'#include <roughnessmap_pars_fragment>',
-					'#include <metalnessmap_pars_fragment>',
-					'#include <logdepthbuf_pars_fragment>',
-					'#include <clipping_planes_pars_fragment>',
-					'void main() {',
-					'	#include <clipping_planes_fragment>',
-					'	vec4 diffuseColor = vec4( diffuse, opacity );',
-					'	ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );',
-					'	vec3 totalEmissiveRadiance = emissive;',
-					'	#include <logdepthbuf_fragment>',
-					'	#include <map_fragment>',
-					'	#include <color_fragment>',
-					'	#include <alphamap_fragment>',
-					'	#include <alphatest_fragment>',
-					'	#include <specularmap_fragment>',
-					'	#include <roughnessmap_fragment>',
-					'	#include <metalnessmap_fragment>',
-					'	#include <normal_flip>',
-					'	#include <normal_fragment>',
-					'	#include <emissivemap_fragment>',
-					'	#include <lights_physical_fragment>',
-					'	#include <lights_template>',
-					'	#ifdef USE_AOMAP',
-					'		float ambientOcclusion = ( texture2D( aoMap, vUv ).r - 1.0 ) * aoMapIntensity + 1.0;',
-					'		reflectedLight.indirectDiffuse *= ambientOcclusion;',
-					'		#if defined( USE_ENVMAP ) && defined( PHYSICAL )',
-					'			float dotNV = saturate( dot( geometry.normal, geometry.viewDir ) );',
-					'			reflectedLight.indirectSpecular *= computeSpecularOcclusion( dotNV, ambientOcclusion, material.specularRoughness );',
-					'		#endif',
-					'	#endif',
-					'	vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;',
-					'	gl_FragColor = vec4( outgoingLight, diffuseColor.a );',
-					'	#include <premultiplied_alpha_fragment>',
-					'	#include <tonemapping_fragment>',
-					'	#include <encodings_fragment>',
-					'	#include <fog_fragment>',
-					'}'].join( '\n' )
-
-			});
 
 			setScene();
 
@@ -220,7 +58,7 @@
 				document.body.appendChild( renderer.domElement );
 
 				var disclaimer = document.createElement( 'p' );
-				disclaimer.textContent = "When 'useUV2' is on, the AO map is sampled using the varying 'vUv2' in the fragment shader as it uses to, and the geometry used has an uv2 attribute. The render fails in Edge and IE11. When 'useUV2' is turned off, the fragment shader uses the varying 'vUv' and the mesh uses a geometry with no uv2 attribute.";
+				disclaimer.textContent = "In IE11 and Edge : when UV1 is used to sample the aomap instead of uv2, the render is correct.";
 				disclaimer.style.cssText = 'position:absolute;top:0;width:100%;text-align:center;font-family:monospace;color:#fff;';
 				document.body.appendChild( disclaimer );
 
@@ -265,37 +103,22 @@
 
 						new THREE.JSONLoader().load( 'geometry.json', function( g ) {
 
-							//mesh without UV2
-							var geoWithoutUV2 = new THREE.BufferGeometry().fromGeometry(g);
-
-							material.uniforms.envMap.value = pmrem;
-							material.uniforms.metalness.value = 1; 
-							material.uniforms.roughness.value = 1;
-							material.uniforms.metalnessMap.value = tLoader.load( 'tex/DefaultMaterial_Metallic.png', update );
-							material.uniforms.roughnessMap.value = tLoader.load( 'tex/DefaultMaterial_Roughness.png', update );
-							material.uniforms.map.value = tLoader.load( 'tex/DefaultMaterial_Base_Color.png', update );
-							material.uniforms.aoMap.value = tLoader.load( 'tex/DefaultMaterial_Mixed_AO.png', update );
-							material.uniforms.aoMapIntensity.value = params.aoMapIntensity;
-							material.uniforms.normalMap.value = tLoader.load( 'tex/DefaultMaterial_Normal.png', update );
-
-							window.meshWithoutUV2 = new THREE.Mesh( geoWithoutUV2, material );
-
 							//mesh with UV2
-							var geoWithUV2 = geoWithoutUV2.clone();
-							geoWithUV2.addAttribute( 'uv2', geoWithUV2.attributes.uv );
+							var geo = new THREE.BufferGeometry().fromGeometry( g );
+							geo.addAttribute( 'uv2', geo.attributes.uv );
 
 							window.meshWithUV2 = new THREE.Mesh(
-								geoWithUV2, 
+								geo, 
 								new THREE.MeshStandardMaterial({
 									envMap : pmrem,
 									metalness : 1, 
 									roughness : 1,
-									metalnessMap : material.uniforms.metalnessMap.value,
-									roughnessMap : material.uniforms.roughnessMap.value,
-									map : material.uniforms.map.value,
-									aoMap : material.uniforms.aoMap.value,
+									metalnessMap : tLoader.load( 'tex/DefaultMaterial_Metallic.png', update ),
+									roughnessMap : tLoader.load( 'tex/DefaultMaterial_Roughness.png', update ),
+									map : tLoader.load( 'tex/DefaultMaterial_Base_Color.png', update ),
+									aoMap : tLoader.load( 'tex/DefaultMaterial_Mixed_AO.png', update ),
 									aoMapIntensity : params.aoMapIntensity,
-									normalMap : material.uniforms.normalMap.value
+									normalMap : tLoader.load( 'tex/DefaultMaterial_Normal.png', update )
 								}));
 
 							scene.add( meshWithUV2 );
@@ -310,38 +133,16 @@
 
 						//controller
 						gui = new dat.GUI();
-
-						var guiboth = gui.add( params, 'useUV2' ); guiboth.onChange( function () {
-
-							if ( params.useUV2 ) {
-
-								scene.remove( meshWithoutUV2 );
-								scene.add( meshWithUV2 );
-							
-								mesh = meshWithUV2;
-
-							} else {
-
-								scene.remove( meshWithUV2 );
-								scene.add( meshWithoutUV2 );
-
-								mesh = meshWithoutUV2;
- 
-							}
-
-							camera.update = true;
-
-						});
 						var guiRough = gui.add( params, 'roughness', 0, 1 ); guiRough.onChange( function () {
-							meshWithUV2.material.roughness = material.uniforms.roughness.value = params.roughness;
+							meshWithUV2.material.roughness = params.roughness;
 							camera.update = true;
 						});
 						var guiMetal = gui.add( params, 'metalness', 0, 1 ); guiMetal.onChange( function () {
-							meshWithUV2.material.metalness = material.uniforms.metalness.value = params.metalness;
+							meshWithUV2.material.metalness = params.metalness;
 							camera.update = true;
 						});
 						var guiAO = gui.add( params, 'aoMapIntensity', 0, 3 ); guiAO.onChange( function () {
-							meshWithUV2.material.aoMapIntensity = material.uniforms.aoMapIntensity.value = params.aoMapIntensity;
+							meshWithUV2.material.aoMapIntensity = params.aoMapIntensity;
 							camera.update = true;
 						});
 
@@ -364,7 +165,6 @@
 				//shadow casting
 				light.castShadow = true;
 				meshWithUV2.castShadow = meshWithUV2.receiveShadow = true;
-				meshWithoutUV2.castShadow = meshWithoutUV2.receiveShadow = true;
 				light.shadow.mapSize.set( 2048, 2048 );
 				light.shadow.camera.top = light.shadow.camera.right = 2;
 				light.shadow.camera.bottom = light.shadow.camera.left = -2;
