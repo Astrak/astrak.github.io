@@ -40,7 +40,7 @@
 
 			var params = { 
 				roughness : 1, 
-				metalness : 1, 
+				metalness : 1,
 				aoMapIntensity : 2.2,
 				lightIntensity : 1,
 				useUV2 : true
@@ -82,6 +82,9 @@
 						envMapIntensity: { value: 1 } // temporary
 					}
 				] ),
+
+				light: true,
+				fog: true,
 
 				vertexShader: ['#define PHYSICAL',
 					'varying vec3 vViewPosition;',
@@ -215,6 +218,11 @@
 				renderer.toneMapping = THREE.ReinhardToneMapping;
 				renderer.toneMappingExposure = 2;
 				document.body.appendChild( renderer.domElement );
+
+				var disclaimer = document.createElement( 'p' );
+				disclaimer.textContent = "When 'useUV2' is on, the AO map is sampled using the varying 'vUv2' in the fragment shader as it uses to, and the geometry used has an uv2 attribute. The render fails in Edge and IE11. When 'useUV2' is turned off, the fragment shader uses the varying 'vUv' and the mesh uses a geometry with no uv2 attribute.";
+				disclaimer.style.cssText = 'position:absolute;top:0;width:100%;text-align:center;font-family:monospace;color:#fff;';
+				document.body.appendChild( disclaimer );
 
 				scene = new THREE.Scene();
 
