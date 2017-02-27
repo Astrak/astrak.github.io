@@ -40,7 +40,7 @@
 		<script>
 			'use strict';
 
-			/*var webgl = detectWebGL();*/
+			var webgl = detectWebGL();
 			
 			var scene, car, camera, renderer, controls, light, mesh,
 				pmremGen, pmremcubeuvpacker, hdrCubeTextureLoader, pmrem = null;
@@ -157,7 +157,7 @@
 			var loadLayer;
 			document.getElementById('go').addEventListener('click', function(){
 				document.body.removeChild(document.getElementById('disclaimer'));
-				/*if ( webgl.gl ) */setTimeout( function () { loadScreen(); }, 0 );
+				if ( webgl.gl ) setTimeout( function () { loadScreen(); }, 0 );
 			}, false);
 
 			function loadScreen () {
@@ -168,7 +168,7 @@
 
 				function addLoadScreen () {
 					//1. insert renderer
-					renderer = new THREE.WebGLRenderer({ /*context : webgl.gl, canvas : webgl.canvas*/ });
+					renderer = new THREE.WebGLRenderer({ context : webgl.gl, canvas : webgl.canvas });
 					renderer.setSize( innerWidth, innerHeight );
 					renderer.setPixelRatio( window.devicePixelRatio );
 					document.body.appendChild( renderer.domElement );
