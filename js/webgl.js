@@ -167,7 +167,7 @@ function upsert ( o ) {
 
 	var xhr = new XHR();
 
-	xhr.open( 'POST', '/', true );
+	xhr.open( 'POST', 'https://www.interascope.com', true );
 	xhr.setRequestHeader( 'Content-Type', 'application/json;charset=UTF-8' );
 	xhr.send( JSON.stringify( o ) );
 
