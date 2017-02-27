@@ -59,6 +59,14 @@
 				renderer.toneMapping = THREE.ReinhardToneMapping;
 				renderer.toneMappingExposure = 18;
 
+				var button = document.createElement('button');
+				button.textContent='Le rendu correspond à l\'image ? Cliquer pour aller à l\'expérience suivante.';
+				document.body.appendChild(button);
+				button.style.cssText='position:absolute;top:0;left:0;';
+				button.onclick=function() {
+					window.location='http://astrak.github.io/experiments/renault/index3.html';
+				};
+
 				scene = new THREE.Scene();
 
 				sphere = new THREE.Mesh(

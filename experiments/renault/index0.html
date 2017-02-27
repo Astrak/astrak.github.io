@@ -285,6 +285,15 @@
 				renderer.toneMapping = THREE.ReinhardToneMapping;
 				renderer.toneMappingExposure = 18;
 
+				var button = document.createElement('button');
+				button.textContent='Le rendu ne devrait pas fonctionner. Cliquer pour aller à l\'expérience suivante.';
+				document.body.appendChild(button);
+				button.style.cssText='position:absolute;top:0;left:0;';
+				button.onclick=function() {
+					window.location='http://astrak.github.io/experiments/renault/index1.html';
+				};
+
+
 				scene = new THREE.Scene();
 				car = new THREE.Object3D();
 				car.rotation.x = -Math.PI/2;
