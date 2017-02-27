@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PBR Setup</title>
+		<meta name='theme-color' content='#444'/>
+		<meta name='viewport' content='width=device-width, user-scalable=no'/>
+		<style>
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+		</style>
+	</head>
+	<body>
+		<div id='disclaimer'>
+			<h1>Expérience 2</h1>
+			<p>Dans cette expérience on vérifie uniquement si la génération de la map d'environnement (la PMREM) se passe correctement en ne l'appliquant qu'à une sphère.</p>
+			<p>Rendu visé dans cette expérience :</p>
+			<img src="img/2.png">
+			<button id=go>Démarrer</button>
+		</div>
+		<script src='threer85devWithUV1.js'></script>
+		<script src='../../js/controls/OrbitControlsr85.js'></script>
+		<script src='../../js/loaders/RGBELoader.js'></script>
+		<script src='../../js/loaders/HDRCubeTextureLoader.js'></script>
+		<script src='../../js/pmrem/PMREMGenerator.js'></script>
+		<script src='../../js/pmrem/PMREMCubeUVPacker.js'></script>
+		<script src='PLYLoader.js'></script>
+		<script>
+			'use strict';
+			
+			var scene, car, camera, renderer, controls, light, mesh,
+				pmremGen, pmremcubeuvpacker, hdrCubeTextureLoader, pmrem = null;
+			var sphere;
+
+			document.getElementById('go').addEventListener('click', function(){
+				document.body.removeChild(document.getElementById('disclaimer'));
+				setScene();
+			}, false);
+
+
+			function setScene () {
+
+					renderer = new THREE.WebGLRenderer();
+					renderer.setSize( innerWidth, innerHeight );
+					renderer.setPixelRatio( window.devicePixelRatio );
+					document.body.appendChild( renderer.domElement );
+				renderer.gammaInput = renderer.gammaOutput = true;
+				renderer.toneMapping = THREE.ReinhardToneMapping;
+				renderer.toneMappingExposure = 18;
+
+				scene = new THREE.Scene();
+
+				sphere = new THREE.Mesh(
+					new THREE.SphereBufferGeometry(2,30, 30),
+					new THREE.MeshStandardMaterial({
+						metalness:1,
+						roughness:0
+					}));
+
+				scene.add( sphere );
+
+				setLighting();
+
+				
+				loadIBL( '../PBR/hdr/', '.hdr' );
+
+			}
+
+			function loadIBL ( url, ext ) {
+				//IBL
+				hdrCubeTextureLoader = new THREE.HDRCubeTextureLoader().load( 
+					THREE.UnsignedByteType, 
+					(function (prefix, postfix) {
+				    	return [
+				    	  prefix + '1' + postfix, prefix + '3' + postfix,
+				    	  prefix + '5' + postfix, prefix + '6' + postfix,
+				    	  prefix + '2' + postfix, prefix + '4' + postfix
+				    	];
+					})( url, ext ),
+					function ( t ) {
+						console.time( 'pmrem generation time' );
+						pmremGen = new THREE.PMREMGenerator( t );
+						pmremGen.update( renderer );
+						pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
+						pmremcubeuvpacker.update( renderer );
+						pmrem = pmremcubeuvpacker.CubeUVRenderTarget.texture;
+						console.timeEnd( 'pmrem generation time' );
+
+						sphere.material.envMap = pmrem;
+						sphere.material.needsUpdate = true;
+
+						setView();
+
+						camera.update = true;
+
+						animate();
+
+					}
+				);
+			}
+
+			function setLighting () {
+
+				light = new THREE.DirectionalLight( 0xffffff, 5, 20 );
+				light.position.set( -5, 5, 5 );
+				scene.add( light );
+
+			}
+
+			function setView () {
+
+				camera = new THREE.PerspectiveCamera( 70, innerWidth / innerHeight, .2, 200 );
+				camera.position.set( -4, .8, 0 );
+				camera.update = true;
+
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', function () { camera.update = true; } );
+				controls.enableDamping = true;
+				controls.dampingFactor = .1;
+				controls.rotateSpeed = .07;
+
+				window.addEventListener( 'resize', resize, false );
+
+			}
+
+			function resize () {
+
+				camera.aspect = innerWidth / innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( innerWidth, innerHeight );
+				camera.update = true;
+
+			}
+
+			function animate () {
+
+				requestAnimationFrame( animate );
+				controls.update();
+
+				if ( camera.update ) {
+					renderer.render( scene, camera );
+					camera.update = false;
+				}
+
+			}
+		</script>
+	</body>
+</html>
