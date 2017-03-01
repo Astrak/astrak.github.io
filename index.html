@@ -75,6 +75,7 @@
 	<!-- Check if  the client can get WebGL contexts, or display why it cannot -->
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/detectizr/2.1.0/detectizr.min.js'></script>
+	<script src="js/webgl.js"></script>
 	<script type='text/javascript'>
 		var log=document.querySelector('#log');
 		var device=Detectizr.device.type==='desktop'?'computer':Detectizr.device.type==='tablet'?'tablet':'mobile';
@@ -84,10 +85,8 @@
 			log.innerHTML='Your are using '+browser+' '+Detectizr.browser.major+' that cannot run WebGL';
 			log.style.background='#b33';
 		} else {
-			var canvas = document.createElement('canvas');
-			canvas.width=canvas.height=10;
-			var ctx = canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
-			if (!ctx) {
+			var webgl = detectWebGL();
+			if (!webgl.gl) {
 				log.style.background='#b33';
 				log.innerHTML='Your are using '+browser+' '+Detectizr.browser.major+' that can run WebGL.<br/>'+
 				'However creating a WebGL context seems to fail. Your '+device+' uses '+Detectizr.os.name+' '+Detectizr.os.version+' '+Detectizr.os.addressRegisterSize+' :<ul>'+
