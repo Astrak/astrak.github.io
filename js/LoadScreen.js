@@ -752,6 +752,8 @@ function LoadScreen ( renderer, style ) {
 			d.path, 
 			function ( g ) {
 
+				console.log(counter, p, geometries);
+
 				output.geometries[ p ] = g;
 
 				geometries[ p ].prog = 1;
