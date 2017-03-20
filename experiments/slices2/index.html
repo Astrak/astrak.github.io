@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>VOLUME RENDERING</title>
+		<meta name='theme-color' content='#444'/>
+		<meta name='viewport' content='width=device-width, user-scalable=no'/>
+		<style>
+			body{
+			    margin:0;
+			    overflow:hidden;
+			}
+			canvas{
+				cursor:grab;
+				cursor:-webkit-grab;
+				cursor:-moz-grab;
+			}
+			canvas:active{
+				cursor:grabbing;
+				cursor:-webkit-grabbing;
+				cursor:-moz-grabbing;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script src='../../js/threer76.js'></script>
+		<script src='../../js/controls/OrbitControlsr76.js'></script>
+
+		<script>
+			'use strict';
+			
+			var scene, renderer, camera, controls;
+			var material, geometry, mesh;
+			var tLoader = new THREE.TextureLoader();
+			
+			setScene();
+			animate();
+
+			function setScene(){
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( innerWidth, innerHeight );
+				renderer.setPixelRatio( window.devicePixelRatio * .5 );
+				document.body.appendChild( renderer.domElement );
+				scene = new THREE.Scene();
+
+				setView();
+
+				createSlices();
+			}
+
+			function setView () {
+				camera = new THREE.PerspectiveCamera( 40, innerWidth / innerHeight, 1, 100 );
+				camera.position.set( -8.5, 4.9, -3.7 );
+				camera.update = false;
+
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', function () { camera.update = true; }, false );
+				controls.enableDamping = true;
+				controls.dampingFactor = .05;
+				controls.rotateSpeed = .07;
+				//controls.minPolarAngle = controls.maxPolarAngle = 1.2;
+
+				window.addEventListener( 'resize', function () {
+					renderer.setSize( innerWidth, innerHeight );
+					camera.aspect = innerWidth / innerHeight;
+					camera.updateProjectionMatrix();
+					camera.update = true;
+				}, false );
+			}
+
+			function createSlices () {
+				geometry = createGeometry();
+				material = new THREE.ShaderMaterial({
+					vertexShader : [
+						'varying vec2 vUv;',
+						'void main () {',
+						'	vUv = uv;',
+						'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1. );',
+						'}'
+					].join('\n'),
+					fragmentShader : [
+						'uniform sampler2D map;',
+						'varying vec2 vUv;',
+						'void main () {',
+						'	vec3 col = texture2D( map, vUv ).rgb;',
+						'	float blackness = ( ( col.r + col.g + col.b ) * 2. - 1. );',
+						'	gl_FragColor = vec4( col, blackness );',
+						'}'
+					].join('\n'),
+					uniforms : {
+						map : { type: 't', value : tLoader.load( 'montage.png', function () { camera.update = true; } ) },
+					},
+					transparent : true,
+					side : THREE.DoubleSide
+				});
+				mesh = new THREE.Mesh( geometry, material );
+				//mesh.position.y = .4;
+				scene.add( mesh );
+			}
+
+			function createGeometry () {
+				var position = [],
+					uvs = [],
+					sliceIndex = [],
+					indices = [];
+
+				var side = 5;
+
+				for ( var i = 0 ; i < 16 * 16 ; i++ ) {
+					position[ i * 12 ] = position[ i * 12 + 2 ] = position[ i * 12 + 3 ] = position[ i * 12 + 8 ] = - side / 2;
+					position[ i * 12 + 1 ] = position[ i * 12 + 4 ] = position[ i * 12 + 7 ] = position[ i * 12 + 10 ] = ( - side / 2 + side * i / ( 16 * 16 ) ) * .6;
+					position[ i * 12 + 6 ] = position[ i * 12 + 9 ] = side / 2;
+					position[ i * 12 + 5 ] = position[ i * 12 + 11 ] = side / 2; 
+
+					uvs[ i * 8 ] = uvs[ i * 8 + 2 ] = 1 - ( i % 16 ) / 16;
+					uvs[ i * 8 + 1 ] = uvs[ i * 8 + 5 ] = 1 / 16 + Math.floor( i / 16 ) / 16;
+					uvs[ i * 8 + 3 ] = uvs[ i * 8 + 7 ] = Math.floor( i / 16 ) / 16;
+					uvs[ i * 8 + 4 ] = uvs[ i * 8 + 6 ] = 1 - ( i % 16 ) / 16 + 1 / 16;
+
+					indices[ i * 6 ] = i * 4;			indices[ i * 6 + 3 ] = i * 4 + 2;
+					indices[ i * 6 + 1 ] = i * 4 + 1;	indices[ i * 6 + 4 ] = i * 4 + 1;
+					indices[ i * 6 + 2 ] = i * 4 + 2;	indices[ i * 6 + 5 ] = i * 4 + 3;
+				}
+
+				var g = new THREE.BufferGeometry();
+
+				var p = new Float32Array( position );
+				g.addAttribute( 'position', new THREE.BufferAttribute( p, 3 ) );
+
+				var uv = new Float32Array( uvs );
+				g.addAttribute( 'uv', new THREE.BufferAttribute( uv, 2 ) );
+
+				var ind = new Uint32Array( indices );
+				g.setIndex( new THREE.BufferAttribute( ind, 1 ) );
+
+				return g;
+			}
+
+			function animate () {
+				requestAnimationFrame( animate );
+				controls.update();
+
+				if ( camera.update ) {
+					renderer.render( scene, camera );
+					camera.update = false;
+				}
+			}
+		</script>
+	</body>
+</html>

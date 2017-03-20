@@ -30,11 +30,12 @@
 		<script src='../../js/loaders/HDRCubeTextureLoader.js'></script>
 		<script src='../../js/pmrem/PMREMGenerator.js'></script>
 		<script src='../../js/pmrem/PMREMCubeUVPacker.js'></script>
+		<script src='../../js/pmrem/PMREMCubeUVPacker.js'></script>
+		<script src='../../js/LoadScreen.min.js'></script>
 		<script>
 			'use strict';
 			
-			var scene, camera, renderer, controls, light, mesh,
-				pmremGen, pmremcubeuvpacker, hdrCubeTextureLoader, pmrem = null;
+			var scene, camera, renderer, controls, light, mesh;
 
 			var gui;
 
@@ -45,17 +46,67 @@
 				lightIntensity : 1
 			};
 
-			setScene();
+			var ASSETS = {
+				textures: {
+					envMap: {
+						path: ( function ( prefix, postfix ) {
+					    	return [
+					    	  prefix + '1' + postfix, prefix + '3' + postfix,
+					    	  prefix + '5' + postfix, prefix + '6' + postfix,
+					    	  prefix + '2' + postfix, prefix + '4' + postfix
+					    	];
+						} )( 'hdr/', '.hdr' ),
+						fileSize: 1325,
+						toPMREM: true
+					},
+					roughness: { path: 'tex/DefaultMaterial_Roughness.png', fileSize: 351 },
+					metalness: { path: 'tex/DefaultMaterial_Metallic.png', fileSize: 351 },
+					albedo: { path: 'tex/DefaultMaterial_Base_Color.png', fileSize: 351 },
+					ao: { path: 'tex/DefaultMaterial_Mixed_AO.png', fileSize: 443 },
+					normalMap: { path: 'tex/DefaultMaterial_Normal.png', fileSize: 541 }
+				},
+				geometries: {
+					shape: {
+						path: 'geometry.json',
+						fileSize: 3541,
+						toBufferGeometry: true,
+						onComplete: function ( g ) {
+							g.addAttribute( 'uv2', g.attributes.uv );
+						}
+					}
+				},
+				objects: {
+					object: {
+						geometry: 'shape',
+						material: new THREE.MeshStandardMaterial({
+							roughness: params.roughness,
+							metalness: params.metalness,
+							aoMapIntensity: params.aoMapIntensity
+						}),
+						map: 'albedo',
+						envMap: 'envMap',
+						roughnessMap: 'roughness',
+						metalnessMap: 'metalness',
+						aoMap: 'ao',
+						normalMap: 'normalMap',
+						castShadow: true,
+						receiveShadow: true
+					}
+				}
+			};
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( innerWidth, innerHeight );
+			renderer.gammaInput = renderer.gammaOutput = true;
+			renderer.toneMapping = THREE.ReinhardToneMapping;
+			renderer.toneMappingExposure = 2;
+			document.body.appendChild( renderer.domElement );
+
+			var ls = new LoadScreen( renderer, { type: 'circular' } )
+			.setOptions({ autoTweenExposure: 0 }).onComplete( setScene ).start( ASSETS );
 
 			function setScene () {
-
-				renderer = new THREE.WebGLRenderer();
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( innerWidth, innerHeight );
-				renderer.gammaInput = renderer.gammaOutput = true;
-				renderer.toneMapping = THREE.ReinhardToneMapping;
-				renderer.toneMappingExposure = 2;
-				document.body.appendChild( renderer.domElement );
 
 				var disclaimer = document.createElement( 'p' );
 				disclaimer.textContent = "In IE11 and Edge : when UV1 is used to sample the aomap instead of uv2, the render is correct.";
@@ -64,91 +115,33 @@
 
 				scene = new THREE.Scene();
 
-				loadIBLThenLoadMesh( 'hdr/', '.hdr' );
+				mesh = ASSETS.objects.object;
+
+				scene.add( mesh );
+
+				//controller
+				gui = new dat.GUI();
+				var guiRough = gui.add( params, 'roughness', 0, 1 ); guiRough.onChange( function () {
+					mesh.material.roughness = params.roughness;
+					camera.update = true;
+				});
+				var guiMetal = gui.add( params, 'metalness', 0, 1 ); guiMetal.onChange( function () {
+					mesh.material.metalness = params.metalness;
+					camera.update = true;
+				});
+				var guiAO = gui.add( params, 'aoMapIntensity', 0, 3 ); guiAO.onChange( function () {
+					mesh.material.aoMapIntensity = params.aoMapIntensity;
+					camera.update = true;
+				});
+
+				setLighting();
 
 				setView();
 
-				animate();
-
-			}
-
-			function update () {
-
 				camera.update = true;
 
-			}
+				ls.remove( animate );
 
-			function loadIBLThenLoadMesh ( url, ext ) {
-				//IBL
-				hdrCubeTextureLoader = new THREE.HDRCubeTextureLoader().load( 
-					THREE.UnsignedByteType, 
-					(function (prefix, postfix) {
-				    	return [
-				    	  prefix + '1' + postfix, prefix + '3' + postfix,
-				    	  prefix + '5' + postfix, prefix + '6' + postfix,
-				    	  prefix + '2' + postfix, prefix + '4' + postfix
-				    	];
-					})( url, ext ),
-					function ( t ) {
-						console.time( 'pmrem generation time' );
-						pmremGen = new THREE.PMREMGenerator( t );
-						pmremGen.update( renderer );
-						pmremcubeuvpacker = new THREE.PMREMCubeUVPacker( pmremGen.cubeLods );
-						pmremcubeuvpacker.update( renderer );
-						pmrem = pmremcubeuvpacker.CubeUVRenderTarget.texture;
-						console.timeEnd( 'pmrem generation time' );
-
-						//PMREM ok > load mesh to apply it as envMap later
-						var tLoader = new THREE.TextureLoader();
-
-						new THREE.JSONLoader().load( 'geometry.json', function( g ) {
-
-							//mesh with UV2
-							var geo = new THREE.BufferGeometry().fromGeometry( g );
-							geo.addAttribute( 'uv2', geo.attributes.uv );
-
-							window.meshWithUV2 = new THREE.Mesh(
-								geo, 
-								new THREE.MeshStandardMaterial({
-									envMap : pmrem,
-									metalness : 1, 
-									roughness : 1,
-									metalnessMap : tLoader.load( 'tex/DefaultMaterial_Metallic.png', update ),
-									roughnessMap : tLoader.load( 'tex/DefaultMaterial_Roughness.png', update ),
-									map : tLoader.load( 'tex/DefaultMaterial_Base_Color.png', update ),
-									aoMap : tLoader.load( 'tex/DefaultMaterial_Mixed_AO.png', update ),
-									aoMapIntensity : params.aoMapIntensity,
-									normalMap : tLoader.load( 'tex/DefaultMaterial_Normal.png', update )
-								}));
-
-							scene.add( meshWithUV2 );
-							
-							mesh = meshWithUV2;
-
-							camera.update = true;
-
-							setLighting();
-
-						});
-
-						//controller
-						gui = new dat.GUI();
-						var guiRough = gui.add( params, 'roughness', 0, 1 ); guiRough.onChange( function () {
-							meshWithUV2.material.roughness = params.roughness;
-							camera.update = true;
-						});
-						var guiMetal = gui.add( params, 'metalness', 0, 1 ); guiMetal.onChange( function () {
-							meshWithUV2.material.metalness = params.metalness;
-							camera.update = true;
-						});
-						var guiAO = gui.add( params, 'aoMapIntensity', 0, 3 ); guiAO.onChange( function () {
-							meshWithUV2.material.aoMapIntensity = params.aoMapIntensity;
-							camera.update = true;
-						});
-
-						camera.update = true;
-					}
-				);
 			}
 
 			function setLighting () {
@@ -164,7 +157,7 @@
 
 				//shadow casting
 				light.castShadow = true;
-				meshWithUV2.castShadow = meshWithUV2.receiveShadow = true;
+				mesh.castShadow = mesh.receiveShadow = true;
 				light.shadow.mapSize.set( 2048, 2048 );
 				light.shadow.camera.top = light.shadow.camera.right = 2;
 				light.shadow.camera.bottom = light.shadow.camera.left = -2;
