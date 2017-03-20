@@ -232,7 +232,7 @@ function LoadScreen ( renderer, style ) {
 
 		rAFID = requestAnimationFrame( animate );
 
-		console.log('there')
+		if ( tweens.progress ) console.log(tweens.progress.targetValue)
 
 		for ( var k in tweens ) {
 
