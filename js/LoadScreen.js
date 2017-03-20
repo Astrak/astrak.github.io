@@ -620,7 +620,7 @@ function LoadScreen ( renderer, style ) {
 
 		var oC = function ( result ) {
 
-			console.log(p, textures);
+			console.log(counter, p, textures);
 
 			output.textures[ p ] = result;
 
