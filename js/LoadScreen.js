@@ -620,6 +620,8 @@ function LoadScreen ( renderer, style ) {
 
 		var oC = function ( result ) {
 
+			console.log(p)
+
 			output.textures[ p ] = result;
 
 			t.prog = 1;
