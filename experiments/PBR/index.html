@@ -104,7 +104,7 @@
 			document.body.appendChild( renderer.domElement );
 
 			var ls = new LoadScreen( renderer, { type: 'circular' } )
-			.setOptions({ autoTweenExposure: 0, verbose: true }).onComplete( setScene ).start( ASSETS );
+			.setOptions({ autoTweenExposure: 0 }).onComplete( setScene ).start( ASSETS );
 
 			function setScene () {
 
