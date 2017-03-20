@@ -34,7 +34,7 @@ function LoadScreen ( renderer, style ) {
 		aLoader,
 		oLoaders = {};
 
-	var output = {};
+	window.output = {};
 
 	var extensions, support = {};
 
