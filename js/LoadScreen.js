@@ -668,6 +668,8 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
+		console.log(d.path);
+
 		if ( ext !== 'cubehdr' ) 
 
 			getTextureLoader( ext.toLowerCase() ).load( d.path, oC, oP );
