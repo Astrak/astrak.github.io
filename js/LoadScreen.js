@@ -232,6 +232,8 @@ function LoadScreen ( renderer, style ) {
 
 		rAFID = requestAnimationFrame( animate );
 
+		console.log('there')
+
 		for ( var k in tweens ) {
 
 			var t = tweens[ k ];
@@ -747,8 +749,6 @@ function LoadScreen ( renderer, style ) {
 		getGeometryLoader( ext.toLowerCase() ).load( 
 			d.path, 
 			function ( g ) {
-
-				console.log('finished geometry', g)
 
 				output.geometries[ p ] = g;
 
