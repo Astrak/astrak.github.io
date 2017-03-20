@@ -49,11 +49,11 @@
 			var ASSETS = {
 				textures: {
 					envMap: {
-						path: ( function ( prefix, postfix ) {
+						path: ( function ( a, b ) {
 					    	return [
-					    	  prefix + '1' + postfix, prefix + '3' + postfix,
-					    	  prefix + '5' + postfix, prefix + '6' + postfix,
-					    	  prefix + '2' + postfix, prefix + '4' + postfix
+					    	  a + '1' + b, a + '3' + b,
+					    	  a + '5' + b, a + '6' + b,
+					    	  a + '2' + b, a + '4' + b
 					    	];
 						} )( 'hdr/', '.hdr' ),
 						fileSize: 4898,
@@ -104,7 +104,7 @@
 			document.body.appendChild( renderer.domElement );
 
 			var ls = new LoadScreen( renderer, { type: 'circular' } )
-			.setOptions({ autoTweenExposure: 0 }).onComplete( setScene ).start( ASSETS );
+			.setOptions({ autoTweenExposure: 0, verbose: true }).onComplete( setScene ).start( ASSETS );
 
 			function setScene () {
 
