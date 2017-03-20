@@ -620,8 +620,6 @@ function LoadScreen ( renderer, style ) {
 
 		var oC = function ( result ) {
 
-			console.log(p)
-
 			output.textures[ p ] = result;
 
 			t.prog = 1;
@@ -670,16 +668,14 @@ function LoadScreen ( renderer, style ) {
 
 		};
 
-		console.log(d.path);
+		if ( ext === 'cubehdr' ) 
 
-		if ( ext !== 'cubehdr' ) 
+			getTextureLoader( ext ).load( THREE.UnsignedByteType, d.path, oC, oP );
+
+		else
 
 			getTextureLoader( ext.toLowerCase() ).load( d.path, oC, oP );
-
-		else 
-
-			getTextureLoader( ext.toLowerCase() ).load( THREE.UnsignedByteType, d.path, oC, oP );
-
+ 
 	}
 
 	function loadMaterial ( p ) {
