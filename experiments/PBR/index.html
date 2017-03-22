@@ -103,7 +103,11 @@
 			renderer.toneMappingExposure = 2;
 			document.body.appendChild( renderer.domElement );
 
-			var ls = new LoadScreen( renderer, { type: 'circular-rotate' } ).onComplete( setScene ).start( ASSETS );
+			var ls = new LoadScreen( renderer, { 
+				type: 'circular-fancy', 
+				weight: 10,
+				progressBar: 'rgba(0,140,255,1)'
+			} ).onComplete( setScene );//.start( ASSETS );
 
 			function setScene () {
 
