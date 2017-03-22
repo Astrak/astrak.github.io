@@ -103,8 +103,7 @@
 			renderer.toneMappingExposure = 2;
 			document.body.appendChild( renderer.domElement );
 
-			var ls = new LoadScreen( renderer, { type: 'circular' } )
-			.setOptions({ autoTweenExposure: 0, verbose: true }).onComplete( setScene ).start( ASSETS );
+			var ls = new LoadScreen( renderer, { type: 'circular-rotate' } ).onComplete( setScene ).start( ASSETS );
 
 			function setScene () {
 
