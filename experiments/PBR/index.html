@@ -31,7 +31,7 @@
 		<script src='../../js/pmrem/PMREMGenerator.js'></script>
 		<script src='../../js/pmrem/PMREMCubeUVPacker.js'></script>
 		<script src='../../js/pmrem/PMREMCubeUVPacker.js'></script>
-		<script src='../../js/LoadScreen.js'></script>
+		<script src='../../js/LoadScreen.min.js'></script>
 		<script>
 			'use strict';
 			
@@ -104,10 +104,14 @@
 			document.body.appendChild( renderer.domElement );
 
 			var ls = new LoadScreen( renderer, { 
-				type: 'circular-fancy', 
+				type: 'stepped-circular-fancy-offset',
 				weight: 10,
-				progressBar: 'rgba(0,140,255,1)'
-			} ).onComplete( setScene ).start( ASSETS );
+				//skew: '5deg',
+				progressColor: '#f80',
+				//progressContainerColor: '#000',
+				//size: '30%'
+			})
+			.onComplete( setScene ).start( ASSETS );
 
 			function setScene () {
 
