@@ -103,13 +103,8 @@
 			renderer.toneMappingExposure = 2;
 			document.body.appendChild( renderer.domElement );
 
-			var ls = new LoadScreen( renderer, { 
-				type: 'stepped-circular-fancy-offset',
-				infoStyle: { padding: '0px' },
-				weight: 7,
-				progressColor: '#f80',
-				size: '30%'
-			}).onComplete( setScene ).start( ASSETS );
+			var ls = new LoadScreen( renderer, { type: 'stepped-circular-fancy-offset', infoStyle: { padding: '0px' }, progressColor: '#f80' })
+			.onComplete( setScene ).start( ASSETS );
 
 			function setScene () {
 
